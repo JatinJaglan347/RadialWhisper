@@ -38,8 +38,9 @@ const userSchema = new Schema({
       profileImageURL: {
         type: String,
         default: function () {  
-            return `https://api.dicebear.com/9.x/fun-emoji/svg?seed=${seed}`;
-        },
+          const defaultSeed = `${Math.random()*100}`; // Fallback seed for default profile image
+          return `https://api.dicebear.com/9.x/fun-emoji/svg?seed=${defaultSeed}`;
+      },
       },
       bio: {
         type: [String], // Predefined options only, stored as an array
@@ -137,9 +138,30 @@ const userSchema = new Schema({
 
 userSchema.pre("save" , async function(next){
     if(!this.isModified("password")) return next();
-    this.password = bcrypt.hash(this.password , 10)
+    this.password =await bcrypt.hash(this.password , 10)
     next()
 });
+
+// Middleware to automatically update `updatedAt` only when specific fields change
+userSchema.pre('save', function (next) {
+  if (this.isModified('fullName') || this.isModified('gender') || this.isModified('bio')) {
+    this.updatedAt = Date.now();
+  }
+  next();
+});
+
+userSchema.methods.updateLocation = function (latitude, longitude) {
+  this.previousLocation = this.currentLocation;
+  this.currentLocation = { latitude, longitude };
+  this.locationUpdatedAt = Date.now();
+
+  // Regenerate the profile picture based on the new location (random seed based on current location)
+  const seed = `${latitude}-${longitude}+${Math.random()*100}`; // Combine latitude and longitude to create a unique seed
+  this.profileImageURL = `https://api.dicebear.com/9.x/fun-emoji/svg?seed=${seed}`;
+
+  // Save the updated user
+  return this.save();
+};
 
 userSchema.methods.isPasswordCorrect = async function(password){
     return await bcrypt.compare(password , this.password)
