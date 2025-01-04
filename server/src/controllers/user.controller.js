@@ -57,9 +57,30 @@ const registerUser = asyncHandler(async (req ,res)=>{
    if (!createdUser){
     throw new ApiError(500 , "Something went wrong while registering the user")
    }
+   const {accessToken, refreshToken}= await generateAccesAndRefreshToken(user._id)
 
-return res.status(201).json(
-    new ApiResponse (201 ,  createdUser , "User registered successfully")
+   
+   const loggedInUser = await User.findOne(user._id).
+   select("-password -refreshToken")
+
+   const options= {
+    httpOnly : true ,
+    secure: true
+   }
+
+return res.status(201)
+    .cookie("accessToken" , accessToken , options)
+   .cookie("refreshToken" , refreshToken , options)
+   .json(
+    new ApiResponse(
+        201,
+        {
+            user: loggedInUser ,accessToken, refreshToken
+        },
+        "User created successfully",
+    )
+
+    // new ApiResponse (201 ,  createdUser , "User registered successfully")
 )
    
 
@@ -136,7 +157,7 @@ const logoutUser = asyncHandler(async(req,res)=>{
 
 const refreshAccessToken = asyncHandler(async(req , res)=>{
    const incomingRefreshToken = req.cookie.refreshToken || req.body.refreshToken
-   if (incomingRefreshToken){
+   if (!incomingRefreshToken){
     throw new ApiError(401 , "unauthorized request")
    }
    try {
@@ -174,4 +195,14 @@ const refreshAccessToken = asyncHandler(async(req , res)=>{
    }
 })
 
-export {registerUser , loginUser , logoutUser , refreshAccessToken } 
+const checkAuth = asyncHandler(async (req, res) => {
+    if (!req.user) {
+        throw new ApiError(401, "User is not authenticated");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, { user: req.user }, "User is authenticated")
+    );
+});
+
+export {registerUser , loginUser , logoutUser , refreshAccessToken ,checkAuth } 
