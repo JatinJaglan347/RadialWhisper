@@ -2,12 +2,14 @@ import { create } from 'zustand';
 import { axiosInstance } from '../lib/axios'; // axios instance for API calls
 import toast from 'react-hot-toast';
 
-export const useAuthStore = create((set) => ({
+export const useAuthStore = create((set, get) => ({
   authUser: null,
   isSigninUp: false,
   isLoggingIn: false,
   isUpdatingProfile: false,
   isCheckingAuth: true,
+  isFetchingNearbyUsers: false, // State to track the loading of nearby users
+  nearbyUsersData: [], // State to store nearby users
 
   // Function to check if the user is authenticated
   checkAuth: async () => {
@@ -27,7 +29,6 @@ export const useAuthStore = create((set) => ({
     try {
       const res = await axiosInstance.get('/api/v1/user/userDetails');
       console.log("Fetched User Details:", res.data);
-       // Log the fetched user details to the console
       set({ authUser: res.data });
     } catch (err) {
       console.error("Error in getUserDetails:", err);
@@ -69,6 +70,59 @@ export const useAuthStore = create((set) => ({
       set({ isLoggingIn: false });
     }
   },
+
+  // Function to fetch nearby users based on the user's current location
+  fetchNearbyUsers: async () => {
+    set({ isFetchingNearbyUsers: true });
+  
+    try {
+      // Use get() to access the current state
+      const { authUser } = get(); // Correctly use `get()` to access the current state
+  
+      // Log the authUser to see the data structure and its contents
+      console.log("authUser data:", authUser);
+      console.log("Location Radius Preference:", authUser?.data?.user?.locationRadiusPreference);
+  
+      // Check if currentLocation and locationRadiusPreference are available
+      if (!authUser?.data?.user?.currentLocation?.coordinates || !authUser?.data?.user?.locationRadiusPreference) {
+        // Log if any of the data is missing
+        console.error("Missing location or radius preference");
+        toast.error("Location or radius preference not available");
+        set({ isFetchingNearbyUsers: false });
+        return;
+      }
+  
+      // Log currentLocation and locationRadiusPreference
+      console.log("Current Location:", authUser?.data?.user?.currentLocation);
+      
+  
+      const { coordinates } = authUser?.data?.user?.currentLocation; // Destructure to get coordinates
+      const radius = authUser?.data?.user?.locationRadiusPreference; // Get radius
+      console.log("coordinates" ,coordinates);
+      // Proceed with API call to fetch nearby users
+      const res = await axiosInstance.post('/api/v1/user/nearbyUsers', {
+        latitude: coordinates[1],  // latitude (coordinates[1] corresponds to latitude)
+        longitude: coordinates[0], // longitude (coordinates[0] corresponds to longitude)
+        radius: radius,            // radius
+      });
+  
+      // Log the response data for nearby users
+      console.log("Nearby Users:", res.data); 
+  
+      // Update Zustand state with fetched nearby users
+      set({ nearbyUsersData: res.data});
+  
+    } catch (err) {
+      // Log any errors encountered during the process
+      console.error("Error in fetchNearbyUsers:", err);
+      toast.error("Failed to fetch nearby users");
+    } finally {
+      // Stop fetching state after the API call is complete
+      set({ isFetchingNearbyUsers: false });
+    }
+  }
+  
+  
 
   // Add any additional actions as needed
 }));

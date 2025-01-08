@@ -52,32 +52,76 @@ const userSchema = new Schema({
           return 100; // Default value; can be dynamically fetched from an admin-configurable source
         },
       },
+
+
+      // currentLocation: {
+      //   latitude: {
+      //     type: Number,
+      //     required: true,
+      //     min: -90,
+      //     max: 90,
+      //   },
+      //   longitude: {
+      //     type: Number,
+      //     required: true,
+      //     min: -180,
+      //     max: 180,
+      //   },
+      // },
       currentLocation: {
-        latitude: {
-          type: Number,
+        type: {
+          type: String,
+          enum: ['Point'], // Must be 'Point'
           required: true,
-          min: -90,
-          max: 90,
         },
-        longitude: {
-          type: Number,
+        coordinates: {
+          type: [Number], // Array of numbers: [longitude, latitude]
           required: true,
-          min: -180,
-          max: 180,
+          validate: {
+            validator: function (value) {
+              const [longitude, latitude] = value;
+              return longitude >= -180 && longitude <= 180 && latitude >= -90 && latitude <= 90;
+            },
+            message: 'Coordinates must be valid [longitude, latitude].',
+          },
         },
       },
+      
+
+
+      // previousLocation: {
+      //   latitude: {
+      //     type: Number,
+      //     min: -90,
+      //     max: 90,
+      //   },
+      //   longitude: {
+      //     type: Number,
+      //     min: -180,
+      //     max: 180,
+      //   },
+      // },
+
       previousLocation: {
-        latitude: {
-          type: Number,
-          min: -90,
-          max: 90,
+        type: {
+          type: String,
+          enum: ['Point'],
         },
-        longitude: {
-          type: Number,
-          min: -180,
-          max: 180,
+        coordinates: {
+          type: [Number], // [longitude, latitude]
+          validate: {
+            validator: function (value) {
+              if (!value || value.length !== 2) return true;// Allow null or undefined
+              const [longitude, latitude] = value;
+              return longitude >= -180 && longitude <= 180 && latitude >= -90 && latitude <= 90;
+            },
+            message: 'Coordinates must be valid [longitude, latitude].',
+          },
         },
       },
+      
+
+
       locationUpdatedAt: {
         type: Date,
         default: Date.now,
@@ -150,18 +194,62 @@ userSchema.pre('save', function (next) {
   next();
 });
 
+// userSchema.methods.updateLocation = function (latitude, longitude) {
+//   this.previousLocation = this.currentLocation;
+//   this.currentLocation = { latitude, longitude };
+//   this.locationUpdatedAt = Date.now();
+
+//   // Regenerate the profile picture based on the new location (random seed based on current location)
+//   const seed = `${latitude}-${longitude}+${Math.random()*100}`; // Combine latitude and longitude to create a unique seed
+//   this.profileImageURL = `https://api.dicebear.com/9.x/fun-emoji/svg?seed=${seed}`;
+
+//   // Save the updated user
+//   return this.save();
+// };
+
+
 userSchema.methods.updateLocation = function (latitude, longitude) {
-  this.previousLocation = this.currentLocation;
-  this.currentLocation = { latitude, longitude };
+  if (
+    typeof latitude !== 'number' ||
+    typeof longitude !== 'number' ||
+    longitude < -180 ||
+    longitude > 180 ||
+    latitude < -90 ||
+    latitude > 90
+  ) {
+    throw new Error('Invalid coordinates. Longitude must be between -180 and 180, and latitude must be between -90 and 90.');
+  }
+
+  // Assign currentLocation to previousLocation if not already set
+  if (!this.previousLocation || !this.previousLocation.coordinates || this.previousLocation.coordinates.length !== 2) {
+    this.previousLocation = {
+      type: 'Point',
+      coordinates: this.currentLocation?.coordinates || [0, 0], // Use currentLocation or fallback to [0, 0]
+    };
+  }
+
+  // Update currentLocation
+  this.currentLocation = {
+    type: 'Point',
+    coordinates: [longitude, latitude],
+  };
+
+  // Update timestamp
   this.locationUpdatedAt = Date.now();
 
-  // Regenerate the profile picture based on the new location (random seed based on current location)
-  const seed = `${latitude}-${longitude}+${Math.random()*100}`; // Combine latitude and longitude to create a unique seed
+  // Generate a new profile image seed
+  const seed = `${latitude}-${longitude}`;
   this.profileImageURL = `https://api.dicebear.com/9.x/fun-emoji/svg?seed=${seed}`;
 
-  // Save the updated user
   return this.save();
 };
+
+
+
+
+
+
+
 
 userSchema.methods.isPasswordCorrect = async function(password){
     return await bcrypt.compare(password , this.password)
@@ -178,7 +266,8 @@ userSchema.methods.generateAccesToken = function(){
             profileImageURL:this.profileImageURL,
             bio:this.bio,
             currentLocation:this.currentLocation,
-            firendList:this.friendList
+            firendList:this.friendList,
+            locationRadiusPreference:this.locationRadiusPreference
         },
         process.env.ACCESS_TOKEN_SECRET,
         {
@@ -198,6 +287,7 @@ userSchema.methods.generateRefreshToken = function(){
         }
     )
 }
+userSchema.index({ currentLocation: "2dsphere" });
 
 
 export const User = mongoose.model("User", userSchema);

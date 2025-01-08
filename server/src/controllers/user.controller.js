@@ -22,70 +22,148 @@ const generateAccesAndRefreshToken = async(userId)=>{
     
 }
 
-const registerUser = asyncHandler(async (req ,res)=>{
+// const registerUser = asyncHandler(async (req ,res)=>{
 
-    const {fullName , email , password , gender , dateOfBirth ,bio , currentLocation  }= req.body
+//     const {fullName , email , password , gender , dateOfBirth ,bio , currentLocation  }= req.body
 
 
-    if (
-        [fullName , email , password , gender ].some((field)=>field?.trim() === "")
-    ){
-       throw new ApiError(400 , "All fields are required") 
-    }
-   const existedUser=await User.findOne({email})
+//     if (
+//         [fullName , email , password , gender ].some((field)=>field?.trim() === "")
+//     ){
+//        throw new ApiError(400 , "All fields are required") 
+//     }
+//    const existedUser=await User.findOne({email})
 
-   if (existedUser){
-    throw new ApiError(409 , "Email already taken ")
-   }
+//    if (existedUser){
+//     throw new ApiError(409 , "Email already taken ")
+//    }
 
-   const uniqueTag = await uniqueTagGen();
+//    const uniqueTag = await uniqueTagGen();
  
-   const user = await User.create({
-    fullName ,
-    email ,
-    password ,
-    gender ,
-    dateOfBirth ,
-    bio ,
-    currentLocation ,
-    uniqueTag,
-   })
-   const createdUser = await User.findById(user._id).select(
-    "-password -refreshToken"
-   )
+//    const user = await User.create({
+//     fullName ,
+//     email ,
+//     password ,
+//     gender ,
+//     dateOfBirth ,
+//     bio ,
+//     currentLocation ,
+//     uniqueTag,
+//    })
+//    const createdUser = await User.findById(user._id).select(
+//     "-password -refreshToken"
+//    )
 
-   if (!createdUser){
-    throw new ApiError(500 , "Something went wrong while registering the user")
-   }
-   const {accessToken, refreshToken}= await generateAccesAndRefreshToken(user._id)
+//    if (!createdUser){
+//     throw new ApiError(500 , "Something went wrong while registering the user")
+//    }
+//    const {accessToken, refreshToken}= await generateAccesAndRefreshToken(user._id)
 
    
-   const loggedInUser = await User.findOne(user._id).
-   select("-password -refreshToken")
+//    const loggedInUser = await User.findOne(user._id).
+//    select("-password -refreshToken")
 
-   const options= {
-    httpOnly : true ,
-    secure: true
-   }
+//    const options= {
+//     httpOnly : true ,
+//     secure: true
+//    }
 
-return res.status(201)
-    .cookie("accessToken" , accessToken , options)
-   .cookie("refreshToken" , refreshToken , options)
-   .json(
-    new ApiResponse(
-        201,
-        {
-            user: loggedInUser ,accessToken, refreshToken
-        },
-        "User created successfully",
-    )
+// return res.status(201)
+//     .cookie("accessToken" , accessToken , options)
+//    .cookie("refreshToken" , refreshToken , options)
+//    .json(
+//     new ApiResponse(
+//         201,
+//         {
+//             user: loggedInUser ,accessToken, refreshToken
+//         },
+//         "User created successfully",
+//     )
 
-    // new ApiResponse (201 ,  createdUser , "User registered successfully")
-)
+//     // new ApiResponse (201 ,  createdUser , "User registered successfully")
+// )
    
 
 
-})
+// })
+
+const registerUser = asyncHandler(async (req, res) => {
+    const { fullName, email, password, gender, dateOfBirth, bio, currentLocation } = req.body;
+
+    // Validate required fields
+    if ([fullName, email, password, gender].some((field) => field?.trim() === "")) {
+        throw new ApiError(400, "All fields are required");
+    }
+
+    // Check if email already exists
+    const existedUser = await User.findOne({ email });
+    if (existedUser) {
+        throw new ApiError(409, "Email already taken");
+    }
+
+    // Validate currentLocation structure
+    if (!currentLocation || !currentLocation.latitude || !currentLocation.longitude) {
+        throw new ApiError(400, "Valid currentLocation with latitude and longitude is required");
+    }
+
+    // Convert latitude and longitude to GeoJSON format
+    const geoCurrentLocation = {
+        type: "Point",
+        coordinates: [currentLocation.longitude, currentLocation.latitude], // GeoJSON expects [longitude, latitude]
+    };
+
+    // Generate a unique tag
+    const uniqueTag = await uniqueTagGen();
+
+    // Create the user
+    const user = await User.create({
+        fullName,
+        email,
+        password,
+        gender,
+        dateOfBirth,
+        bio,
+        currentLocation: geoCurrentLocation, // Assign GeoJSON location
+        uniqueTag,
+    });
+
+    // Fetch created user without sensitive fields
+    const createdUser = await User.findById(user._id).select("-password -refreshToken");
+
+    if (!createdUser) {
+        throw new ApiError(500, "Something went wrong while registering the user");
+    }
+
+    // Generate access and refresh tokens
+    const { accessToken, refreshToken } = await generateAccesAndRefreshToken(user._id);
+
+    // Fetch logged-in user without sensitive fields
+    const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
+
+    // Set cookie options
+    const options = {
+        httpOnly: true,
+        secure: true,
+    };
+
+    // Respond with user data and tokens
+    return res
+        .status(201)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json(
+            new ApiResponse(
+                201,
+                {
+                    user: loggedInUser,
+                    accessToken,
+                    refreshToken,
+                },
+                "User created successfully"
+            )
+        );
+});
+
 
 const loginUser = asyncHandler (async (req ,res)=>{
     const {email , password} = req.body
