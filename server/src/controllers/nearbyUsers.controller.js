@@ -58,7 +58,7 @@ const updateLocationAndFetchNearbyUsers = asyncHandler(async (req, res) => {
             }
         },
         _id: { $ne: userId } // Exclude the current user from the result
-    });
+    }).select("-password -refreshToken -dateOfBirth");
 
     // Log the nearby users query result
     console.log("Nearby Users Found:", nearbyUsers);

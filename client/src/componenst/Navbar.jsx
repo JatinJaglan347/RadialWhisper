@@ -14,7 +14,7 @@ const Navbar = () => {
     getUserDetails();
 
     // Log the fetched user data to the console
-    console.log("Fetched User Details from frontend: ", authUser);
+    // console.log("Fetched User Details from frontend: ", authUser);
   }, [getUserDetails]);
 
   const handleLogout = async () => {
@@ -57,7 +57,7 @@ const Navbar = () => {
             className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52"
           >
             <li>
-              <a href="#">
+              <a href="/profile">
                 <User className="w-5 h-5" /> Profile
               </a>
             </li>

@@ -1,75 +1,69 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useAuthStore } from '../store/useAuthStore'; // Zustand store
-import { User as UserIcon } from 'lucide-react'; // Lucide icons
 import toast from 'react-hot-toast';
-// Helper function to ensure the value is an array
-const ensureArray = (data) => {
-  return Array.isArray(data) ? data : [];
-};
 
 const HomePage = () => {
   const { authUser, fetchNearbyUsers, nearbyUsersData, isFetchingNearbyUsers } = useAuthStore();
-  const [isLocationFetched, setIsLocationFetched] = useState(false);
   const [locationPermissionDenied, setLocationPermissionDenied] = useState(false);
-  // Use the helper function to ensure nearbyUsers is an array
-  const arrayOfNearbyUserData = ensureArray(nearbyUsersData?.data?.nearbyUsers);
+  const [location, setLocation] = useState({ latitude: '', longitude: '' });
+  
+  const isInitialFetchDone = useRef(false); // Track if the initial fetch is done
 
-  // Function to fetch location with geolocation API
+  const arrayOfNearbyUserData = Array.isArray(nearbyUsersData?.data?.nearbyUsers)
+    ? nearbyUsersData?.data?.nearbyUsers
+    : [];
+
+  // Function to fetch user's current location
   const fetchLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
-          // Call the fetchNearbyUsers function to get users within the radius
-          fetchNearbyUsers(latitude, longitude);
-          setIsLocationFetched(true);
+          setLocation({ latitude, longitude });
         },
         (error) => {
-          console.error("Error fetching location:", error);
-          // Check if location permission is denied
+          console.error('Geolocation error:', error);
           if (error.code === error.PERMISSION_DENIED) {
-            setLocationPermissionDenied(true);  // Set state to show the prompt
-            toast.error("Location permission denied. Please allow location access.");
+            setLocationPermissionDenied(true);
+            toast.error('Location permission denied. Please allow location access.');
           } else {
-            toast.error("Failed to fetch location. Please try again.");
+            toast.error('Failed to fetch location. Please try again.');
           }
         }
       );
     } else {
-      toast.error("Geolocation is not supported by this browser.");
+      toast.error('Geolocation is not supported by this browser.');
     }
   };
 
-  // Run this effect when the component is mounted
+  const refreshtime = 1000000
+  // Call `fetchNearbyUsers` every 10 seconds when location is available
   useEffect(() => {
-    // Check if user is authenticated and has details
-    if (!authUser) {
-      toast.error("User not authenticated");
-      return;
+    if (location.latitude && location.longitude && !isInitialFetchDone.current) {
+      // Call immediately on initial render
+      fetchNearbyUsers(location);
+      isInitialFetchDone.current = true; // Mark initial fetch as done
     }
 
-    // If location permission is denied, prompt the user to allow location
-    if (locationPermissionDenied) {
-      toast.error("Location permission denied. Please enable location access in your browser settings.");
-      return;
-    }
+    // Set interval to call `fetchNearbyUsers` every 100,000ms (100 seconds)
+    const fetchInterval = setInterval(() => {
+      if (location.latitude && location.longitude) {
+        fetchNearbyUsers(location);
+      }
+    }, refreshtime); // 100 seconds
 
-    // Fetch the user's current location when the component is mounted
-    fetchLocation();
-  }, [authUser, fetchNearbyUsers, locationPermissionDenied]);
+    
 
-  // Log the nearbyUsersData whenever they change
+    return () => clearInterval(fetchInterval); // Cleanup interval on component unmount
+  }, [location]); // Depend on `location` to re-trigger only when it changes
+
+  // Fetch location on component mount and when permission is not denied
   useEffect(() => {
-    
-  
-    // Log the nearby users array
-    console.log("Nearby Users from frontend:", arrayOfNearbyUserData);
-  
-    // Check if `x` is defined and an array before accessing its length
-    
-      console.log("Number of nearby users:", arrayOfNearbyUserData.length);  // Prints the length of the array
-    
-  }, [nearbyUsersData]);
+    if (authUser && !locationPermissionDenied) {
+      fetchLocation();
+    }
+  }, [authUser, locationPermissionDenied]);
+
   return (
     <div className="home-page container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Nearby Users</h1>
@@ -78,12 +72,12 @@ const HomePage = () => {
       {isFetchingNearbyUsers && <div>Loading nearby users...</div>}
 
       {/* Error State */}
-      {!isLocationFetched && !isFetchingNearbyUsers && (
-        <div>No location data available. Please try again later.</div>
+      {!isFetchingNearbyUsers && arrayOfNearbyUserData.length === 0 && (
+        <div>No nearby users found. Please try again later.</div>
       )}
 
       {/* Display Nearby Users */}
-      {arrayOfNearbyUserData.length > 0 ? (
+      {arrayOfNearbyUserData.length > 0 && (
         <div className="user-list grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {arrayOfNearbyUserData.map((user) => (
             <div key={user._id} className="user-card border p-4 rounded-lg shadow-md">
@@ -101,18 +95,19 @@ const HomePage = () => {
             </div>
           ))}
         </div>
-      ) : (
-        <div>No nearby users found.</div>
       )}
 
-      {/* Display prompt to ask the user to allow location access if it was denied */}
+      {/* Handle Location Permission Denial */}
       {locationPermissionDenied && (
         <div className="alert alert-warning mt-4">
-          <p>Location permission was denied. Please enable location access in your browser settings to find nearby users.</p>
+          <p>
+            Location permission was denied. Please enable location access in your browser settings to find nearby
+            users.
+          </p>
           <button
             onClick={() => {
-              setLocationPermissionDenied(false);  // Reset permission state
-              fetchLocation();  // Try fetching location again
+              setLocationPermissionDenied(false); // Reset permission state
+              fetchLocation(); // Retry fetching location
             }}
             className="btn btn-primary mt-2"
           >
