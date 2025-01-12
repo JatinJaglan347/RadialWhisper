@@ -3,7 +3,7 @@ import { useAuthStore } from '../store/useAuthStore.js'; // Zustand store
 import { axiosInstance } from '../lib/axios'; // axios instance for API calls
 import { User, Settings, LogOut } from 'lucide-react'; // Lucide icons
 import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
   const { authUser, getUserDetails, checkAuth } = useAuthStore();
@@ -34,7 +34,8 @@ const Navbar = () => {
     <div className="navbar bg-base-100 shadow-md">
       {/* Left side: Logo */}
       <div className="flex-1">
-        <a className="btn btn-ghost normal-case text-xl">Radial Whisper</a>
+       
+        <Link to="/" className="btn btn-ghost normal-case text-xl">Radial Whisper</Link>
       </div>
 
       {/* Right side: Profile dropdown */}
