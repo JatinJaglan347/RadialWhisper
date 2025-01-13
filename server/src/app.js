@@ -26,7 +26,7 @@ import updateRouter from './routes/infoUpdate.router.js';
 
 //routes declaration
 app.use("/api/v1/user" , userRouter)
-app.use("/api/v1/update/", updateRouter)
+app.use("/api/v1/update", updateRouter)
 
 
 
