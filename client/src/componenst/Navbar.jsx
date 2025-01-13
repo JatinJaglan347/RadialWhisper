@@ -1,22 +1,45 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/useAuthStore.js'; // Zustand store
 import { axiosInstance } from '../lib/axios'; // axios instance for API calls
-import { User, Settings, LogOut } from 'lucide-react'; // Lucide icons
+import { User, Settings, LogOut , Skull , Scale , Crown} from 'lucide-react'; // Lucide icons
 import toast from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
   const { authUser, getUserDetails, checkAuth } = useAuthStore();
   const navigate = useNavigate();
+  const [adminOptin , setAdminOptin] = useState(false);
+  const [moderatorOptin , setModeratorOptin] = useState(false);
+  const [kingOptin , setKingOptin] = useState(false);
 
   useEffect(() => {
     // Fetch user details on component mount
     getUserDetails();
-
+    if (authUser?.data?.user?.userRole === 'king') {
+      setKingOptin(true);
+      setAdminOptin(true);
+      setModeratorOptin(true);
+    }
+    else if (authUser?.data?.user?.userRole === 'admin') {
+      setKingOptin(false);
+      setAdminOptin(true);
+      setModeratorOptin(true);
+    }
+    else if (authUser?.data?.user?.userRole === 'moderator') {
+      setKingOptin(false);
+      setModeratorOptin(true);
+      setAdminOptin(false);
+    }else{
+      setKingOptin(false);
+      setAdminOptin(false);
+      setModeratorOptin(false);
+    }
+    // Fetch user details on component mount
     // Log the fetched user data to the console
     // console.log("Fetched User Details from frontend: ", authUser);
   }, [getUserDetails]);
 
+  
   const handleLogout = async () => {
     try {
       await axiosInstance.post('/api/v1/user/logout');
@@ -33,9 +56,9 @@ const Navbar = () => {
   return (
     <div className="navbar bg-base-100 shadow-md">
       {/* Left side: Logo */}
-      <div className="flex-1">
-       
+      <div className="flex-1"> 
         <Link to="/" className="btn btn-ghost normal-case text-xl">Radial Whisper</Link>
+        
       </div>
 
       {/* Right side: Profile dropdown */}
@@ -57,15 +80,38 @@ const Navbar = () => {
             tabIndex={0}
             className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52"
           >
+            {kingOptin &&
             <li>
-              <a href="/profile">
+               <Link to="/king">
+                  <Crown className="w-5 h-5" />KingPanal
+                </Link>
+            </li>
+            }
+            {adminOptin &&
+            <li>
+               <Link to="/admin">
+                  <Skull className="w-5 h-5" />AdminPanal
+               </Link>
+            </li>
+            }
+
+            {moderatorOptin &&
+            <li>
+               <Link to="/moderator">
+                  <Scale  className="w-5 h-5"/>Moderate
+               </Link>
+            </li>
+            }
+
+            <li>
+              <Link to="/profile">
                 <User className="w-5 h-5" /> Profile
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="#">
+              <Link to="#">
                 <Settings className="w-5 h-5" /> Settings
-              </a>
+              </Link>
             </li>
             <li>
               <button onClick={handleLogout}>

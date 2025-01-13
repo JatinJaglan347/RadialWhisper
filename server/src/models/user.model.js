@@ -128,7 +128,7 @@ const userSchema = new Schema({
       },
       userRole: {
         type: String,
-        enum: ['admin', 'moderator', 'normalUser'],
+        enum: ['admin', 'moderator', 'normalUser' , 'king'],
         default: 'normalUser',
       },
       friendList: [

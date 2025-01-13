@@ -1,10 +1,30 @@
-import React from "react";
+import React, {useState} from "react";
 import { Edit3, MapPin, Cake,Hash } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
+import UpdateField from "../componenst/UpdateField";
 
 const ProfilePage = () => {
   const { authUser } = useAuthStore();
   const userData = authUser?.data?.user;
+
+
+  const [showUpdateBox, setShowUpdateBox] = useState(false);
+  const [editField, setEditField] = useState("");
+  const [fieldValue, setFieldValue] = useState("");
+ const [fieldType, setFieldType] = useState("");
+  const handleEditClick = (field, value , type) => {
+    setEditField(field);
+    setFieldValue(value);
+    setFieldType(type);
+    setShowUpdateBox(true);
+  };
+
+  console.count("Profile Page Render");
+
+  const handleFieldUpdate = (newValue) => {
+    console.log(`Updated ${editField}:`, newValue);
+    // You can update the user data here (e.g., by calling an API).
+  };
 
   if (!userData) {
     return (
@@ -57,8 +77,24 @@ let genderIcon = "";
       timeStyle: "short",
     });
 
+   
+
   return (
     <div className="max-w-4xl mx-auto px-8 py-12 ">
+
+
+{showUpdateBox && (
+
+        <UpdateField
+          initialValue={fieldValue}
+          fieldLabel={editField}
+          fieldType={fieldType}
+          onClose={() => setShowUpdateBox(false)}
+          onUpdate={handleFieldUpdate}
+        />
+      )}
+
+
       {/* Profile Header */}
       <div className="flex flex-col md:flex-row bg-gray-800 p-8 rounded-xl shadow-xl mb-8">
         {/* Profile Image */}
@@ -78,7 +114,9 @@ let genderIcon = "";
           {/* Full Name with Edit */}
           <div className="flex items-center justify-between">
             <h1 className="text-4xl font-extrabold ">{fullName}</h1>
-            <button className="p-2 text-accent rounded-full  hover:text-white transition duration-300 flex items-center gap-2">
+            <button className="p-2 text-accent rounded-full  hover:text-white transition duration-300 flex items-center gap-2"
+              onClick={() => handleEditClick("Full Name", fullName)}
+            >
               <Edit3 size={16} />
             </button>
           </div>
@@ -101,14 +139,19 @@ let genderIcon = "";
           {/* Gender with Edit */}
           <div className="flex items-center justify-between">
             <p className="text-gray-400 ">{genderIcon} <span className=" text-gray-300">{gender}</span></p>
-            <button className="p-2 text-accent rounded-full   hover:text-white transition duration-300 flex items-center gap-2">
+            <button className="p-2 text-accent rounded-full   hover:text-white transition duration-300 flex items-center gap-2"
+              onClick={() => handleEditClick("Gender", gender , "text")}
+            >
               <Edit3 size={16} />
             </button>
           </div>
 
+          {/* Date of Birth with Edit */}
           <div className="flex items-center justify-between">
             <p className="text-gray-400 mb-1 flex justify-center items-center gap-1"><Cake size={18} /> {new Date(dateOfBirth).toLocaleDateString()}</p>
-            <button className="p-2 text-accent rounded-full   hover:text-white transition duration-300 flex items-center gap-2">
+            <button className="p-2 text-accent rounded-full   hover:text-white transition duration-300 flex items-center gap-2"
+              onClick={() => handleEditClick("Date of Birth", dateOfBirth , "date")}
+              >
               <Edit3 size={16} />
             </button>
           </div>
@@ -118,7 +161,9 @@ let genderIcon = "";
               <p className="font-medium text-gray-400">
               Zone: <span className=" text-gray-300">{locationRadiusPreference || "Not set"}m</span>
               </p>
-              <button className="p-2 text-accent rounded-full  hover:text-white transition duration-300 flex items-center gap-2">
+              <button className="p-2 text-accent rounded-full  hover:text-white transition duration-300 flex items-center gap-2"
+                onClick={() => handleEditClick("Location Radius", locationRadiusPreference , "number")}
+              >
                 <Edit3 size={16} />
               </button>
             </div>
