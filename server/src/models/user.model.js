@@ -53,21 +53,6 @@ const userSchema = new Schema({
         },
       },
 
-
-      // currentLocation: {
-      //   latitude: {
-      //     type: Number,
-      //     required: true,
-      //     min: -90,
-      //     max: 90,
-      //   },
-      //   longitude: {
-      //     type: Number,
-      //     required: true,
-      //     min: -180,
-      //     max: 180,
-      //   },
-      // },
       currentLocation: {
         type: {
           type: String,
@@ -87,20 +72,6 @@ const userSchema = new Schema({
         },
       },
       
-
-
-      // previousLocation: {
-      //   latitude: {
-      //     type: Number,
-      //     min: -90,
-      //     max: 90,
-      //   },
-      //   longitude: {
-      //     type: Number,
-      //     min: -180,
-      //     max: 180,
-      //   },
-      // },
 
       previousLocation: {
         type: {
@@ -173,6 +144,21 @@ const userSchema = new Schema({
         type: Boolean,
         default: false, // Indicates if the user is currently active on the site
       },
+      banned: {
+        current: {
+          status: { type: Boolean, default: false },
+          reason: { type: String, default: "" },
+          date: { type: Date },
+        },
+        history: [
+          {
+            status: { type: Boolean },
+            reason: { type: String },
+            date: { type: Date },
+          },
+        ],
+      },
+      
       refreshToken: {
         type: String,
       },  
@@ -193,20 +179,6 @@ userSchema.pre('save', function (next) {
   }
   next();
 });
-
-// userSchema.methods.updateLocation = function (latitude, longitude) {
-//   this.previousLocation = this.currentLocation;
-//   this.currentLocation = { latitude, longitude };
-//   this.locationUpdatedAt = Date.now();
-
-//   // Regenerate the profile picture based on the new location (random seed based on current location)
-//   const seed = `${latitude}-${longitude}+${Math.random()*100}`; // Combine latitude and longitude to create a unique seed
-//   this.profileImageURL = `https://api.dicebear.com/9.x/fun-emoji/svg?seed=${seed}`;
-
-//   // Save the updated user
-//   return this.save();
-// };
-
 
 userSchema.methods.updateLocation = function (latitude, longitude) {
   if (
@@ -244,9 +216,25 @@ userSchema.methods.updateLocation = function (latitude, longitude) {
   return this.save();
 };
 
+userSchema.methods.bannedUser = function (status, reason) {
+  const currentDate = new Date();
 
+  // Update the current ban status
+  this.banned.current = {
+    status: status,
+    reason: reason || (status ? "No reason provided" : "Unbanned"),
+    date: currentDate,
+  };
 
+  // Add the action to the history
+  this.banned.history.push({
+    status: status,
+    reason: reason || (status ? "No reason provided" : "Unbanned"),
+    date: currentDate,
+  });
 
+  return this.save();
+};
 
 
 
@@ -267,7 +255,8 @@ userSchema.methods.generateAccesToken = function(){
             bio:this.bio,
             currentLocation:this.currentLocation,
             firendList:this.friendList,
-            locationRadiusPreference:this.locationRadiusPreference
+            locationRadiusPreference:this.locationRadiusPreference,
+            banned:this.banned.current.status,
         },
         process.env.ACCESS_TOKEN_SECRET,
         {

@@ -31,17 +31,17 @@ app.use("/api/v1/update", updateRouter)
 
 
 // Error handling middleware (place it here)
-// app.use((err, req, res, next) => {
-//     if (err instanceof ApiError) {
-//         return res.status(err.statusCode).json({
-//             message: err.message,
-//             errors: err.errors,
-//             success: err.success,
-//         });
-//     }
-//     return res.status(500).json({
-//         message: "Something went wrong!",
-//     });
-// });
+app.use((err, req, res, next) => {
+    if (err instanceof ApiError) {
+        return res.status(err.statusCode).json({
+            message: err.message,
+            errors: err.errors,
+            success: err.success,
+        });
+    }
+    return res.status(500).json({
+        message: "Something went wrong!",
+    });
+});
 
 export {app};
