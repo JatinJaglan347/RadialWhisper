@@ -140,9 +140,16 @@ const userSchema = new Schema({
       updatedAt: {
         type: Date,
       },
-      active: {
-        type: Boolean,
-        default: false, // Indicates if the user is currently active on the site
+      onscreen: {
+        current:{
+          type: Boolean,
+          default: false,
+        },
+        lastOnscreen: {
+          type: Date,
+        }
+        
+         // Indicates if the user is currently active on the site
       },
       banned: {
         current: {
@@ -179,6 +186,16 @@ userSchema.pre('save', function (next) {
   }
   next();
 });
+
+userSchema.pre('save', function (next) {
+  // Check if the onscreen status is changing to false
+  if (this.isModified('onscreen.current') && !this.onscreen.current) {
+    // Update the lastOnscreen field with the current date and time
+    this.onscreen.lastOnscreen = Date.now();
+  }
+  next();
+});
+
 
 userSchema.methods.updateLocation = function (latitude, longitude) {
   if (
