@@ -181,7 +181,7 @@ userSchema.pre("save" , async function(next){
 
 // Middleware to automatically update `updatedAt` only when specific fields change
 userSchema.pre('save', function (next) {
-  if (this.isModified('fullName') || this.isModified('gender') || this.isModified('bio')) {
+  if (this.isModified('fullName') || this.isModified('gender') || this.isModified('bio') || this.isModified('locationRadiusPreference') || this.isModified('dateOfBirth')) {
     this.updatedAt = Date.now();
   }
   next();
