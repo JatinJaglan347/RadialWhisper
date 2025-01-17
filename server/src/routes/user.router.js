@@ -3,6 +3,7 @@ import { registerUser ,loginUser , logoutUser , refreshAccessToken, checkAuth } 
 import { userDetails } from "../controllers/userDetails.controller.js";
 import { updateLocationAndFetchNearbyUsers } from "../controllers/nearbyUsers.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { verifyAdminRole } from "../middlewares/role.middleware.js";
 
 const router = Router();
 

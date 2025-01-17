@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 
 
 const userSchema = new Schema({
+
     fullName: {
         type: String,
         required: true,
@@ -52,7 +53,6 @@ const userSchema = new Schema({
           return 100; // Default value; can be dynamically fetched from an admin-configurable source
         },
       },
-
       currentLocation: {
         type: {
           type: String,
@@ -71,8 +71,6 @@ const userSchema = new Schema({
           },
         },
       },
-      
-
       previousLocation: {
         type: {
           type: String,
@@ -90,9 +88,6 @@ const userSchema = new Schema({
           },
         },
       },
-      
-
-
       locationUpdatedAt: {
         type: Date,
         default: Date.now,
@@ -165,10 +160,10 @@ const userSchema = new Schema({
           },
         ],
       },
-      
       refreshToken: {
         type: String,
       },  
+      
 });
 
 

@@ -41,6 +41,8 @@ function SignUpPage() {
     "Tank",
     "Pookie",
     "Mig-31",
+    "usb cable 1m",
+    "USB CABLE 1.5M",
   ];
 
 
