@@ -5,12 +5,18 @@ import { User } from "../models/user.model.js";
 import {UserInfoRules} from "../models/userInfoRules.model.js";
 
 const getUserInfoRules = asyncHandler(async (req, res) => {
+  
     // Fetch the user ID from the request
-    const userId = req.user._id;
+    // const userId = req.user._id;
+    const userId = req.body.userId;
+
 
     // Retrieve the user and exclude sensitive fields
     const user = await User.findById(userId).select("-password -refreshToken");
 
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    };
     // Check if the user has the required role
     const isOP = user?.userRole === "admin" || user?.userRole === "king";
     if (!isOP) {
@@ -20,6 +26,7 @@ const getUserInfoRules = asyncHandler(async (req, res) => {
     // Fetch the rules document
     const userInfoRules = await UserInfoRules.findOne();
 
+    console.log(userInfoRules);
     // If no rules are found, return a 404 error
     if (!userInfoRules) {
         throw new ApiError(404, "User info rules not found");

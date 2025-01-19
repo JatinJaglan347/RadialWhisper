@@ -114,63 +114,6 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  // Function to fetch nearby users based on the user's current location
-  // fetchNearbyUsers: async () => {
-  //   set({ isFetchingNearbyUsers: true });
-  
-  //   try {
-  //     // Use get() to access the current state
-  //     const { authUser } = get(); // Correctly use `get()` to access the current state
-  
-  //     // Log the authUser to see the data structure and its contents
-
-
-  //     // console.log("authUser data:", authUser);
-  //     // console.log("Location Radius Preference:", authUser?.data?.user?.locationRadiusPreference);
-  //     console.log("Fetch NearbyUsers API");
-
-  //     // Check if currentLocation and locationRadiusPreference are available
-  //     if (!authUser?.data?.user?.currentLocation?.coordinates || !authUser?.data?.user?.locationRadiusPreference) {
-  //       // Log if any of the data is missing
-  //       console.error("Missing location or radius preference");
-  //       toast.error("Location or radius preference not available");
-  //       set({ isFetchingNearbyUsers: false });
-  //       return;
-  //     }
-  
-  //     // Log currentLocation and locationRadiusPreference
-  //     // console.log("Current Location:", authUser?.data?.user?.currentLocation);
-      
-  
-  //     const { coordinates } = authUser?.data?.user?.currentLocation; // Destructure to get coordinates
-  //     const radius = authUser?.data?.user?.locationRadiusPreference; // Get radius
-
-
-  //     // console.log("coordinates" ,coordinates);
-
-
-  //     // Proceed with API call to fetch nearby users
-  //     const res = await axiosInstance.post('/api/v1/user/nearbyUsers', {
-  //       latitude: coordinates[1],  // latitude (coordinates[1] corresponds to latitude)
-  //       longitude: coordinates[0], // longitude (coordinates[0] corresponds to longitude)
-  //       radius: radius,            // radius
-  //     });
-  
-  //     // Log the response data for nearby users
-  //     // console.log("Nearby Users:", res.data); 
-  
-  //     // Update Zustand state with fetched nearby users
-  //     set({ nearbyUsersData: res.data});
-  
-  //   } catch (err) {
-  //     // Log any errors encountered during the process
-  //     console.error("Error in fetchNearbyUsers:", err);
-  //     toast.error("Failed to fetch nearby users");
-  //   } finally {
-  //     // Stop fetching state after the API call is complete
-  //     set({ isFetchingNearbyUsers: false });
-  //   }
-  // }
 
   fetchNearbyUsers: async (data)=>{
     set({ isFetchingNearbyUsers: true });
@@ -190,5 +133,4 @@ export const useAuthStore = create((set, get) => ({
   
   
 
-  // Add any additional actions as needed
 }));
