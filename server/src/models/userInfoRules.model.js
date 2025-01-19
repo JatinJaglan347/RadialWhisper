@@ -117,4 +117,5 @@ const userInfoRulesSchema = new Schema({
 
 });
 
-export default mongoose.model("UserInfoRules", userInfoRulesSchema);
+// export default mongoose.model("UserInfoRules", userInfoRulesSchema);
+export const UserInfoRules = mongoose.model("UserInfoRules", userInfoRulesSchema);

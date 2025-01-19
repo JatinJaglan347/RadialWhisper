@@ -16,7 +16,7 @@ export const verifyAdminRole = asyncHandler(async (req, res, next) => {
 
         const user = await User.findById(decodedToken?._id).select("-password -refrenceToken");
 
-        const isAdmin = user?.userRole === "admin";
+        const isAdmin = user?.userRole === "admin" || user?.userRole === "king";
 
         if (!isAdmin) {
             throw new ApiError(401, "Unauthorized user role");
@@ -28,6 +28,8 @@ export const verifyAdminRole = asyncHandler(async (req, res, next) => {
     throw new ApiError(401 , error?.message || "Invalid Access Token")
 }
 })
+
+
 
 export const verifyModeratorRole = asyncHandler(async (req, res, next) => {
     try{
@@ -42,7 +44,7 @@ export const verifyModeratorRole = asyncHandler(async (req, res, next) => {
 
         const user = await User.findById(decodedToken?._id).select("-password -refrenceToken");
 
-        const isAdmin = user?.userRole === "moderator";
+        const isAdmin = user?.userRole === "moderator" || user?.userRole === "admin" || user?.userRole === "king"; 
 
         if (!isAdmin) {
             throw new ApiError(401, "Unauthorized user role");
@@ -54,6 +56,8 @@ export const verifyModeratorRole = asyncHandler(async (req, res, next) => {
     throw new ApiError(401 , error?.message || "Invalid Access Token")
 }
 })
+
+
 
 
 

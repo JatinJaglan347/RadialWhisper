@@ -1,9 +1,11 @@
 import { create } from 'zustand';
 import { axiosInstance } from '../lib/axios'; // axios instance for API calls
 import toast from 'react-hot-toast';
+import { checkAuth } from '../../../server/src/controllers/user.controller';
 
 export const useAuthStore = create((set, get) => ({
   authUser: null,
+  isOpUser: false,
   isSigninUp: false,
   isLoggingIn: false,
   isUpdatingProfile: false,
@@ -24,6 +26,18 @@ export const useAuthStore = create((set, get) => ({
       set({ authUser: null });
     } finally {
       set({ isCheckingAuth: false });
+    }
+  },
+
+  checkOp: async () => {
+    await checkAuth();
+    const userRole = get().authUser?.userRole;
+   
+    if (userRole === 'admin' || userRole === 'king') {
+      set({ isOpUser: true });
+    }else{
+      toast.error("You are not authorized to access this page");
+      set({ isOpUser: false });
     }
   },
 
