@@ -1,11 +1,13 @@
 import { create } from 'zustand';
 import { axiosInstance } from '../lib/axios'; // axios instance for API calls
 import toast from 'react-hot-toast';
-import { checkAuth } from '../../../server/src/controllers/user.controller';
+
 
 export const useAuthStore = create((set, get) => ({
   authUser: null,
-  isOpUser: false,
+  isAdmin: false,
+  isKing: false,
+  isModrater: false,
   isSigninUp: false,
   isLoggingIn: false,
   isUpdatingProfile: false,
@@ -21,6 +23,21 @@ export const useAuthStore = create((set, get) => ({
       console.log("check Auth API");
 
       set({ authUser: res.data });
+      const { authUser } = get();
+      const userRole = authUser?.data?.user?.userRole;
+      console.log("User Role:", userRole);
+
+      if (userRole === 'king') {
+        set({ isKing: true });
+      } else if (userRole === 'admin') {    
+        set({ isAdmin: true });
+      } else if (userRole === 'moderator') {
+        set({ isModrater: true });
+      } else {
+        set({ isKing: false });
+        set({ isAdmin: false });
+        set({ isModrater: false });
+      }
     } catch (err) {
       console.error("Error in checkAuth:", err);
       set({ authUser: null });
@@ -29,17 +46,17 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  checkOp: () => {
-    const userRole = get().authUser?.userRole;
-  
-    if (userRole === 'admin' || userRole === 'king') {
-      set({ isOpUser: true });
-    } else {
+  checkOpUser:()=>{
+     const { isKing, isAdmin, isModrater } = get();
+    if (!isKing && !isAdmin && !isModrater) {
       toast.error("You are not authorized to access this page");
-      set({ isOpUser: false });
+      
+
+    }else{
+      toast.success("User Verified Successfully");
+      
     }
   },
-  
 
   // Function to get the user details from the API
   getUserDetails: async () => {
