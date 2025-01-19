@@ -29,17 +29,17 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  checkOp: async () => {
-    await checkAuth();
+  checkOp: () => {
     const userRole = get().authUser?.userRole;
-   
+  
     if (userRole === 'admin' || userRole === 'king') {
       set({ isOpUser: true });
-    }else{
+    } else {
       toast.error("You are not authorized to access this page");
       set({ isOpUser: false });
     }
   },
+  
 
   // Function to get the user details from the API
   getUserDetails: async () => {
