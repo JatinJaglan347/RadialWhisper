@@ -10,7 +10,7 @@ const getUserInfoRules = asyncHandler(async (req, res) => {
     // const userId = req.user._id;
     const userId = req.body.userId;
 
-
+    // console.log("heloooooooo",userId);
     // Retrieve the user and exclude sensitive fields
     const user = await User.findById(userId).select("-password -refreshToken");
 
@@ -33,7 +33,39 @@ const getUserInfoRules = asyncHandler(async (req, res) => {
     }
 
     // Respond with the rules in a structured format
-    res.status(200).json(new ApiResponse(200, "User info rules fetched successfully", userInfoRules));
+    res.status(200).json(new ApiResponse(200, userInfoRules ,"User info rules fetched successfully"));
 });
 
-export { getUserInfoRules };
+const updateUserInfoRules = asyncHandler(async (req, res) => {
+  const updateData = req.body;
+
+  const currentData = await UserInfoRules.findOne();
+
+  const updateFields ={};
+
+// Loop through the fields in the request body (updateData)
+for (let field in updateData) {
+    // If the field exists in the current data and its value is different
+    if (JSON.stringify(currentData[field]) !== JSON.stringify(updateData[field])) {
+      if (typeof updateData[field] === 'object' && updateData[field] !== null) {
+        // For nested objects, merge them rather than overwriting
+        updateFields[field] = { ...currentData[field], ...updateData[field] };
+      } else {
+        // For simple fields, just assign the new value
+        updateFields[field] = updateData[field];
+      }
+    }
+  }
+
+    if (Object.keys(updateFields).length === 0) {
+        return res.status(200).json(new ApiResponse(200, currentData, "No changes detected"));
+    }
+
+    const updatedData = await UserInfoRules.updateOne({}, { $set: updateFields });
+
+    res.status(200).json(new ApiResponse(200, updatedData, "User info rules updated successfully"));
+
+})
+
+
+export { getUserInfoRules , updateUserInfoRules };

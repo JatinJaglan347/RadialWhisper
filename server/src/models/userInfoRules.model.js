@@ -5,13 +5,13 @@ const userInfoRulesSchema = new Schema({
   fullName: {
     minLength: {
       type: Number,
-      required: true,
+       
       trim: true,
       default: 3,
     },
     maxLength: {
       type: Number,
-      required: true,
+       
       trim: true,
       default: 40,
     },
@@ -19,28 +19,28 @@ const userInfoRulesSchema = new Schema({
   password: {
     minCharLength: {
       type: Number,
-      required: true,
+       
       default: 8, 
     },
     requireUpperCase: {
       type: Boolean,
-      required: true,
+       
       default: true, 
     },
     requireNumber: {
       type: Boolean,
-      required: true,
+       
       default: true,
     },
     requireSpecialChar: {
       type: Boolean,
-      required: true,
+       
       default: true, 
     },
   },
   genderList: {
     type: Array,
-    required: true,
+     
     default: [
         "Male",
         "Female",
@@ -66,19 +66,19 @@ const userInfoRulesSchema = new Schema({
   dateOfBirth: {
     minAge: {
       type: Number,
-      required: true,
+       
       default: 18,
     },
     maxAge: {
       type: Number,
-      required: true,
+       
       default: 100,
     },
   },
   bio: {
     options:{
     type: Array,
-    required: true,
+     
     default: [
         "Adventurous",
         "Bookworm",
@@ -98,19 +98,19 @@ const userInfoRulesSchema = new Schema({
     },
     selectionLimit: {
       type: Number,
-      required: true,
+       
       default: 6,
         }
   },
   locationRadiusPreference:{
         minLength: {
           type: Number,
-          required: true,
+           
           default: 50,
         },
         maxLength: {
           type: Number,
-          required: true,
+           
           default: 200,
         },
   },

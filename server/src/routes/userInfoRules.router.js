@@ -1,10 +1,11 @@
 import {Router} from "express";
-import {getUserInfoRules} from "../controllers/userInfoRules.controller.js";
+import {getUserInfoRules , updateUserInfoRules } from "../controllers/userInfoRules.controller.js";
 import {verifyJWT} from "../middlewares/auth.middleware.js";
 import {verifyAdminRole} from "../middlewares/role.middleware.js";
 
 const router = Router();
 
 router.route("/user-info-rules").post(verifyJWT,verifyAdminRole,getUserInfoRules)
+router.route("/update-user-info-rules").patch(updateUserInfoRules)
 
 export default router
