@@ -4,7 +4,7 @@ import { User } from "../models/user.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 // Controller to update location and fetch nearby users
-// Controller to update location and fetch nearby users
+
 const updateLocationAndFetchNearbyUsers = asyncHandler(async (req, res) => {
     const userId = req.user._id; // Get user ID from the authenticated token
     const { latitude, longitude } = req.body; // Get latitude and longitude from request body

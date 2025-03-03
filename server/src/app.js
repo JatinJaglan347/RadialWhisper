@@ -24,12 +24,13 @@ app.use(cookieparser());
 import userRouter from './routes/user.router.js';
 import updateRouter from './routes/infoUpdate.router.js';
 import opRouter from './routes/userInfoRules.router.js';
-
+import opRouterr from './routes/manageUser.route.js';
 //routes declaration
+
 app.use("/api/v1/user" , userRouter)
 app.use("/api/v1/update", updateRouter)
 app.use("/api/v1/op", opRouter) 
-
+app.use("/api/v1/op", opRouterr) 
 
 
 // // Error handling middleware (place it here)

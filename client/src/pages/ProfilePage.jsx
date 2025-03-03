@@ -4,7 +4,7 @@ import { useAuthStore } from "../store/useAuthStore";
 import UpdateField from "../componenst/UpdateField"
 
 const ProfilePage = () => {
-  const { authUser } = useAuthStore();
+  const { authUser, isGettingUserInfoRules,userInfoRulesData } = useAuthStore();
   const userData = authUser?.data?.user;
 
   const [showUpdateBox, setShowUpdateBox] = useState(false);
@@ -242,3 +242,28 @@ const ProfilePage = () => {
 };
 
 export default ProfilePage;
+
+
+
+
+
+
+// import React,{useEffect ,useState} from 'react'
+// import Loader from '../componenst/Loader';
+
+// function ProfilePage() {
+//   const [loading, setLoading] = useState(true);
+
+//   useEffect(() => {
+//     // Simulate a loading delay (e.g., fetching chat data)
+//     const timer = setTimeout(() => setLoading(false), 3000);
+//     return () => clearTimeout(timer);
+//   }, []);
+
+//   return (
+//     <div>
+//       {loading ? <Loader /> : <div>Your Chat Application Goes Here</div>}
+//     </div>
+//   );
+// }
+// export default ProfilePage

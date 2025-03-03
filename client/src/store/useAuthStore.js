@@ -14,6 +14,8 @@ export const useAuthStore = create((set, get) => ({
   isCheckingAuth: true,
   isFetchingNearbyUsers: false, // State to track the loading of nearby users
   nearbyUsersData: [], // State to store nearby users
+  userInfoRulesData: null,
+  isGettingUserInfoRules :false,
 
   // Function to check if the user is authenticated
   checkAuth: async () => {
@@ -128,6 +130,21 @@ export const useAuthStore = create((set, get) => ({
       toast.error(errorMessage);
     }finally{
       set({ isFetchingNearbyUsers: false });
+    }
+  },
+
+  getUserInfoRules:async(data)=>{
+    set({isGettingUserInfoRules:true});
+    try{
+      const res = await axiosInstance.post('/api/v1/op/update-user-info-rules' ,data);
+      console.log("Fetch UserInfor Rules");
+      set({userInfoRulesData: res.data});
+    }catch(err){
+      console.error("Error in getUserInfoRules: " , err);
+      const errorMessage = err.response?.data?.message || "Failed to get the User Info Rules";
+      toast.error(errorMessage);
+    }finally{
+      set({isGettingUserInfoRules:false});
     }
   }
   

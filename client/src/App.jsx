@@ -11,6 +11,7 @@ import { Loader } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 import ConfigRulesPage from './pages/dashboard/ConfigRulesPage.jsx';
 import toast from 'react-hot-toast';
+import LandingPage from './pages/MainWebPage/LandingPage.jsx';
 
 function App() {
   const { authUser, checkAuth, isCheckingAuth,  isKing , isAdmin , isModrater , checkOpUser } = useAuthStore();
@@ -45,6 +46,7 @@ function App() {
           <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/" />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/profile" element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
+          <Route path="/home" element={<LandingPage/>} />
           <Route path="/op">
             <Route
               path="config-user-info-rules"

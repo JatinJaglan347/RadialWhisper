@@ -150,12 +150,14 @@ const userSchema = new Schema({
         current: {
           status: { type: Boolean, default: false },
           reason: { type: String, default: "" },
+          actionBy: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
           date: { type: Date },
         },
         history: [
           {
             status: { type: Boolean },
             reason: { type: String },
+            actionBy :{type: mongoose.Schema.Types.ObjectId, ref: 'User'},
             date: { type: Date },
           },
         ],
