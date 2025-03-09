@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { axiosInstance } from '../lib/axios'; // axios instance for API calls
 import toast from 'react-hot-toast';
+import { io } from 'socket.io-client'
+
 
 
 export const useAuthStore = create((set, get) => ({
@@ -146,7 +148,167 @@ export const useAuthStore = create((set, get) => ({
     }finally{
       set({isGettingUserInfoRules:false});
     }
-  }
+  },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  authUser: null,
+  socket: null,
+  messages: [],
+  activeChatRoom: null,
+  unreadMessagesBySender: {},
+  currentUserId: null,
+
+  connectSocket: () => {
+    const { socket } = get();
+    if (socket) return;
+
+    const newSocket = io(import.meta.env.VITE_API_BASE_URL, {
+      transports: ["websocket"],
+      withCredentials: true,
+    });
+
+    newSocket.on("connect", () => {
+      console.log("🟢 Connected to Socket.io server:", newSocket.id);
+    });
+
+    try {
+      const storedUnread = JSON.parse(localStorage.getItem('unreadMessagesBySender') || '{}');
+      set({ unreadMessagesBySender: storedUnread });
+    } catch (error) {
+      console.error("Error loading stored unread messages:", error);
+    }
+
+
+    newSocket.on("newMessage", (data) => {
+      console.log("📩 New message received:", data);
+      
+      const state = get();
+      const { activeChatRoom, currentUserId } = state;
+      
+      // If I'm the sender, just add to messages
+      if (data.sender === currentUserId) {
+        set(state => ({ messages: [...state.messages, data] }));
+        return;
+      }
+      
+      // Always add to messages array
+      set(state => ({ messages: [...state.messages, data] }));
+      
+      // Important change: Track unread messages for ALL senders except the active chat
+      if (data.room !== activeChatRoom) {
+        set(state => {
+          const newUnreadMessagesBySender = {
+            ...state.unreadMessagesBySender,
+            [data.sender]: (state.unreadMessagesBySender[data.sender] || 0) + 1
+          };
+          
+          // Save to localStorage for persistence
+          localStorage.setItem('unreadMessagesBySender', JSON.stringify(newUnreadMessagesBySender));
+          
+          return { unreadMessagesBySender: newUnreadMessagesBySender };
+        });
+      } else {
+        // Mark as read if this is the active chat
+        if (get().socket) {
+          get().socket.emit("markMessagesAsRead", { roomId: activeChatRoom });
+        }
+      }
+    });
+
+
+    newSocket.on("messageDelivered", (data) => {
+      console.log("📩 Message delivery status updated:", data);
+      set(state => ({
+        messages: state.messages.map(msg => 
+          msg._id === data.messageId ? { ...msg, status: 'delivered' } : msg
+        )
+      }));
+    });
+
+    newSocket.on("messagesRead", (data) => {
+      console.log("📩 Messages marked as read:", data);
+      set(state => ({
+        messages: state.messages.map(msg => 
+          (data.messageIds || []).includes(msg._id) ? { ...msg, status: 'read' } : msg
+        )
+      }));
+    });
+
+    set({ socket: newSocket });
+  },
+
+ 
+  markMessagesAsReadForSender: (senderId) => {
+    set(state => {
+   
+      const newUnreadMessagesBySender = {
+        ...state.unreadMessagesBySender,
+        [senderId]: 0 // Reset count for this sender
+      };
+            localStorage.setItem('unreadMessagesBySender', JSON.stringify(newUnreadMessagesBySender));
+      
+      return { unreadMessagesBySender: newUnreadMessagesBySender };
+    });
+  },
+
+  setActiveChatRoom: (roomId) => {
+    set({ activeChatRoom: roomId });
+  },
+
+  setCurrentUserId: (userId) => {
+    set({ currentUserId: userId });
+  },
+
+  sendMessage: (message) => {
+    const { socket } = get();
+    if (socket) {
+      socket.emit("message", { text: message });
+      console.log("📤 Message sent:", message);
+    } else {
+      console.warn("⚠️ Socket not connected!");
+    }
+  },
+
+  disconnectSocket: () => {
+    const { socket } = get();
+    if (socket) {
+      socket.disconnect();
+      set({ socket: null });
+    }
+  },
+
+
   
   
 
