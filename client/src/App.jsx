@@ -11,7 +11,7 @@ import { Loader } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 import ConfigRulesPage from './pages/dashboard/ConfigRulesPage.jsx';
 import toast from 'react-hot-toast';
-import LandingPage from './pages/MainWebPage/LandingPage.jsx';
+import LandingPage from './pages/MainWebPage/LandingHome.jsx';
 
 function App() {
   const { authUser, checkAuth, isCheckingAuth,  isKing , isAdmin , isModrater , checkOpUser } = useAuthStore();
