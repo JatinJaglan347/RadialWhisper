@@ -16,8 +16,8 @@ import {
 } from 'lucide-react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import LandingFooter from '../../componenst/MainWebPage/LandingFooter';
-import LandingNavbar from '../../componenst/MainWebPage/LandingNavbar';
+import LandingFooter from '../../components/MainWebPage/LandingFooter';
+
 
 function LandingHome() {
   useEffect(() => {
@@ -44,7 +44,7 @@ function LandingHome() {
 
   return (
     <div className="bg-[#272829] text-[#FFF6E0] overflow-hidden">
-      <LandingNavbar />
+      {/* <LandingNavbar /> */}
       
       {/* Hero Section */}
       <div className="relative min-h-screen flex items-center">
@@ -219,7 +219,7 @@ function LandingHome() {
         </div>
         
         {/* Diagonal divider */}
-        <div className="absolute bottom-0 left-0 w-full overflow-hidden">
+        <div className="absolute bottom-0 left-0 w-full overflow-hidden transform scale-y-[-1]">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-20 md:h-32">
             <path d="M1200 120L0 16.48V0h1200v120z" fill="#272829"></path>
           </svg>
@@ -229,7 +229,7 @@ function LandingHome() {
       {/* App Preview Section */}
       <div className="py-24 md:py-36 relative overflow-hidden">
         {/* Background elements */}
-        <div className="absolute top-40 left-0 w-96 h-96 rounded-full bg-[#61677A] blur-[150px] opacity-20 parallax" data-speed="0.3"></div>
+        <div className="absolute top-40 left-0 w-96 h-96 rounded-full bg-[#61677A] blur-[150px] opacity-20 parallax " data-speed="0.3"></div>
         <div className="absolute bottom-0 right-0 w-64 h-64 rounded-full bg-[#61677A] blur-[100px] opacity-10 parallax" data-speed="0.2"></div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">

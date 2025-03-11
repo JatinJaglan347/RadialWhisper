@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/useAuthStore.js'; // Zustand store
-import { axiosInstance } from '../lib/axios'; // axios instance for API calls
+import { axiosInstance } from '../lib/axios.js'; // axios instance for API calls
 import { User, Settings, LogOut , Skull , Scale , Crown} from 'lucide-react'; // Lucide icons
 import toast from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';

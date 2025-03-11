@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Edit3, MapPin, Cake, Hash, User, Globe, Clock } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
-import UpdateField from "../componenst/UpdateField"
+import UpdateField from "../components/UpdateField"
 
 const ProfilePage = () => {
   const { authUser, isGettingUserInfoRules, userInfoRulesData } = useAuthStore();

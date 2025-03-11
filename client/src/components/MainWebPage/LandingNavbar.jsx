@@ -16,11 +16,13 @@ const LandingNavbar = () => {
           
           <div className="hidden md:flex items-center space-x-4">
             <Link to="/" className="px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Home</Link>
+            <Link to="/chat" className="px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Chat</Link>
             <Link to="/about" className="px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">About</Link>
             <Link to="/features" className="px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Features</Link>
             <Link to="/contact" className="px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Contact</Link>
             <Link to="/login" className="px-4 py-2 rounded-md bg-[#61677A] hover:bg-[#D8D9DA] hover:text-[#272829] font-medium transition duration-300">Login</Link>
             <Link to="/signup" className="px-4 py-2 rounded-md bg-[#FFF6E0] text-[#272829] hover:bg-[#D8D9DA] font-medium transition duration-300">Sign Up</Link>
+
           </div>
           
           <div className="md:hidden flex items-center">
