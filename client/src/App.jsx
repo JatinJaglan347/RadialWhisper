@@ -16,6 +16,7 @@ import LandingNavbar from './components/MainWebPage/LandingNavbar.jsx';
 import Navbar from './components/Navbar.jsx';
 import LandingHome from './pages/MainWebPage/LandingHome.jsx';
 import LandingAbout from './pages/MainWebPage/LandingAbout.jsx';
+import NotFoundPage from './pages/NotFoundPage.jsx';
 // import LandingNavbar from './componenst/MainWebPage/LandingNavbar.js';
 
 function App() {
@@ -31,12 +32,9 @@ function App() {
   const isChatRoute = location.pathname.startsWith('/chat') || location.pathname.startsWith('/op');
   
   // Show loader while checking authUser status
-  if (isCheckingAuth && !authUser)
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader className="size-10 animate-spin" />
-      </div>
-    );
+  if (isChatRoute){
+    
+  }
   
   return (
     <div className="">
@@ -51,6 +49,7 @@ function App() {
           {/* Main landing pages */}
           <Route path="/" element={<LandingHome/>} />
           <Route path="/about" element={<LandingAbout/>} />
+          <Route path="/not" element={<NotFoundPage/>} />
           
           {/* Authentication routes at root level */}
           <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/chat" />} />
@@ -58,8 +57,8 @@ function App() {
           
           {/* Chat related routes */}
           <Route path="/chat" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
-          <Route path="/chat/settings" element={authUser ? <SettingsPage /> : <Navigate to="/login" />} />
-          <Route path="/chat/profile" element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
+          <Route path="/settings" element={authUser ? <SettingsPage /> : <Navigate to="/login" />} />
+          <Route path="/profile" element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
           
           {/* Admin routes */}
           <Route path="/op">
@@ -68,6 +67,9 @@ function App() {
               element={isAdmin || isKing ? <ConfigRulesPage /> : <Navigate to="/" /> }
             />
           </Route>
+
+          {/* 404 Not Found - this catches all unmatched routes */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
         <Toaster />
       </main>

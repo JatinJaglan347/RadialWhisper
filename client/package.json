@@ -13,6 +13,7 @@
     "aos": "^2.3.4",
     "axios": "^1.7.9",
     "dotenv": "^16.4.7",
+    "framer-motion": "^12.4.12",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.469.0",
     "react": "^18.3.1",
