@@ -105,6 +105,7 @@ const HomePage = () => {
   // Fetch user's current location
   const fetchLocation = () => {
     if (navigator.geolocation) {
+       
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;

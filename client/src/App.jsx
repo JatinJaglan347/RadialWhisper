@@ -17,6 +17,8 @@ import Navbar from './components/Navbar.jsx';
 import LandingHome from './pages/MainWebPage/LandingHome.jsx';
 import LandingAbout from './pages/MainWebPage/LandingAbout.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
+import LandingContact from './pages/MainWebPage/LandingContact.jsx';
+import LandingSuggestion from './pages/MainWebPage/LandingSuggestion.jsx';
 // import LandingNavbar from './componenst/MainWebPage/LandingNavbar.js';
 
 function App() {
@@ -32,9 +34,15 @@ function App() {
   const isChatRoute = location.pathname.startsWith('/chat') || location.pathname.startsWith('/op');
   
   // Show loader while checking authUser status
-  if (isChatRoute){
-    
+  if (isChatRoute && !authUser){
+    toast.error("Login required to access!");
   }
+  if (isCheckingAuth && !authUser)
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader className="size-10 animate-spin" />
+      </div>
+    );
   
   return (
     <div className="">
@@ -49,7 +57,8 @@ function App() {
           {/* Main landing pages */}
           <Route path="/" element={<LandingHome/>} />
           <Route path="/about" element={<LandingAbout/>} />
-          <Route path="/not" element={<NotFoundPage/>} />
+          <Route path="/contact" element={<LandingContact/>} />
+          <Route path="/suggestion" element={<LandingSuggestion/>} />
           
           {/* Authentication routes at root level */}
           <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/chat" />} />

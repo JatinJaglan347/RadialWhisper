@@ -18,6 +18,9 @@ export const useAuthStore = create((set, get) => ({
   nearbyUsersData: [], // State to store nearby users
   userInfoRulesData: null,
   isGettingUserInfoRules :false,
+  suggestions: [], // Stores the list of all suggestions
+  selectedSuggestion: null, // Stores a single selected suggestion
+
 
   // Function to check if the user is authenticated
   checkAuth: async () => {
@@ -74,7 +77,7 @@ export const useAuthStore = create((set, get) => ({
     } catch (err) {
       console.error("Error in getUserDetails:", err);
       set({ authUser: null });
-      toast.error("Failed to fetch user details");
+      // toast.error("Failed to fetch user details");
     }
   },
 
@@ -149,6 +152,81 @@ export const useAuthStore = create((set, get) => ({
       set({isGettingUserInfoRules:false});
     }
   },
+
+
+
+
+
+
+
+
+
+
+
+
+  // Function to create a suggestion
+createSuggestion: async (data) => {
+  try {
+    const res = await axiosInstance.post('/api/v1/suggestions/create', data);
+    console.log("✅ Suggestion Created:", res.data);
+    toast.success("Suggestion submitted successfully");
+  } catch (error) {
+    console.error("❌ Error in createSuggestion:", error);
+    const errorMessage = error.response?.data?.message || "Failed to create suggestion";
+    toast.error(errorMessage);
+  }
+},
+
+// Function to get all suggestions
+fetchSuggestions: async () => {
+  try {
+    const res = await axiosInstance.get('/api/v1/suggestions');
+    console.log("📌 Fetched Suggestions:", res.data);
+    set({ suggestions: res.data.suggestions });
+  } catch (error) {
+    console.error("❌ Error in fetchSuggestions:", error);
+    toast.error("Failed to load suggestions");
+  }
+},
+
+// Function to get a single suggestion by ID
+fetchSuggestionById: async (id) => {
+  try {
+    const res = await axiosInstance.get(`/api/v1/suggestions/${id}`);
+    console.log("📌 Fetched Suggestion:", res.data);
+    set({ selectedSuggestion: res.data.suggestion });
+  } catch (error) {
+    console.error("❌ Error in fetchSuggestionById:", error);
+    toast.error("Failed to load suggestion details");
+  }
+},
+
+// Function to like a suggestion
+likeSuggestion: async (id) => {
+  try {
+    await axiosInstance.post(`/api/v1/suggestions/${id}/like`);
+    console.log("👍 Suggestion Liked");
+    toast.success("You liked this suggestion");
+    get().fetchSuggestions(); // Refresh the list
+  } catch (error) {
+    console.error("❌ Error in likeSuggestion:", error);
+    toast.error("Failed to like suggestion");
+  }
+},
+
+// Function to dislike a suggestion
+dislikeSuggestion: async (id) => {
+  try {
+    await axiosInstance.post(`/api/v1/suggestions/${id}/dislike`);
+    console.log("👎 Suggestion Disliked");
+    toast.success("You disliked this suggestion");
+    get().fetchSuggestions(); // Refresh the list
+  } catch (error) {
+    console.error("❌ Error in dislikeSuggestion:", error);
+    toast.error("Failed to dislike suggestion");
+  }
+},
+
 
 
 

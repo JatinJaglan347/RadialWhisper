@@ -37,7 +37,7 @@ const LandingNavbar = () => {
       setAdminOptin(false);
       setModeratorOptin(false);
     }
-  }, [getUserDetails, authUser]);
+  }, [getUserDetails, authUser?.data?.user?.userRole]);
 
   const handleLogout = async () => {
     try {
@@ -65,7 +65,7 @@ const LandingNavbar = () => {
             <Link to="/" className="px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Home</Link>
             <Link to="/chat" className="px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Chat</Link>
             <Link to="/about" className="px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">About</Link>
-            <Link to="/features" className="px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Features</Link>
+            <Link to="/suggestion" className="px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Suggestion</Link>
             <Link to="/contact" className="px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Contact</Link>
             
             {/* Conditional rendering based on auth status */}
@@ -109,12 +109,12 @@ const LandingNavbar = () => {
                     </li>
                   )}
                   <li>
-                    <Link to="/chat/profile">
+                    <Link to="/profile">
                       <User className="w-5 h-5" /> Profile
                     </Link>
                   </li>
                   <li>
-                    <Link to="#">
+                    <Link to="/settings">
                       <Settings className="w-5 h-5" /> Settings
                     </Link>
                   </li>
@@ -156,7 +156,7 @@ const LandingNavbar = () => {
             <Link to="/" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Home</Link>
             <Link to="/chat" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Chat</Link>
             <Link to="/about" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">About</Link>
-            <Link to="/features" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Features</Link>
+            <Link to="/suggestion" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Suggestion</Link>
             <Link to="/contact" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Contact</Link>
             
             {/* Conditional rendering for mobile menu */}

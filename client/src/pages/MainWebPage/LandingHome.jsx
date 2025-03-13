@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   MapPin, 
@@ -20,6 +20,12 @@ import LandingFooter from '../../components/MainWebPage/LandingFooter';
 
 
 function LandingHome() {
+
+  const [seed , setSeed]= useState();
+
+  useEffect(()=>{
+    setSeed(Math.random()*100);
+  },[])
   useEffect(() => {
     AOS.init({
       duration: 800,
@@ -267,7 +273,7 @@ function LandingHome() {
                   <div className="absolute bottom-16 inset-x-4 bg-[#272829]/80 backdrop-blur-md p-3 rounded-xl border border-[#61677A]/30">
                     <div className="flex items-start gap-2">
                       <div className="w-8 h-8 rounded-full bg-[#61677A] flex-shrink-0 overflow-hidden">
-                        <img src="/src/assets/images/user-avatar.jpg" alt="User" className="w-full h-full object-cover" />
+                        <img src={`https://api.dicebear.com/9.x/fun-emoji/svg?seed=${seed}`} alt="User" className="w-full h-full object-cover" />
                       </div>
                       <div className="bg-[#61677A]/50 px-3 py-2 rounded-lg max-w-[80%]">
                         <p className="text-sm text-[#FFF6E0]">Hey! Are you at the north entrance?</p>
@@ -497,7 +503,7 @@ function LandingHome() {
             <div className="bg-gradient-to-br from-[#272829] to-[#31333A] p-8 rounded-xl border border-[#61677A]/30 shadow-xl transition-all duration-500 hover:shadow-2xl hover:translate-y-[-5px]" data-aos="fade-up" data-aos-delay="100">
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-14 h-14 rounded-full overflow-hidden">
-                  <img src="/api/placeholder/100/100" alt="User" className="w-full h-full object-cover" />
+                  <img src={`https://api.dicebear.com/9.x/fun-emoji/svg?seed=Sarah`} alt="User" className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <h4 className="font-bold">Sarah T.</h4>
@@ -518,7 +524,7 @@ function LandingHome() {
             <div className="bg-gradient-to-br from-[#272829] to-[#31333A] p-8 rounded-xl border border-[#61677A]/30 shadow-xl transition-all duration-500 hover:shadow-2xl hover:translate-y-[-5px]" data-aos="fade-up" data-aos-delay="200">
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-14 h-14 rounded-full overflow-hidden">
-                  <img src="/api/placeholder/100/100" alt="User" className="w-full h-full object-cover" />
+                  <img src={`https://api.dicebear.com/9.x/fun-emoji/svg?seed=Michae`} alt="User" className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <h4 className="font-bold">Michael R.</h4>
@@ -539,7 +545,7 @@ function LandingHome() {
             <div className="bg-gradient-to-br from-[#272829] to-[#31333A] p-8 rounded-xl border border-[#61677A]/30 shadow-xl transition-all duration-500 hover:shadow-2xl hover:translate-y-[-5px]" data-aos="fade-up" data-aos-delay="300">
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-14 h-14 rounded-full overflow-hidden">
-                  <img src="/api/placeholder/100/100" alt="User" className="w-full h-full object-cover" />
+                  <img src={`https://api.dicebear.com/9.x/fun-emoji/svg?seed=Jamie`} alt="User" className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <h4 className="font-bold">Jamie L.</h4>
