@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { axiosInstance } from '../lib/axios'; // axios instance for API calls
 import toast from 'react-hot-toast';
 import { io } from 'socket.io-client'
@@ -181,8 +182,8 @@ createSuggestion: async (data) => {
 fetchSuggestions: async () => {
   try {
     const res = await axiosInstance.get('/api/v1/suggestions');
-    console.log("📌 Fetched Suggestions:", res.data);
-    set({ suggestions: res.data.suggestions });
+    console.log("📌 Fetched Suggestions:", res.data.data);
+    set({ suggestions: res.data.data });
   } catch (error) {
     console.error("❌ Error in fetchSuggestions:", error);
     toast.error("Failed to load suggestions");
@@ -203,29 +204,25 @@ fetchSuggestionById: async (id) => {
 
 // Function to like a suggestion
 likeSuggestion: async (id) => {
+  const { authUser } = get();
+  if (!authUser?.data?.user?._id) {
+    toast.error("You must be logged in to like a suggestion");
+    return;
+  }
+
   try {
-    await axiosInstance.post(`/api/v1/suggestions/${id}/like`);
-    console.log("👍 Suggestion Liked");
-    toast.success("You liked this suggestion");
+    await axiosInstance.post(`/api/v1/suggestions/${id}/like`, { userId: authUser.data.user._id });
+    console.log("👍 Suggestion Like Toggled");
+    toast.success("Like updated successfully");
     get().fetchSuggestions(); // Refresh the list
   } catch (error) {
     console.error("❌ Error in likeSuggestion:", error);
-    toast.error("Failed to like suggestion");
+    toast.error(error.response?.data?.message || "Failed to update like");
   }
 },
 
-// Function to dislike a suggestion
-dislikeSuggestion: async (id) => {
-  try {
-    await axiosInstance.post(`/api/v1/suggestions/${id}/dislike`);
-    console.log("👎 Suggestion Disliked");
-    toast.success("You disliked this suggestion");
-    get().fetchSuggestions(); // Refresh the list
-  } catch (error) {
-    console.error("❌ Error in dislikeSuggestion:", error);
-    toast.error("Failed to dislike suggestion");
-  }
-},
+
+
 
 
 
@@ -391,3 +388,5 @@ dislikeSuggestion: async (id) => {
   
 
 }));
+
+

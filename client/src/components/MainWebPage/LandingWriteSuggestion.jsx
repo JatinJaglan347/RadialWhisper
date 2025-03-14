@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Send, CheckCircle, Tag, AlertTriangle } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore.js';
 
+
 const LandingWriteSuggestion = () => {
-  const { authUser } = useAuthStore();
-  
+  const { authUser, createSuggestion, checkAuth  } = useAuthStore();
   const [formState, setFormState] = useState({
     title: '',
     category: '',
@@ -24,6 +24,9 @@ const LandingWriteSuggestion = () => {
     'Documentation',
     'Other'
   ];
+
+
+  
   
   // Update character count when description changes
   useEffect(() => {
@@ -45,6 +48,10 @@ const LandingWriteSuggestion = () => {
       }));
     }
   };
+
+
+
+  
   
   const validateForm = () => {
     const newErrors = {};
@@ -65,7 +72,7 @@ const LandingWriteSuggestion = () => {
     return Object.keys(newErrors).length === 0;
   };
   
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!validateForm()) {
@@ -74,9 +81,19 @@ const LandingWriteSuggestion = () => {
     
     setIsSubmitting(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      // Prepare the data according to your controller requirements
+      const suggestionData = {
+        title: formState.title,
+        category: formState.category,
+        description: formState.description,
+        userId: authUser.data.user._id // Make sure this matches your user ID structure
+      };
+      
+      // Call the createSuggestion function from your store
+      await createSuggestion(suggestionData);
+      
+      // Handle successful submission
       setIsSubmitted(true);
       
       // Reset form after submission
@@ -90,8 +107,14 @@ const LandingWriteSuggestion = () => {
       setTimeout(() => {
         setIsSubmitted(false);
       }, 5000);
-    }, 1500);
+    } catch (error) {
+      // Error handling is already done in your store function
+      console.error("Error submitting suggestion:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
   
   // If user not logged in
   const renderLoginPrompt = () => (
@@ -119,7 +142,7 @@ const LandingWriteSuggestion = () => {
   }
   
   return (
-    <div className="max-w-3xl mx-auto" data-aos="fade-up">
+    <div className="max-w-3xl mx-auto" >
       {isSubmitted ? (
         <div className="bg-gradient-to-br from-[#272829] to-[#31333A] p-8 rounded-xl shadow-lg text-center">
           <CheckCircle size={64} className="mx-auto mb-6 text-green-400" />
@@ -134,6 +157,7 @@ const LandingWriteSuggestion = () => {
             Submit Another Suggestion
           </button>
         </div>
+       
       ) : (
         <div className="bg-gradient-to-br from-[#272829] to-[#31333A] rounded-xl p-8 relative overflow-hidden">
           {/* Form background effect */}
@@ -233,8 +257,11 @@ const LandingWriteSuggestion = () => {
             </div>
           </form>
         </div>
+        
       )}
     </div>
+
+    
   );
 };
 

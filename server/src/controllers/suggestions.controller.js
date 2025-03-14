@@ -67,29 +67,32 @@ const deleteSuggestion = asyncHandler(async (req, res) => {
 
 const likeSuggestion = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const suggestion = await Suggestion.findByIdAndUpdate(
-        id,
-        { $inc: { likes: 1 } },
-        { new: true }
-    );
+    const { userId } = req.body; // Get the userId from request
+
+    const suggestion = await Suggestion.findById(id);
     if (!suggestion) {
         throw new ApiError(404, "Suggestion not found");
     }
-    return res.status(200).json(new ApiResponse(200, suggestion, "Suggestion liked"));
+
+    const userIndex = suggestion.likedBy.indexOf(userId);
+
+    if (userIndex === -1) {
+        // User has not liked before → Add like
+        suggestion.likes += 1;
+        suggestion.likedBy.push(userId);
+    } else {
+        // User has already liked → Remove like
+        suggestion.likes -= 1;
+        suggestion.likedBy.splice(userIndex, 1);
+    }
+
+    await suggestion.save();
+    return res.status(200).json(new ApiResponse(200, suggestion, "Suggestion like updated"));
 });
 
-const dislikeSuggestion = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const suggestion = await Suggestion.findByIdAndUpdate(
-        id,
-        { $inc: { dislikes: 1 } },
-        { new: true }
-    );
-    if (!suggestion) {
-        throw new ApiError(404, "Suggestion not found");
-    }
-    return res.status(200).json(new ApiResponse(200, suggestion, "Suggestion disliked"));
-});
+
+
+
 
 export {
     createSuggestion,
@@ -98,5 +101,5 @@ export {
     updateSuggestion,
     deleteSuggestion,
     likeSuggestion,
-    dislikeSuggestion
+    
 };

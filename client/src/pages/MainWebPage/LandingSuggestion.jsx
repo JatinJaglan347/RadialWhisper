@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Lightbulb, List } from 'lucide-react';
 import LandingWriteSuggestion from '../../components/MainWebPage/LandingWriteSuggestion';
 import LandingViewSuggestions from '../../components/MainWebPage/LandingViewSuggestions ';
@@ -9,15 +9,17 @@ const LandingSuggestion = () => {
   const [activeTab, setActiveTab] = useState('view');
   
   // Render content based on active tab
+  
   const renderContent = () => {
     switch(activeTab) {
       case 'write':
-        return <LandingWriteSuggestion/>;
+        return <LandingWriteSuggestion key="write" />;
       case 'view':
       default:
-        return <LandingViewSuggestions/>;
+        return <LandingViewSuggestions key="view" />;
     }
   };
+  
   
   return (
     <div className="min-h-screen bg-[#272829] text-[#FFF6E0]">
