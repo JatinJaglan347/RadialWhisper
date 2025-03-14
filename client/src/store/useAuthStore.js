@@ -106,23 +106,22 @@ export const useAuthStore = create((set, get) => ({
   // Function to handle user login
   login: async (data) => {
     set({ isLoggingIn: true });
-
     try {
       const res = await axiosInstance.post('/api/v1/user/login', data);
-
       console.log("Login API");
-
       set({ authUser: res.data });
+      // Immediately update role flags by calling checkAuth:
+      await get().checkAuth();
       toast.success("Logged in successfully");
     } catch (error) {
-      console.error(error);  // Log the entire error object to the console
+      console.error(error);
       const errorMessage = error.response?.data?.message || "Failed to log in";
       toast.error(errorMessage);
     } finally {
       set({ isLoggingIn: false });
     }
   },
-
+  
 
   fetchNearbyUsers: async (data)=>{
     set({ isFetchingNearbyUsers: true });
@@ -269,7 +268,7 @@ fetchOpStats: async (range = 'daily') => {
 
 
 
-  authUser: null,
+  
   socket: null,
   messages: [],
   activeChatRoom: null,
