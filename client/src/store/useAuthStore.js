@@ -21,6 +21,7 @@ export const useAuthStore = create((set, get) => ({
   isGettingUserInfoRules :false,
   suggestions: [], // Stores the list of all suggestions
   selectedSuggestion: null, // Stores a single selected suggestion
+  opStats: {},
 
 
   // Function to check if the user is authenticated
@@ -224,6 +225,17 @@ likeSuggestion: async (id) => {
 
 
 
+// Update the fetchOpStats function:
+fetchOpStats: async (range = 'daily') => {
+  try {
+    const res = await axiosInstance.get(`/api/v1/op/stats?range=${range}`);
+    console.log("📊 OP Stats Fetched:", res.data);
+    set({ opStats: res.data });
+  } catch (error) {
+    console.error("❌ Error fetching OP stats:", error);
+    toast.error("Failed to fetch OP stats");
+  }
+},
 
 
 

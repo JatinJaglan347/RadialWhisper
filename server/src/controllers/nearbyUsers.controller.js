@@ -26,9 +26,9 @@ const updateLocationAndFetchNearbyUsers = asyncHandler(async (req, res) => {
     }
 
     // Log user's currentLocation and locationRadiusPreference to debug
-    console.log("User data:", user);
-    console.log("Current Location:", user.currentLocation);
-    console.log("Location Radius Preference:", user.locationRadiusPreference);
+    // console.log("User data:", user);
+    // console.log("Current Location:", user.currentLocation);
+    // console.log("Location Radius Preference:", user.locationRadiusPreference);
 
     // Check that the user has valid location and radius
     if (!user.currentLocation || !user.locationRadiusPreference || !user.currentLocation.coordinates || !user.locationRadiusPreference) {
@@ -61,7 +61,7 @@ const updateLocationAndFetchNearbyUsers = asyncHandler(async (req, res) => {
     }).select("-password -refreshToken -dateOfBirth");
 
     // Log the nearby users query result
-    console.log("Nearby Users Found:", nearbyUsers);
+    // console.log("Nearby Users Found:", nearbyUsers);
 
     // If no nearby users are found
     if (nearbyUsers.length === 0) {

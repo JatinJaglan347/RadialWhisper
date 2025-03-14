@@ -96,7 +96,7 @@ const LandingNavbar = () => {
                   )}
                   {adminOptin && (
                     <li>
-                      <Link to="/op/admin">
+                      <Link to="/op/dashboard">
                         <Skull className="w-5 h-5" />AdminPanal
                       </Link>
                     </li>
@@ -166,7 +166,7 @@ const LandingNavbar = () => {
                   <Link to="/king" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">King Panel</Link>
                 )}
                 {adminOptin && (
-                  <Link to="/admin" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Admin Panel</Link>
+                  <Link to="/op/dashboard" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Admin Panel</Link>
                 )}
                 {moderatorOptin && (
                   <Link to="/moderator" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Moderate</Link>

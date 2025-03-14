@@ -141,7 +141,7 @@ const Navbar = () => {
               {adminOptin && (
                 <li>
                   <Link
-                    to="/admin"
+                    to="/op/dashboard"
                     className="flex items-center text-[#FFF6E0] hover:bg-[#FFF6E0]/10"
                   >
                     <Skull size={16} className="text-[#FFF6E0]/70" />
@@ -259,7 +259,7 @@ const Navbar = () => {
               )}
               {adminOptin && (
                 <Link
-                  to="/admin"
+                  to="/op/dashboard"
                   className="flex items-center px-4 py-2 text-[#FFF6E0] hover:bg-[#FFF6E0]/10 transition-colors"
                 >
                   <Skull size={16} className="mr-2 text-[#FFF6E0]/70" />

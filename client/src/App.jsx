@@ -19,6 +19,7 @@ import LandingAbout from './pages/MainWebPage/LandingAbout.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 import LandingContact from './pages/MainWebPage/LandingContact.jsx';
 import LandingSuggestion from './pages/MainWebPage/LandingSuggestion.jsx';
+import DashboardPage from './pages/dashboard/DashboardPage.jsx';
 // import LandingNavbar from './componenst/MainWebPage/LandingNavbar.js';
 
 function App() {
@@ -74,6 +75,10 @@ function App() {
             <Route
               path="config-user-info-rules"
               element={isAdmin || isKing ? <ConfigRulesPage /> : <Navigate to="/" /> }
+            />
+            <Route
+              path="dashboard"
+              element={isAdmin || isKing ? <DashboardPage/> : <Navigate to="/" /> }
             />
           </Route>
 

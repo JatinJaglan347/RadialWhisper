@@ -4,6 +4,8 @@ import connectDB from "./db/db.js";
 import { app } from "./app.js";
 import { initializeSocket } from "./routes/socket.routes.js";
 
+
+
 dotenv.config({
     path: "./.env"
 });

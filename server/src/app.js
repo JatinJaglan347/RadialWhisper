@@ -3,6 +3,7 @@ import cors from 'cors';
 import cookieparser from 'cookie-parser';
 import dotenv from 'dotenv';
 import { ApiError } from './utils/ApiError.js';
+import './scheduler/activeUserSnapshot.scheduler.js';
 
 // Load environment variables
 dotenv.config();

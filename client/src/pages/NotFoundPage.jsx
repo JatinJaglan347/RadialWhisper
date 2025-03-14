@@ -86,7 +86,7 @@ const NotFoundPage = () => {
             <Link to="/signup" className="bg-[#31333A]/50 hover:bg-[#31333A] p-4 rounded-xl border border-[#61677A]/30 transition-all duration-300 flex items-center">
               <MapPin className="mr-3 h-5 w-5 text-[#FFF6E0]/70" />
               Sign Up
-            </Link>
+            </Link> 
           </div>
         </div>
       </div>

@@ -3,12 +3,15 @@ import { ChatMessage } from "../models/chatMessage.model.js";
 
 const connectedUsers = new Map(); 
 const activeChats = new Map(); 
+const activeSockets = new Set();
+const activeRooms = new Set();
 
 export function registerUser(socket, data) {
   connectedUsers.set(data.userId, {
     socketId: socket.id,
     activeChatRoom: null,
   });
+  activeSockets.add(socket.id);
   socket.userId = data.userId;
   console.log("User registered:", data.userId);
   
@@ -251,12 +254,17 @@ export function leaveChat(socket, data, io) {
   if (user) {
     user.activeChatRoom = null;
   }
+   // Check if the room is empty and remove it from activeRooms
+   if (!io.sockets.adapter.rooms.has(data.roomId)) {
+    activeRooms.delete(data.roomId);
+  }
   
   // Optionally notify the other user that this user has left
   io.to(data.roomId).emit("userLeft", { 
     userId: socket.userId, 
     message: "User has left the chat" 
   });
+
 }
 export function disconnect(socket, io) {
   const userId = socket.userId;
@@ -268,7 +276,40 @@ export function disconnect(socket, io) {
         message: "User disconnected" 
       });
     }
+    activeSockets.delete(socket.id);
     connectedUsers.delete(userId);
   }
   console.log("Client disconnected:", socket.id);
 }
+
+
+
+export function initSocket (io)  {
+  io.on("connection", (socket) => {
+      console.log(`User connected: ${socket.id}`);
+      activeSockets.add(socket.id);
+
+      socket.on("join_room", (room) => {
+          socket.join(room);
+          activeRooms.add(room);
+          console.log(`User joined room: ${room}`);
+      });
+
+      socket.on("disconnect", () => {
+          console.log(`User disconnected: ${socket.id}`);
+          
+          activeSockets.delete(socket.id);
+          if (socket.userId) {
+            connectedUsers.delete(socket.userId);
+        }
+      });
+  });
+};
+
+export function getSocketStats() {
+  return {
+    activeSockets: activeSockets.size,
+    activeRooms: activeRooms.size,
+  };
+}
+
