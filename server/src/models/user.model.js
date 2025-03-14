@@ -194,7 +194,7 @@ userSchema.pre('save', function (next) {
 });
 
 
-userSchema.methods.updateLocation = function (latitude, longitude) {
+userSchema.methods.updateLocation = async function (latitude, longitude) {
   if (
     typeof latitude !== 'number' ||
     typeof longitude !== 'number' ||
@@ -206,15 +206,25 @@ userSchema.methods.updateLocation = function (latitude, longitude) {
     throw new Error('Invalid coordinates. Longitude must be between -180 and 180, and latitude must be between -90 and 90.');
   }
 
-  // Assign currentLocation to previousLocation if not already set
-  if (!this.previousLocation || !this.previousLocation.coordinates || this.previousLocation.coordinates.length !== 2) {
+  // If the new location is the same as the current one, do nothing
+  if (
+    this.currentLocation &&
+    this.currentLocation.coordinates &&
+    this.currentLocation.coordinates[0] === longitude &&
+    this.currentLocation.coordinates[1] === latitude
+  ) {
+    return this; // No need to update, return the current user document
+  }
+
+  // Only update `previousLocation` if `currentLocation` is different
+  if (this.currentLocation && this.currentLocation.coordinates.length === 2) {
     this.previousLocation = {
       type: 'Point',
-      coordinates: this.currentLocation?.coordinates || [0, 0], // Use currentLocation or fallback to [0, 0]
+      coordinates: [...this.currentLocation.coordinates], // Store old location
     };
   }
 
-  // Update currentLocation
+  // Update `currentLocation`
   this.currentLocation = {
     type: 'Point',
     coordinates: [longitude, latitude],
@@ -223,12 +233,14 @@ userSchema.methods.updateLocation = function (latitude, longitude) {
   // Update timestamp
   this.locationUpdatedAt = Date.now();
 
-  // Generate a new profile image seed
+  // Generate a new profile image seed based on location
   const seed = `${latitude}-${longitude}`;
   this.profileImageURL = `https://api.dicebear.com/9.x/fun-emoji/svg?seed=${seed}`;
 
-  return this.save();
+  return await this.save();
 };
+
+
 
 userSchema.methods.bannedUser = function (status, reason) {
   const currentDate = new Date();

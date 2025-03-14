@@ -30,7 +30,6 @@ const HomePage = () => {
 
 
 
-
   const formatTime = (timestamp) => {
     if (!timestamp) return '';
     
@@ -91,15 +90,6 @@ const HomePage = () => {
       return () => clearTimeout(timer);
     }
   }, [authUser, connectSocket]);
-
-
-
-
-
-
-
-
-
 
 
   // Fetch user's current location
