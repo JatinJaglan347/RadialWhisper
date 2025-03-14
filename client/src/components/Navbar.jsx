@@ -62,7 +62,7 @@ const Navbar = () => {
   };
 
   return (
-    <div className="relative z-20">
+    <div className="relative z-20 flex flex-wrap w-full ">
       {/* Background blur effect */}
       <div className="absolute inset-0 bg-[#272829]/80 backdrop-blur-md z-0"></div>
 
@@ -70,7 +70,7 @@ const Navbar = () => {
       <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-[#FFF6E0]/5 via-[#FFF6E0]/20 to-[#FFF6E0]/5"></div>
 
       {/* Navbar content */}
-      <div className="px-4 md:px-8 py-3 relative z-10 flex items-center justify-between">
+      <div className="px-4 md:px-8 py-3 relative z-10 flex flex-wrap items-center justify-between w-full">
         {/* Left side: Logo with subtle animation */}
         <div className="flex items-center">
           <Link to="/" className="group flex items-center">
@@ -162,7 +162,7 @@ const Navbar = () => {
               )}
               <li>
                 <Link
-                  to="/profile"
+                  to="/chat/profile"
                   className="flex items-center text-[#FFF6E0] hover:bg-[#FFF6E0]/10"
                 >
                   <User size={16} className="text-[#FFF6E0]/70" />
@@ -171,7 +171,7 @@ const Navbar = () => {
               </li>
               <li>
                 <Link
-                  to="#"
+                  to="/chat/settings"
                   className="flex items-center text-[#FFF6E0] hover:bg-[#FFF6E0]/10"
                 >
                   <Settings size={16} className="text-[#FFF6E0]/70" />
@@ -279,14 +279,14 @@ const Navbar = () => {
               <div className="h-px w-full bg-gradient-to-r from-transparent via-[#61677A]/30 to-transparent my-1"></div>
 
               <Link
-                to="/profile"
+                to="/chat/profile"
                 className="flex items-center px-4 py-2 text-[#FFF6E0] hover:bg-[#FFF6E0]/10 transition-colors"
               >
                 <User size={16} className="mr-2 text-[#FFF6E0]/70" />
                 <span>Profile</span>
               </Link>
               <Link
-                to="#"
+                to="/chat/settings"
                 className="flex items-center px-4 py-2 text-[#FFF6E0] hover:bg-[#FFF6E0]/10 transition-colors"
               >
                 <Settings size={16} className="mr-2 text-[#FFF6E0]/70" />

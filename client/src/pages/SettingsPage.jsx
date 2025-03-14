@@ -135,7 +135,7 @@ const SettingPage = () => {
             </div>
             
             <div className="mt-4 md:mt-0">
-              <Link to="/profile" className="btn bg-[#61677A]/30 hover:bg-[#61677A]/50 text-[#FFF6E0] px-4 py-2 rounded-full font-medium transition-all duration-300 border border-[#FFF6E0]/20 hover:border-[#FFF6E0]/40">
+              <Link to="/chat/profile" className="btn bg-[#61677A]/30 hover:bg-[#61677A]/50 text-[#FFF6E0] px-4 py-2 rounded-full font-medium transition-all duration-300 border border-[#FFF6E0]/20 hover:border-[#FFF6E0]/40">
                 View Profile
               </Link>
             </div>

@@ -110,15 +110,7 @@
 
 
 
-
-
-
-
-
-
-
-
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 // import Navbar from './components/Navbar.jsx';
 
@@ -148,17 +140,33 @@ import DashboardPage from './pages/ModerationPages/DashboardPage.jsx';
 // import ManageSuggestionsPage from './pages/ModerationPages/ManageSuggestionsPage.jsx';
 // import ManageReportsPage from './pages/ModerationPages/ManageReportsPage.jsx';
 // import ManageContactsPage from './pages/ModerationPages/ManageContactsPage.jsx';
-import AdminPanelNavbar from './components/ModerationComponents/AdminPanelNavbar.jsx';
+import AdminPanelNavbar, { SidebarContext } from './components/ModerationComponents/AdminPanelNavbar.jsx';
 // import LandingNavbar from './componenst/MainWebPage/LandingNavbar.js';
 
 function App() {
   const { authUser, checkAuth, isCheckingAuth, isKing, isAdmin, isModrater, checkOpUser } = useAuthStore();
   const location = useLocation();
   
+  // Sidebar state
+  const [isNavbarCollapsed, setIsNavbarCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  
   // Fetch authUser data on initial load
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
+  
+  // Check if device is mobile
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   // Check if current path starts with /chat or /op
   const isChatRoute = location.pathname.startsWith('/chat') || location.pathname.startsWith('/op');
@@ -184,95 +192,148 @@ function App() {
   
   // Check if user has admin access for /op routes
   const hasAdminAccess = isAdmin || isKing;
+
+  // Handle sidebar state changes
+  const handleSidebarStateChange = (isCollapsed) => {
+    setIsNavbarCollapsed(isCollapsed);
+  };
+  
+  // Handle mobile menu state changes
+  const handleMobileMenuChange = (isOpen) => {
+    setShowMobileMenu(isOpen);
+  };
   
   return (
-    <div className="">
-      {/* Conditionally render navbars based on route */}
-      {isAdminRoute ? (
-        authUser && hasAdminAccess && <AdminPanelNavbar/>
-      ) : isChatRoute ? (
-        authUser && <Navbar />
-      ) : (
-        <LandingNavbar />
-      )}
+    <div className="flex flex-col min-h-screen">
+      {/* Top Navigation Bar - Choose between regular and landing navbar */}
+      <div 
+  className={`
+    flex-1 transition-all duration-300 w-full
+    ${isMobile ? 'px-2' : 'px-4'} 
+    ${isAdminRoute && hasAdminAccess && !isMobile ? 'admin-main' : ''}
+  `}
+  style={{ 
+    marginLeft: isAdminRoute && hasAdminAccess && !isMobile
+      ? (isNavbarCollapsed ? '4rem' : '16rem') 
+      : '0',
+    width: isMobile ? '100vw' : 'auto',
+    padding: '0' // Remove any padding
+  }}
+>
+  {isChatRoute && authUser ? <Navbar /> : <LandingNavbar />}
+</div>
       
-      <main className={`${isAdminRoute && hasAdminAccess ? 'md:pl-64' : ''}`}>
-        <Routes>
-          {/* Main landing pages */}
-          <Route path="/" element={<LandingHome/>} />
-          <Route path="/about" element={<LandingAbout/>} />
-          <Route path="/contact" element={<LandingContact/>} />
-          <Route path="/suggestion" element={<LandingSuggestion/>} />
-          
-          {/* Authentication routes at root level */}
-          <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/chat" />} />
-          <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to="/chat" />} />
-          
-          {/* Chat related routes */}
-          <Route path="/chat" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
-          <Route path="/settings" element={authUser ? <SettingsPage /> : <Navigate to="/login" />} />
-          <Route path="/profile" element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
-          
-          {/* Admin routes */}
-          <Route path="/op">
-            {/* Dashboard route */}
-            <Route
-              index
-              element={hasAdminAccess ? <DashboardPage/> : <Navigate to="/" />}
-            />
-            <Route
-              path="dashboard"
-              element={hasAdminAccess ? <DashboardPage/> : <Navigate to="/" />}
-            />
+      {/* Content area with potential admin sidebar */}
+      <div className="flex flex-1 relative">
+        {/* Admin sidebar for /op routes */}
+        {isAdminRoute && authUser && hasAdminAccess && (
+          <SidebarContext.Provider value={{ 
+            isCollapsed: isNavbarCollapsed, 
+            sidebarWidth: '16rem', 
+            collapsedWidth: '4rem',
+            isMobile: isMobile,
+            showMobileMenu: showMobileMenu,
+            onCollapsedChange: handleSidebarStateChange,
+            onMobileMenuChange: handleMobileMenuChange
+          }}>
+            {/* <div className="fixed top-[var(--navbar-height)] left-0 h-[calc(100vh-var(--navbar-height))] z-20"> */}
+              <AdminPanelNavbar />
+            {/* </div> */}
+          </SidebarContext.Provider>
+        )}
+        
+        {/* Main content area */}
+        <main 
+          className={`
+            flex-1 transition-all duration-300 w-full
+            ${isMobile ? 'px-2' : 'px-4'} 
+            ${isAdminRoute && hasAdminAccess && !isMobile ? 'admin-main' : ''}
+          `}
+          style={{ 
+            marginLeft: isAdminRoute && hasAdminAccess && !isMobile
+              ? (isNavbarCollapsed ? '4rem' : '16rem') 
+              : '0',
+            width: isMobile ? '100vw' : 'auto',
+            padding: '0' // Remove any padding
+          }}
+        >
+          <Routes>
+            {/* Main landing pages */}
+            <Route path="/" element={<LandingHome/>} />
+            <Route path="/about" element={<LandingAbout/>} />
+            <Route path="/contact" element={<LandingContact/>} />
+            <Route path="/suggestion" element={<LandingSuggestion/>} />
             
-            {/* User Management */}
-            {/* <Route
-              path="users"
-              element={hasAdminAccess ? <ManageUsersPage /> : <Navigate to="/" />}
-            /> */}
+            {/* Authentication routes at root level */}
+            <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/chat" />} />
+            <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to="/chat" />} />
             
-            {/* Moderator Management */}
-            {/* <Route
-              path="moderators"
-              element={hasAdminAccess ? <ManageModeratorsPage /> : <Navigate to="/" />}
-            /> */}
+            {/* Chat related routes */}
+            <Route path="/chat" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
+            <Route path="/chat/settings" element={authUser ? <SettingsPage /> : <Navigate to="/login" />} />
+            <Route path="/chat/profile" element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
             
-            {/* Ban/Unban Management */}
-            {/* <Route
-              path="bans"
-              element={hasAdminAccess ? <BanUnbanUsersPage /> : <Navigate to="/" />}
-            /> */}
-            
-            {/* Suggestions Management */}
-            {/* <Route
-              path="suggestions"
-              element={hasAdminAccess ? <ManageSuggestionsPage /> : <Navigate to="/" />}
-            /> */}
-            
-            {/* Reports Management */}
-            {/* <Route
-              path="reports"
-              element={hasAdminAccess ? <ManageReportsPage /> : <Navigate to="/" />}
-            /> */}
-            
-            {/* Contact Management */}
-            {/* <Route
-              path="contacts"
-              element={hasAdminAccess ? <ManageContactsPage /> : <Navigate to="/" />}
-            /> */}
-            
-            {/* Config/Rules Management */}
-            <Route
-              path="config"
-              element={hasAdminAccess ? <ConfigRulesPage /> : <Navigate to="/" />}
-            />
-          </Route>
+            {/* Admin routes */}
+            <Route path="/op">
+              {/* Dashboard route */}
+              <Route
+                index
+                element={hasAdminAccess ? <DashboardPage/> : <Navigate to="/" />}
+              />
+              <Route
+                path="dashboard"
+                element={hasAdminAccess ? <DashboardPage/> : <Navigate to="/" />}
+              />
+              
+              {/* User Management */}
+              {/* <Route
+                path="users"
+                element={hasAdminAccess ? <ManageUsersPage /> : <Navigate to="/" />}
+              /> */}
+              
+              {/* Moderator Management */}
+              {/* <Route
+                path="moderators"
+                element={hasAdminAccess ? <ManageModeratorsPage /> : <Navigate to="/" />}
+              /> */}
+              
+              {/* Ban/Unban Management */}
+              {/* <Route
+                path="bans"
+                element={hasAdminAccess ? <BanUnbanUsersPage /> : <Navigate to="/" />}
+              /> */}
+              
+              {/* Suggestions Management */}
+              {/* <Route
+                path="suggestions"
+                element={hasAdminAccess ? <ManageSuggestionsPage /> : <Navigate to="/" />}
+              /> */}
+              
+              {/* Reports Management */}
+              {/* <Route
+                path="reports"
+                element={hasAdminAccess ? <ManageReportsPage /> : <Navigate to="/" />}
+              /> */}
+              
+              {/* Contact Management */}
+              {/* <Route
+                path="contacts"
+                element={hasAdminAccess ? <ManageContactsPage /> : <Navigate to="/" />}
+              /> */}
+              
+              {/* Config/Rules Management */}
+              <Route
+                path="config"
+                element={hasAdminAccess ? <ConfigRulesPage /> : <Navigate to="/" />}
+              />
+            </Route>
 
-          {/* 404 Not Found - this catches all unmatched routes */}
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-        <Toaster />
-      </main>
+            {/* 404 Not Found - this catches all unmatched routes */}
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+          <Toaster />
+        </main>
+      </div>
     </div>
   );
 }

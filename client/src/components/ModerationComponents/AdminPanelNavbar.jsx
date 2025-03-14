@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, createContext, useContext } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 import { 
   Users, 
   ShieldAlert, 
@@ -10,12 +10,34 @@ import {
   Settings,
   ChevronRight,
   ChevronLeft,
-  LogOut
+  LogOut,
+  LayoutDashboard
 } from 'lucide-react';
+
+// Create a context to share sidebar state with other components
+export const SidebarContext = createContext({
+  isCollapsed: false,
+  sidebarWidth: '16rem',
+  collapsedWidth: '4rem',
+  isMobile: false,
+  showMobileMenu: false,
+  onCollapsedChange: () => {},
+  onMobileMenuChange: () => {}
+});
+
+export const useSidebar = () => useContext(SidebarContext);
 
 const AdminPanelNavbar = () => {
   const location = useLocation();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { 
+    isCollapsed, 
+    sidebarWidth, 
+    collapsedWidth, 
+    onCollapsedChange, 
+    onMobileMenuChange 
+  } = useSidebar();
+  
+  const [localIsCollapsed, setLocalIsCollapsed] = useState(isCollapsed);
   const [isMobile, setIsMobile] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
@@ -25,21 +47,53 @@ const AdminPanelNavbar = () => {
   // Handle responsive behavior
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-      if (window.innerWidth >= 768) {
+      const mobileView = window.innerWidth < 768;
+      setIsMobile(mobileView);
+      
+      if (!mobileView && showMobileMenu) {
         setShowMobileMenu(false);
+        if (onMobileMenuChange) onMobileMenuChange(false);
       }
     };
 
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [showMobileMenu, onMobileMenuChange]);
+
+  // Sync local state with context
+  useEffect(() => {
+    setLocalIsCollapsed(isCollapsed);
+  }, [isCollapsed]);
+
+  // Handle toggle collapse
+  const handleToggleCollapse = () => {
+    const newState = !localIsCollapsed;
+    setLocalIsCollapsed(newState);
+    if (onCollapsedChange) {
+      onCollapsedChange(newState);
+    }
+  };
+
+  // Handle mobile menu toggle
+  const handleMobileMenuToggle = () => {
+    const newState = !showMobileMenu;
+    setShowMobileMenu(newState);
+    if (onMobileMenuChange) {
+      onMobileMenuChange(newState);
+    }
+  };
 
   // Don't render if not on admin route
   if (!isAdminRoute) return null;
 
   const navItems = [
+    {
+      path: '/op/dashboard',
+      icon: <LayoutDashboard size={20} />,
+      label: 'Dashboard',
+      description: 'Overview and statistics'
+    },
     { 
       path: '/op/users', 
       icon: <Users size={20} />, 
@@ -84,20 +138,24 @@ const AdminPanelNavbar = () => {
     }
   ];
 
-  const isActiveRoute = (path) => {
-    return location.pathname === path || location.pathname.startsWith(`${path}/`);
-  };
-
   return (
     <>
       {/* Mobile menu toggle */}
       {isMobile && (
         <button
-          onClick={() => setShowMobileMenu(!showMobileMenu)}
+          onClick={handleMobileMenuToggle}
           className="fixed top-4 left-4 z-50 bg-[#31333A] p-2 rounded-full text-[#FFF6E0] shadow-lg"
         >
           {showMobileMenu ? <ChevronLeft size={24} /> : <ChevronRight size={24} />}
         </button>
+      )}
+
+      {/* Backdrop for mobile menu */}
+      {isMobile && showMobileMenu && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-30"
+          onClick={handleMobileMenuToggle}
+        />
       )}
 
       {/* Desktop sidebar or mobile menu */}
@@ -105,18 +163,18 @@ const AdminPanelNavbar = () => {
         className={`fixed top-0 left-0 h-full bg-[#272829] text-[#FFF6E0] shadow-xl transition-all duration-300 z-40
                     ${isMobile 
                       ? showMobileMenu 
-                        ? 'w-64 translate-x-0' 
-                        : 'w-64 -translate-x-full'
-                      : isCollapsed 
+                        ? 'w-3/4 max-w-64 translate-x-0' 
+                        : 'w-3/4 max-w-64 -translate-x-full'
+                      : localIsCollapsed 
                         ? 'w-16' 
                         : 'w-64'}`}
       >
         {/* Admin panel logo/header */}
         <div className="h-16 flex items-center justify-between px-4 bg-[#31333A] border-b border-[#61677A]/30">
-          <div className={`flex items-center ${isCollapsed && !isMobile ? 'justify-center w-full' : ''}`}>
+          <div className={`flex items-center ${localIsCollapsed && !isMobile ? 'justify-center w-full' : ''}`}>
             <div className="bg-gradient-to-r from-[#FFF6E0]/10 to-transparent p-1 rounded-full">
               <span className="bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-[#272829] px-2 py-1 rounded-full text-sm font-medium">
-                {isCollapsed && !isMobile ? 'OP' : 'ADMIN PANEL'}
+                {localIsCollapsed && !isMobile ? 'OP' : 'ADMIN PANEL'}
               </span>
             </div>
           </div>
@@ -124,10 +182,10 @@ const AdminPanelNavbar = () => {
           {/* Collapse toggle button (desktop only) */}
           {!isMobile && (
             <button 
-              onClick={() => setIsCollapsed(!isCollapsed)}
+              onClick={handleToggleCollapse}
               className="text-[#FFF6E0]/70 hover:text-[#FFF6E0] transition-colors"
             >
-              {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+              {localIsCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
             </button>
           )}
         </div>
@@ -135,62 +193,66 @@ const AdminPanelNavbar = () => {
         {/* Navigation items */}
         <div className="py-4">
           {navItems.map((item) => (
-            <Link
+            <NavLink
               key={item.path}
               to={item.path}
-              className={`
+              className={({ isActive }) => `
                 flex items-center px-4 py-3 hover:bg-[#31333A] transition-colors relative
-                ${isActiveRoute(item.path) ? 'bg-[#31333A]' : ''}
+                ${isActive ? 'bg-[#31333A]' : ''}
               `}
             >
-              {/* Active indicator */}
-              {isActiveRoute(item.path) && (
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#FFF6E0] to-[#D8D9DA]"></div>
+              {({ isActive }) => (
+                <>
+                  {/* Active indicator */}
+                  {isActive && (
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#FFF6E0] to-[#D8D9DA]"></div>
+                  )}
+                  
+                  {/* Icon */}
+                  <div className={`
+                    ${isActive ? 'text-[#FFF6E0]' : 'text-[#FFF6E0]/70'} 
+                    ${localIsCollapsed && !isMobile ? 'mx-auto' : 'mr-3'}
+                  `}>
+                    {item.icon}
+                  </div>
+                  
+                  {/* Label and description */}
+                  {(!localIsCollapsed || isMobile) && (
+                    <div className="flex flex-col">
+                      <span className={`font-medium ${isActive ? 'text-[#FFF6E0]' : 'text-[#FFF6E0]/90'}`}>
+                        {item.label}
+                      </span>
+                      <span className="text-xs text-[#D8D9DA]/60">
+                        {item.description}
+                      </span>
+                    </div>
+                  )}
+                </>
               )}
-              
-              {/* Icon */}
-              <div className={`
-                ${isActiveRoute(item.path) ? 'text-[#FFF6E0]' : 'text-[#FFF6E0]/70'} 
-                ${isCollapsed && !isMobile ? 'mx-auto' : 'mr-3'}
-              `}>
-                {item.icon}
-              </div>
-              
-              {/* Label and description */}
-              {(!isCollapsed || isMobile) && (
-                <div className="flex flex-col">
-                  <span className={`font-medium ${isActiveRoute(item.path) ? 'text-[#FFF6E0]' : 'text-[#FFF6E0]/90'}`}>
-                    {item.label}
-                  </span>
-                  <span className="text-xs text-[#D8D9DA]/60">
-                    {item.description}
-                  </span>
-                </div>
-              )}
-            </Link>
+            </NavLink>
           ))}
         </div>
 
         {/* Logout option at bottom */}
         <div className="absolute bottom-0 left-0 right-0 p-4">
-          <Link
+          <NavLink
             to="/"
-            className="flex items-center px-4 py-3 hover:bg-[#31333A] rounded-xl transition-colors bg-[#31333A]/50 border border-[#61677A]/30"
+            className={({ isActive }) => `
+              flex items-center px-4 py-3 hover:bg-[#31333A] rounded-xl transition-colors 
+              bg-[#31333A]/50 border border-[#61677A]/30
+              ${isActive ? 'bg-[#31333A]' : ''}
+            `}
           >
-            <div className={`text-[#FFF6E0]/70 ${isCollapsed && !isMobile ? 'mx-auto' : 'mr-3'}`}>
+            <div className={`text-[#FFF6E0]/70 ${localIsCollapsed && !isMobile ? 'mx-auto' : 'mr-3'}`}>
               <LogOut size={20} />
             </div>
-            {(!isCollapsed || isMobile) && (
+            {(!localIsCollapsed || isMobile) && (
               <span className="font-medium">Exit Admin Panel</span>
             )}
-          </Link>
+          </NavLink>
         </div>
         
-        {/* Background elements */}
-        <div className="absolute bottom-0 right-0 w-full h-64 pointer-events-none overflow-hidden">
-          <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-[#31333A]/30 to-transparent"></div>
-          <div className="absolute bottom-20 right-10 w-40 h-40 rounded-full bg-[#61677A] blur-[80px] opacity-10 animate-pulse" style={{animationDuration: '10s'}}></div>
-        </div>
+        
       </div>
     </>
   );

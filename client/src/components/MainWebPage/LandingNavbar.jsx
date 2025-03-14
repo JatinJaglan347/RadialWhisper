@@ -52,7 +52,7 @@ const LandingNavbar = () => {
   };
 
   return (
-    <nav className="bg-[#272829] text-[#FFF6E0] shadow-lg">
+    <nav className="bg-[#272829] text-[#FFF6E0] shadow-lg w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
@@ -109,12 +109,12 @@ const LandingNavbar = () => {
                     </li>
                   )}
                   <li>
-                    <Link to="/profile">
+                    <Link to="/chat/profile">
                       <User className="w-5 h-5" /> Profile
                     </Link>
                   </li>
                   <li>
-                    <Link to="/settings">
+                    <Link to="/chat/settings">
                       <Settings className="w-5 h-5" /> Settings
                     </Link>
                   </li>
@@ -171,8 +171,8 @@ const LandingNavbar = () => {
                 {moderatorOptin && (
                   <Link to="/moderator" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Moderate</Link>
                 )}
-                <Link to="/profile" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Profile</Link>
-                <Link to="#" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Settings</Link>
+                <Link to="/chat/profile" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Profile</Link>
+                <Link to="/chat/settings" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Settings</Link>
                 <button 
                   onClick={handleLogout}
                   className="block w-full text-left px-3 py-2 rounded-md hover:bg-[#61677A] font-medium"

@@ -2,26 +2,28 @@ import React, { useEffect, useState } from "react";
 import { axiosInstance } from "../../lib/axios";
 import toast from "react-hot-toast";
 import { useAuthStore } from "../../store/useAuthStore";
-import {
-  AiOutlineUser,
-  AiOutlineLock,
-  AiOutlineCalendar,
-  AiOutlineBulb,
-  AiOutlineClose,
-  AiOutlineEdit,
-  AiOutlinePlus,
-  AiOutlineCheck
-} from "react-icons/ai";
+import { 
+  User, 
+  Lock, 
+  Calendar, 
+  MapPin, 
+  Radio, 
+  Edit, 
+  Plus, 
+  Check, 
+  X, 
+  Save
+} from "lucide-react";
 
 function ConfigRulesPage() {
   const { authUser } = useAuthStore();
   const userId = authUser?.data?.user?._id;
 
   const [userInfoRulesData, setUserInfoRulesData] = useState(null);
-  const [originalData, setOriginalData] = useState(null); // Store original values
+  const [originalData, setOriginalData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isChanged, setIsChanged] = useState(false); // Track changes
+  const [isChanged, setIsChanged] = useState(false);
   const [key, setKey] = useState(0);
 
   const [configRules, setConfigRules] = useState({
@@ -37,10 +39,8 @@ function ConfigRulesPage() {
     maxRadiusLength: 0,
   });
 
-  // New state for Bio and Gender options
   const [bioOptions, setBioOptions] = useState([]);
   const [genderList, setGenderList] = useState([]);
-  // New states for inline editing and new additions
   const [editingBioIndex, setEditingBioIndex] = useState(null);
   const [editingGenderIndex, setEditingGenderIndex] = useState(null);
   const [newBioOption, setNewBioOption] = useState("");
@@ -55,7 +55,7 @@ function ConfigRulesPage() {
         const response = await axiosInstance.post("/api/v1/op/user-info-rules", { userId });
         const data = response.data.data;
         setUserInfoRulesData(data);
-        setOriginalData(data); // Store original data for comparison
+        setOriginalData(data);
 
         setConfigRules({
           minFullNameLength: data?.fullName?.minLength || 0,
@@ -70,7 +70,6 @@ function ConfigRulesPage() {
           maxRadiusLength: data?.locationRadiusPreference?.maxLength || 0,
         });
 
-        // Set the new states from fetched data
         setBioOptions(data?.bio?.options || []);
         setGenderList(data?.genderList || []);
       } catch (err) {
@@ -84,7 +83,7 @@ function ConfigRulesPage() {
     fetchUserInfoRules();
   }, [userId, key]);
 
-  // Check if any changes were made (including bioOptions and genderList)
+  // Check if any changes were made
   useEffect(() => {
     if (!originalData) return;
 
@@ -101,14 +100,9 @@ function ConfigRulesPage() {
       maxRadiusLength: originalData?.locationRadiusPreference?.maxLength || 0,
     };
 
-    const rulesChanged =
-      JSON.stringify(configRules) !== JSON.stringify(originalConfig);
-    const bioChanged =
-      JSON.stringify(bioOptions) !==
-      JSON.stringify(originalData?.bio?.options || []);
-    const genderChanged =
-      JSON.stringify(genderList) !==
-      JSON.stringify(originalData?.genderList || []);
+    const rulesChanged = JSON.stringify(configRules) !== JSON.stringify(originalConfig);
+    const bioChanged = JSON.stringify(bioOptions) !== JSON.stringify(originalData?.bio?.options || []);
+    const genderChanged = JSON.stringify(genderList) !== JSON.stringify(originalData?.genderList || []);
 
     setIsChanged(rulesChanged || bioChanged || genderChanged);
   }, [configRules, originalData, bioOptions, genderList]);
@@ -165,7 +159,7 @@ function ConfigRulesPage() {
     }));
   };
 
-  // ----- Bio Options Handlers -----
+  // Bio Options Handlers
   const startEditingBio = (index) => setEditingBioIndex(index);
   const finishEditingBio = (index, value) => {
     if (!value.trim()) {
@@ -192,7 +186,7 @@ function ConfigRulesPage() {
     setBioOptions(newOptions);
   };
 
-  // ----- Gender Options Handlers -----
+  // Gender Options Handlers
   const startEditingGender = (index) => setEditingGenderIndex(index);
   const finishEditingGender = (index, value) => {
     if (!value.trim()) {
@@ -221,7 +215,6 @@ function ConfigRulesPage() {
 
   // Handle Save
   const handleSave = async () => {
-    // Filter out empty strings (although our UI prevents empty values)
     const filteredBioOptions = bioOptions.filter((option) => option.trim() !== "");
     const filteredGenderList = genderList.filter((gender) => gender.trim() !== "");
 
@@ -305,7 +298,6 @@ function ConfigRulesPage() {
       return;
     }
 
-    console.log("Data being sent to API:", updatedData);
     try {
       await axiosInstance.patch("/api/v1/op/update-user-info-rules", {
         userId,
@@ -345,193 +337,255 @@ function ConfigRulesPage() {
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    return (
+      <div className="min-h-screen bg-[#272829] flex items-center justify-center">
+        <div className="relative">
+          <div className="w-16 h-16 rounded-full border-4 border-[#FFF6E0]/30 border-t-[#FFF6E0] animate-spin"></div>
+          <span className="mt-4 block text-[#FFF6E0]">Loading configuration...</span>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-4xl font-bold text-center mb-8 text-teal-500">
-        User Configuration Rules
-      </h1>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* User Info */}
-        <div className="card bg-base-200 shadow-xl">
-          <div className="card-body">
-            <h2 className="card-title flex items-center gap-2">
-              <AiOutlineUser className="text-teal-500" />
-              User Info
-            </h2>
-            <div className="form-control mt-4">
-              <label htmlFor="minFullNameLength" className="label">
-                <span className="label-text">Full Name - Min Length</span>
-              </label>
-              <input
-                type="number"
-                min="3"
-                max="60"
-                id="minFullNameLength"
-                name="minFullNameLength"
-                value={configRules.minFullNameLength}
-                onChange={handleInputChange}
-                className="input input-bordered"
-              />
-            </div>
-            <div className="form-control mt-4">
-              <label htmlFor="maxFullNameLength" className="label">
-                <span className="label-text">Full Name - Max Length</span>
-              </label>
-              <input
-                type="number"
-                min="3"
-                max="60"
-                id="maxFullNameLength"
-                name="maxFullNameLength"
-                value={configRules.maxFullNameLength}
-                onChange={handleInputChange}
-                className="input input-bordered"
-              />
-            </div>
-            <hr className="my-6" />
-            <h2 className="card-title flex items-center gap-2">
-              <AiOutlineLock className="text-teal-500" />
-              Password
-            </h2>
-            <div className="form-control mt-4">
-              <label htmlFor="minPasswordLength" className="label">
-                <span className="label-text">Min Length</span>
-              </label>
-              <input
-                type="number"
-                min="3"
-                max="100"
-                id="minPasswordLength"
-                name="minPasswordLength"
-                value={configRules.minPasswordLength}
-                onChange={handleInputChange}
-                className="input input-bordered"
-              />
-            </div>
-            <div className="form-control mt-4">
-              <label className="cursor-pointer label">
-                <span className="label-text">Require Upper Case</span>
-                <input
-                  type="checkbox"
-                  name="requireUpperCase"
-                  checked={configRules.requireUpperCase}
-                  onChange={handleInputChange}
-                  className="toggle toggle-success"
-                />
-              </label>
-            </div>
-            <div className="form-control mt-4">
-              <label className="cursor-pointer label">
-                <span className="label-text">Require Number</span>
-                <input
-                  type="checkbox"
-                  name="requireNumber"
-                  checked={configRules.requireNumber}
-                  onChange={handleInputChange}
-                  className="toggle toggle-success"
-                />
-              </label>
-            </div>
-            <div className="form-control mt-4">
-              <label className="cursor-pointer label">
-                <span className="label-text">Require Special Char</span>
-                <input
-                  type="checkbox"
-                  name="requireSpecialChar"
-                  checked={configRules.requireSpecialChar}
-                  onChange={handleInputChange}
-                  className="toggle toggle-success"
-                />
-              </label>
-            </div>
-          </div>
-        </div>
-
-        {/* Date of Birth & Location */}
-        <div className="card bg-base-200 shadow-xl">
-          <div className="card-body">
-            <h2 className="card-title flex items-center gap-2">
-              <AiOutlineCalendar className="text-teal-500" />
-              Date of Birth &amp; Location
-            </h2>
-            <div className="form-control mt-4">
-              <label htmlFor="minAge" className="label">
-                <span className="label-text">User Age - Min Years</span>
-              </label>
-              <input
-                type="number"
-                min="5"
-                max="120"
-                id="minAge"
-                name="minAge"
-                value={configRules.minAge}
-                onChange={handleInputChange}
-                className="input input-bordered"
-              />
-            </div>
-            <div className="form-control mt-4">
-              <label htmlFor="maxAge" className="label">
-                <span className="label-text">User Age - Max Years</span>
-              </label>
-              <input
-                type="number"
-                min="5"
-                max="120"
-                id="maxAge"
-                name="maxAge"
-                value={configRules.maxAge}
-                onChange={handleInputChange}
-                className="input input-bordered"
-              />
-            </div>
-            <hr className="my-6" />
-            <h2 className="card-title">Location Radius</h2>
-            <div className="form-control mt-4">
-              <label htmlFor="minRadiusLength" className="label">
-                <span className="label-text">Min Radius (m)</span>
-              </label>
-              <input
-                type="number"
-                min="1"
-                id="minRadiusLength"
-                name="minRadiusLength"
-                value={configRules.minRadiusLength}
-                onChange={handleInputChange}
-                className="input input-bordered"
-              />
-            </div>
-            <div className="form-control mt-4">
-              <label htmlFor="maxRadiusLength" className="label">
-                <span className="label-text">Max Radius (m)</span>
-              </label>
-              <input
-                type="number"
-                min="1"
-                id="maxRadiusLength"
-                name="maxRadiusLength"
-                value={configRules.maxRadiusLength}
-                onChange={handleInputChange}
-                className="input input-bordered"
-              />
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen bg-[#272829] text-[#FFF6E0] relative overflow-hidden">
+      {/* Background elements */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-[#272829] opacity-80"></div>
+        <div className="absolute inset-0 bg-cover bg-center opacity-10 mix-blend-overlay"></div>
+        <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-[#272829] via-[#31333A] to-transparent opacity-90"></div>
       </div>
-
-      {/* Bio & Gender Options Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
-        {/* Bio Options Panel */}
-        <div className="card bg-base-200 shadow-xl">
-          <div className="card-body">
-            <h2 className="card-title flex items-center gap-2">
-              <AiOutlineBulb className="text-teal-500" />
-              Bio Options
+      
+      {/* Animated floating orbs */}
+      {/* <div className="absolute top-40 right-20 w-64 h-64 rounded-full bg-[#61677A] blur-[100px] opacity-30 animate-pulse"></div>
+      <div className="absolute bottom-60 left-20 w-80 h-80 rounded-full bg-[#61677A] blur-[120px] opacity-20 animate-pulse"></div>
+      <div className="absolute top-20 left-1/4 w-40 h-40 rounded-full bg-[#FFF6E0] blur-[80px] opacity-10 animate-pulse"></div> */}
+      
+      {/* Animated grid pattern */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0" style={{
+          backgroundImage: 'radial-gradient(circle, #FFF6E0 1px, transparent 1px)',
+          backgroundSize: '30px 30px'
+        }}></div>
+      </div>
+      
+      {/* Content */}
+      <div className="container mx-auto p-6 relative z-10">
+        <div className="flex justify-center mb-8">
+          <div className="bg-gradient-to-r from-[#FFF6E0]/10 to-transparent p-1 inline-block rounded-full">
+            <div className="bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-[#272829] px-6 py-2 rounded-full text-lg font-medium flex items-center">
+              <Radio size={20} className="mr-2" />
+              Configuration Rules
+            </div>
+          </div>
+        </div>
+        
+        <h1 className="text-4xl font-bold text-center mb-10">
+          <span className="bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-transparent bg-clip-text">User Settings Configuration</span>
+        </h1>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* User Info */}
+          <div className="bg-[#31333A]/80 rounded-2xl backdrop-blur-sm border border-[#61677A]/30 shadow-xl p-6">
+            <h2 className="text-xl font-semibold mb-6 flex items-center">
+              <User className="mr-3 h-5 w-5 text-[#FFF6E0]" />
+              <span className="bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-transparent bg-clip-text">User Info</span>
             </h2>
-            <div className="flex flex-wrap gap-2 mt-4">
+            
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label htmlFor="minFullNameLength" className="block text-[#D8D9DA] text-sm">
+                  Full Name - Min Length
+                </label>
+                <input
+                  type="number"
+                  min="3"
+                  max="60"
+                  id="minFullNameLength"
+                  name="minFullNameLength"
+                  value={configRules.minFullNameLength}
+                  onChange={handleInputChange}
+                  className="w-full bg-[#272829]/80 border border-[#61677A]/50 rounded-lg px-4 py-2 text-[#FFF6E0] focus:outline-none focus:ring-2 focus:ring-[#FFF6E0]/30"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="maxFullNameLength" className="block text-[#D8D9DA] text-sm">
+                  Full Name - Max Length
+                </label>
+                <input
+                  type="number"
+                  min="3"
+                  max="60"
+                  id="maxFullNameLength"
+                  name="maxFullNameLength"
+                  value={configRules.maxFullNameLength}
+                  onChange={handleInputChange}
+                  className="w-full bg-[#272829]/80 border border-[#61677A]/50 rounded-lg px-4 py-2 text-[#FFF6E0] focus:outline-none focus:ring-2 focus:ring-[#FFF6E0]/30"
+                />
+              </div>
+            </div>
+            
+            <div className="my-8 border-t border-[#61677A]/30"></div>
+            
+            <h2 className="text-xl font-semibold mb-6 flex items-center">
+              <Lock className="mr-3 h-5 w-5 text-[#FFF6E0]" />
+              <span className="bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-transparent bg-clip-text">Password</span>
+            </h2>
+            
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label htmlFor="minPasswordLength" className="block text-[#D8D9DA] text-sm">
+                  Min Length
+                </label>
+                <input
+                  type="number"
+                  min="3"
+                  max="100"
+                  id="minPasswordLength"
+                  name="minPasswordLength"
+                  value={configRules.minPasswordLength}
+                  onChange={handleInputChange}
+                  className="w-full bg-[#272829]/80 border border-[#61677A]/50 rounded-lg px-4 py-2 text-[#FFF6E0] focus:outline-none focus:ring-2 focus:ring-[#FFF6E0]/30"
+                />
+              </div>
+              
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[#D8D9DA] text-sm">Require Upper Case</span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="requireUpperCase"
+                    checked={configRules.requireUpperCase}
+                    onChange={handleInputChange}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-[#272829] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#D8D9DA] after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#FFF6E0]/30"></div>
+                </label>
+              </div>
+              
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[#D8D9DA] text-sm">Require Number</span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="requireNumber"
+                    checked={configRules.requireNumber}
+                    onChange={handleInputChange}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-[#272829] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#D8D9DA] after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#FFF6E0]/30"></div>
+                </label>
+              </div>
+              
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[#D8D9DA] text-sm">Require Special Char</span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="requireSpecialChar"
+                    checked={configRules.requireSpecialChar}
+                    onChange={handleInputChange}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-[#272829] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#D8D9DA] after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#FFF6E0]/30"></div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Date of Birth & Location */}
+          <div className="bg-[#31333A]/80 rounded-2xl backdrop-blur-sm border border-[#61677A]/30 shadow-xl p-6">
+            <h2 className="text-xl font-semibold mb-6 flex items-center">
+              <Calendar className="mr-3 h-5 w-5 text-[#FFF6E0]" />
+              <span className="bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-transparent bg-clip-text">Date of Birth &amp; Location</span>
+            </h2>
+            
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label htmlFor="minAge" className="block text-[#D8D9DA] text-sm">
+                  User Age - Min Years
+                </label>
+                <input
+                  type="number"
+                  min="5"
+                  max="120"
+                  id="minAge"
+                  name="minAge"
+                  value={configRules.minAge}
+                  onChange={handleInputChange}
+                  className="w-full bg-[#272829]/80 border border-[#61677A]/50 rounded-lg px-4 py-2 text-[#FFF6E0] focus:outline-none focus:ring-2 focus:ring-[#FFF6E0]/30"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="maxAge" className="block text-[#D8D9DA] text-sm">
+                  User Age - Max Years
+                </label>
+                <input
+                  type="number"
+                  min="5"
+                  max="120"
+                  id="maxAge"
+                  name="maxAge"
+                  value={configRules.maxAge}
+                  onChange={handleInputChange}
+                  className="w-full bg-[#272829]/80 border border-[#61677A]/50 rounded-lg px-4 py-2 text-[#FFF6E0] focus:outline-none focus:ring-2 focus:ring-[#FFF6E0]/30"
+                />
+              </div>
+            </div>
+            
+            <div className="my-8 border-t border-[#61677A]/30"></div>
+            
+            <h2 className="text-xl font-semibold mb-6 flex items-center">
+              <MapPin className="mr-3 h-5 w-5 text-[#FFF6E0]" />
+              <span className="bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-transparent bg-clip-text">Location Radius</span>
+            </h2>
+            
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label htmlFor="minRadiusLength" className="block text-[#D8D9DA] text-sm">
+                  Min Radius (m)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  id="minRadiusLength"
+                  name="minRadiusLength"
+                  value={configRules.minRadiusLength}
+                  onChange={handleInputChange}
+                  className="w-full bg-[#272829]/80 border border-[#61677A]/50 rounded-lg px-4 py-2 text-[#FFF6E0] focus:outline-none focus:ring-2 focus:ring-[#FFF6E0]/30"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="maxRadiusLength" className="block text-[#D8D9DA] text-sm">
+                  Max Radius (m)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  id="maxRadiusLength"
+                  name="maxRadiusLength"
+                  value={configRules.maxRadiusLength}
+                  onChange={handleInputChange}
+                  className="w-full bg-[#272829]/80 border border-[#61677A]/50 rounded-lg px-4 py-2 text-[#FFF6E0] focus:outline-none focus:ring-2 focus:ring-[#FFF6E0]/30"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bio & Gender Options Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+          {/* Bio Options Panel */}
+          <div className="bg-[#31333A]/80 rounded-2xl backdrop-blur-sm border border-[#61677A]/30 shadow-xl p-6">
+            <h2 className="text-xl font-semibold mb-6 flex items-center">
+              <Radio className="mr-3 h-5 w-5 text-[#FFF6E0]" />
+              <span className="bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-transparent bg-clip-text">Bio Options</span>
+            </h2>
+            
+            <div className="flex flex-wrap gap-2 mb-6">
               {bioOptions.map((option, index) =>
                 editingBioIndex === index ? (
                   <input
@@ -539,51 +593,55 @@ function ConfigRulesPage() {
                     type="text"
                     defaultValue={option}
                     onBlur={(e) => finishEditingBio(index, e.target.value)}
-                    className="input input-bordered"
+                    className="bg-[#272829]/80 border border-[#61677A]/50 rounded-lg px-3 py-1 text-[#FFF6E0] focus:outline-none focus:ring-2 focus:ring-[#FFF6E0]/30"
                     autoFocus
                   />
                 ) : (
                   <div
                     key={index}
-                    className="badge badge-lg badge-secondary flex items-center gap-1 cursor-pointer"
+                    className="bg-[#61677A]/40 px-3 py-1 rounded-full flex items-center gap-2 cursor-pointer group transition-all hover:bg-[#61677A]/60"
                     onClick={() => startEditingBio(index)}
-                    title="Click to edit"
                   >
-                    {option}
-                    <AiOutlineClose
+                    <span className="text-[#FFF6E0]">{option}</span>
+                    <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleRemoveBioOption(index);
                       }}
-                      className="cursor-pointer"
-                    />
+                      className="opacity-70 hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-4 w-4 text-[#FFF6E0]" />
+                    </button>
                   </div>
                 )
               )}
             </div>
-            <div className="input-group mt-4 flex gap-2">
+            
+            <div className="flex gap-2">
               <input
                 type="text"
                 placeholder="Add new bio option"
                 value={newBioOption}
                 onChange={(e) => setNewBioOption(e.target.value)}
-                className="input input-bordered w-full"
+                className="w-full bg-[#272829]/80 border border-[#61677A]/50 rounded-lg px-4 py-2 text-[#FFF6E0] focus:outline-none focus:ring-2 focus:ring-[#FFF6E0]/30"
               />
-              <button onClick={handleAddBioOption} className="btn btn-square btn-outline">
-                <AiOutlineCheck size={20} />
+              <button
+                onClick={handleAddBioOption}
+                className="bg-[#FFF6E0]/10 hover:bg-[#FFF6E0]/20 text-[#FFF6E0] rounded-lg px-3 transition-colors flex items-center justify-center"
+              >
+                <Plus className="h-5 w-5" />
               </button>
             </div>
           </div>
-        </div>
 
-        {/* Gender Options Panel */}
-        <div className="card bg-base-200 shadow-xl">
-          <div className="card-body">
-            <h2 className="card-title flex items-center gap-2">
-              <AiOutlineBulb className="text-teal-500" />
-              Gender Options
+          {/* Gender Options Panel */}
+          <div className="bg-[#31333A]/80 rounded-2xl backdrop-blur-sm border border-[#61677A]/30 shadow-xl p-6">
+            <h2 className="text-xl font-semibold mb-6 flex items-center">
+              <Radio className="mr-3 h-5 w-5 text-[#FFF6E0]" />
+              <span className="bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-transparent bg-clip-text">Gender Options</span>
             </h2>
-            <div className="flex flex-wrap gap-2 mt-4">
+            
+            <div className="flex flex-wrap gap-2 mb-6">
               {genderList.map((option, index) =>
                 editingGenderIndex === index ? (
                   <input
@@ -591,52 +649,61 @@ function ConfigRulesPage() {
                     type="text"
                     defaultValue={option}
                     onBlur={(e) => finishEditingGender(index, e.target.value)}
-                    className="input input-bordered"
+                    className="bg-[#272829]/80 border border-[#61677A]/50 rounded-lg px-3 py-1 text-[#FFF6E0] focus:outline-none focus:ring-2 focus:ring-[#FFF6E0]/30"
                     autoFocus
                   />
                 ) : (
                   <div
                     key={index}
-                    className="badge badge-lg badge-accent flex items-center gap-1 cursor-pointer"
+                    className="bg-[#61677A]/40 px-3 py-1 rounded-full flex items-center gap-2 cursor-pointer group transition-all hover:bg-[#61677A]/60"
                     onClick={() => startEditingGender(index)}
-                    title="Click to edit"
                   >
-                    {option}
-                    <AiOutlineClose
+                    <span className="text-[#FFF6E0]">{option}</span>
+                    <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleRemoveGender(index);
                       }}
-                      className="cursor-pointer"
-                    />
+                      className="opacity-70 hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-4 w-4 text-[#FFF6E0]" />
+                    </button>
                   </div>
                 )
               )}
             </div>
-            <div className="input-group mt-4 flex gap-2">
+            
+            <div className="flex gap-2">
               <input
                 type="text"
                 placeholder="Add new gender option"
                 value={newGenderOption}
                 onChange={(e) => setNewGenderOption(e.target.value)}
-                className="input input-bordered w-full"
+                className="w-full bg-[#272829]/80 border border-[#61677A]/50 rounded-lg px-4 py-2 text-[#FFF6E0] focus:outline-none focus:ring-2 focus:ring-[#FFF6E0]/30"
               />
-              <button onClick={handleAddGender} className="btn btn-square btn-outline">
-                <AiOutlineCheck size={20} />
+              <button
+                onClick={handleAddGender}
+                className="bg-[#FFF6E0]/10 hover:bg-[#FFF6E0]/20 text-[#FFF6E0] rounded-lg px-3 transition-colors flex items-center justify-center"
+              >
+                <Plus className="h-5 w-5" />
               </button>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Save Button */}
-      {isChanged && (
-        <div className="mt-8 flex justify-center">
-          <button onClick={handleSave} className="btn btn-primary btn-lg">
-            Save Changes
-          </button>
-        </div>
-      )}
+        {/* Save Button */}
+        {isChanged && (
+          <div className="mt-8 flex justify-center">
+            <button 
+              onClick={handleSave} 
+              className="bg-gradient-to-r from-[#FFF6E0]/20 to-[#D8D9DA]/20 hover:from-[#FFF6E0]/30 hover:to-[#D8D9DA]/30 px-6 py-3 rounded-xl text-[#FFF6E0] font-medium transition-all shadow-lg flex items-center gap-2"
+            >
+              <Save className="h-5 w-5" />
+              Save Changes
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

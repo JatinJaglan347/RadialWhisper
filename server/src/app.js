@@ -11,8 +11,8 @@ dotenv.config();
 const app = express();
 
 app.use(cors({
-    // origin: process.env.CORS_ORIGIN,
-    origin: ['http://localhost:5173', 'https://2gfrh047-5173.inc1.devtunnels.ms/'],
+    origin: process.env.CORS_ORIGIN,
+    // origin: ['http://localhost:5173', 'https://2gfrh047-5173.inc1.devtunnels.ms/'],
     credentials: true
 }));
 
