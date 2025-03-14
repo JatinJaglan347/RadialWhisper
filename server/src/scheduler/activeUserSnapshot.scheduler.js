@@ -20,4 +20,4 @@ const recordActiveUserSnapshot = async () => {
 };
 
 // Schedule the job to run every 5 minutes:
-cron.schedule('*/5 * * * *', recordActiveUserSnapshot);
+cron.schedule('*/60 * * * *', recordActiveUserSnapshot);

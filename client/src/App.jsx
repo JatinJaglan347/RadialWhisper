@@ -10,7 +10,7 @@ import ProfilePage from './pages/ProfilePage';
 import { useAuthStore } from './store/useAuthStore.js';
 import { Loader } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
-import ConfigRulesPage from './pages/dashboard/ConfigRulesPage.jsx';
+import ConfigRulesPage from './pages/ModerationPages/ConfigRulesPage.jsx';
 import toast from 'react-hot-toast';
 import LandingNavbar from './components/MainWebPage/LandingNavbar.jsx';
 import Navbar from './components/Navbar.jsx';
@@ -19,7 +19,7 @@ import LandingAbout from './pages/MainWebPage/LandingAbout.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 import LandingContact from './pages/MainWebPage/LandingContact.jsx';
 import LandingSuggestion from './pages/MainWebPage/LandingSuggestion.jsx';
-import DashboardPage from './pages/dashboard/DashboardPage.jsx';
+import DashboardPage from './pages/ModerationPages/DashboardPage.jsx';
 // import LandingNavbar from './componenst/MainWebPage/LandingNavbar.js';
 
 function App() {
