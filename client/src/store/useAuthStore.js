@@ -28,7 +28,9 @@ export const useAuthStore = create((set, get) => ({
   currentPage: 1,
   isSearchingUser: false,
   searchedUser: null,
-  
+  isUpdatingBanStatus: false,
+  bannedUser: null,
+
 
 
   // Function to check if the user is authenticated
@@ -246,7 +248,7 @@ export const useAuthStore = create((set, get) => ({
         });
 
         console.log("Admin Search User API:", res.data);
-        set({ searchedUser: res.data });
+        set({ searchedUser: res.data.message });
 
         toast.success("User found successfully");
     } catch (error) {
@@ -258,6 +260,30 @@ export const useAuthStore = create((set, get) => ({
         set({ isSearchingUser: false });
     }
 },
+
+
+
+banUnbanUser: async (data) => {
+  set({ isUpdatingBanStatus: true });
+
+  try {
+      const res = await axiosInstance.post('/api/v1/op/ban-unban', data);
+
+      console.log("Ban/Unban User API:", res.data);
+      toast.success("User ban status updated successfully");
+
+      // Optionally update local state if needed
+      set({ bannedUser: res.data });
+
+  } catch (error) {
+      console.error("Error in banUnbanUser:", error);
+      const errorMessage = error.response?.data?.message || "Failed to update ban status";
+      toast.error(errorMessage);
+  } finally {
+      set({ isUpdatingBanStatus: false });
+  }
+},
+
 
 
 

@@ -3,7 +3,7 @@ import { useAuthStore } from '../../store/useAuthStore.js';
 import { 
   Users, Filter, Search, Shield, X, UserX, RefreshCw, ChevronLeft, ChevronRight, Eye
 } from 'lucide-react';
-import ViewUser from '../../components/ModerationComponents/ViewUser.jsx';
+import { useLocation, useNavigate } from "react-router-dom";
 
 const ManageUsersPage = () => {
   const { getUsers, usersData, totalPages, currentPage, isFetchingUsers } = useAuthStore();
@@ -17,9 +17,9 @@ const ManageUsersPage = () => {
     maxAge: ''
   });
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [isViewUserOpen, setIsViewUserOpen] = useState(false);
-
+  const navigate = useNavigate();
+  const location = useLocation();
+  
   useEffect(() => {
     getUsers({}, 1);
   }, []);
@@ -69,16 +69,13 @@ const ManageUsersPage = () => {
       getUsers(filters, page);
     }
   };
-
-  const handleViewUser = (user) => {
-    setSelectedUser(user);
-    setIsViewUserOpen(true);
+  
+  // Updated to only pass email to the modrateUser route
+  const handleViewClick = (userEmail) => {
+    navigate(`${location.pathname}/modrateUser`, { state: { userEmail } });
   };
-
-  const handleCloseViewUser = () => {
-    setIsViewUserOpen(false);
-    getUsers(filters, currentPage);
-  };
+  
+  
 
   return (
     <div className="bg-[#272829] text-[#FFF6E0] p-4 md:p-6 h-full">
@@ -290,12 +287,12 @@ const ManageUsersPage = () => {
                         </td>
                         <td className="p-3">
                           <button 
-                            onClick={() => handleViewUser(user)}
+                            onClick={() => handleViewClick(user.email)}
                             className="p-1.5 bg-[#FFF6E0]/10 rounded-lg hover:bg-[#FFF6E0]/20 flex items-center"
-                            title="View User Details"
+                            title="Moderate User"
                           >
                             <Eye size={12} className="mr-1" />
-                            <span className="text-xs">View</span>
+                            <span className="text-xs">Moderate</span>
                           </button>
                         </td>
                       </tr>
@@ -367,14 +364,6 @@ const ManageUsersPage = () => {
           </div>
         </div>
       </div>
-      
-      {/* View User Modal */}
-      {isViewUserOpen && selectedUser && (
-        <ViewUser
-          user={selectedUser}
-          onClose={handleCloseViewUser}
-        />
-      )}
     </div>
   );
 };

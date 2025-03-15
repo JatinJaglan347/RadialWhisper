@@ -142,6 +142,7 @@ import DashboardPage from './pages/ModerationPages/DashboardPage.jsx';
 // import ManageContactsPage from './pages/ModerationPages/ManageContactsPage.jsx';
 import AdminPanelNavbar, { SidebarContext } from './components/ModerationComponents/AdminPanelNavbar.jsx';
 import ManageUsersPage from './pages/ModerationPages/ManageUsersPage.jsx';
+import ModerateUser from './components/ModerationComponents/ModerateUser.jsx';
 // import LandingNavbar from './componenst/MainWebPage/LandingNavbar.js';
 
 function App() {
@@ -273,7 +274,7 @@ function App() {
             <Route path="/chat" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
             <Route path="/chat/settings" element={authUser ? <SettingsPage /> : <Navigate to="/login" />} />
             <Route path="/chat/profile" element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
-            
+            {/* <Route path="/modrateUser" element={<ModerateUser/>} /> */}
             {/* Admin routes */}
             <Route path="/op">
               {/* Dashboard route */}
@@ -328,7 +329,7 @@ function App() {
                 element={hasAdminAccess ? <ConfigRulesPage /> : <Navigate to="/" />}
               />
             </Route>
-
+            <Route path="*" element={location.pathname.includes("modrateUser") ? <ModerateUser /> : <NotFoundPage />} />
             {/* 404 Not Found - this catches all unmatched routes */}
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

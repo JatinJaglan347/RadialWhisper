@@ -6,7 +6,7 @@ import {verifyAdminRole} from "../middlewares/role.middleware.js";
 
 const router = Router();
 
-router.route("/ban-unban").post(banUnbanUser);
+router.post("/ban-unban",banUnbanUser);
 router.get("/stats",verifyJWT,verifyAdminRole, getAdminStats);
 router.get("/getusers",verifyJWT, getUsers);
 router.get("/adminsearchuser",adminSearchUser);
