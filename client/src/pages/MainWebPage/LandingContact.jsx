@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Send, MessageSquare, MapPin, Phone, Mail, ArrowRight, CheckCircle } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore.js'; // Import the auth store
+import AOS from 'aos';
+import 'aos/dist/aos.css'; // Import AOS CSS
 
 const LandingContact = () => {
   const { authUser } = useAuthStore(); // Get the authenticated user from store
-  
+
   const [formState, setFormState] = useState({
     name: '',
     email: '',
@@ -15,18 +17,37 @@ const LandingContact = () => {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  // Initialize AOS when component mounts
+  useEffect(() => {
+    AOS.init({
+      duration: 800,
+      once: false, // whether animation should happen only once - while scrolling down
+      mirror: true, // whether elements should animate out while scrolling past them
+      easing: 'ease-out-cubic',
+    });
+  }, []);
+
+  // Refresh AOS on route changes or when DOM changes
+  useEffect(() => {
+    AOS.refresh();
+  }, [isSubmitted]); // Refresh when content changes (like form submission)
   
   // Use effect to pre-fill form when user is logged in
   useEffect(() => {
+    console.log("authUser updated:", authUser);
     if (authUser?.data?.user) {
       const user = authUser.data.user;
+      console.log("Updating form state with:", user.fullName, user.email);
+  
       setFormState(prevState => ({
-        ...prevState,  
-        name: user.fullName || '', // Use name if available, otherwise username
+        ...prevState,
+        name: user.fullName || '',
         email: user.email || ''
       }));
     }
   }, [authUser]);
+  
   
   const handleChange = (e) => {
     setFormState({
@@ -56,6 +77,7 @@ const LandingContact = () => {
       }, 5000);
     }, 1500);
   };
+
   
   return (
     <div className="min-h-screen bg-[#272829] text-[#FFF6E0] relative">
@@ -154,7 +176,7 @@ const LandingContact = () => {
                 <h2 className="text-2xl font-bold">Send Us A Message</h2>
                 {authUser && (
                   <span className="text-sm bg-[#FFF6E0]/10 text-[#D8D9DA] px-3 py-1 rounded-full ml-2">
-                    Welcome back, {authUser?.data?.user?.username || authUser?.data?.user?.name}
+                    Welcome back, {authUser?.data?.user?.fullName}
                   </span>
                 )}
               </div>
@@ -250,7 +272,7 @@ const LandingContact = () => {
               )}
             </div>
           </div>
-          </div>
+        </div>
       </div>
     </div>
   );

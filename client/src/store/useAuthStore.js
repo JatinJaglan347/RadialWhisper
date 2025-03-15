@@ -33,6 +33,7 @@ export const useAuthStore = create((set, get) => ({
 
       set({ authUser: res.data });
       const { authUser } = get();
+      localStorage.setItem('authUser', JSON.stringify(res.data));
       const userRole = authUser?.data?.user?.userRole;
       console.log("User Role:", userRole);
 
@@ -67,15 +68,18 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
+
   // Function to get the user details from the API
   getUserDetails: async () => {
     try {
+      
       const res = await axiosInstance.get('/api/v1/user/userDetails');
 
       console.log("Fetched User Details API");
 
       // console.log("Fetched User Details:", res.data);
       set({ authUser: res.data });
+      
     } catch (err) {
       console.error("Error in getUserDetails:", err);
       set({ authUser: null });
@@ -121,6 +125,50 @@ export const useAuthStore = create((set, get) => ({
       set({ isLoggingIn: false });
     }
   },
+
+
+  logout: async () => {
+    try {
+      await axiosInstance.post("/api/v1/user/logout");
+      toast.success("Logged out successfully");
+  
+      // Reset all relevant state
+      set({
+        authUser: null,
+        isAdmin: false,
+        isKing: false,
+        isModrater: false,
+        nearbyUsersData: [],
+        userInfoRulesData: null,
+        suggestions: [],
+        selectedSuggestion: null,
+        opStats: {},
+        unreadMessagesBySender: {},
+        activeChatRoom: null,
+        currentUserId: null,
+      });
+  
+      // Clear stored user data
+      localStorage.removeItem("authUser");
+      localStorage.removeItem("unreadMessagesBySender");
+  
+      // Disconnect socket if connected
+      const { socket } = get();
+      if (socket) {
+        socket.disconnect();
+        set({ socket: null });
+      }
+  
+      // Navigate to login page
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 500); 
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Error logging out");
+    }
+  },
+  
   
 
   fetchNearbyUsers: async (data)=>{

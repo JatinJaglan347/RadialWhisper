@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 
 const LandingNavbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { authUser, getUserDetails } = useAuthStore();
+  const { authUser, getUserDetails,logout } = useAuthStore();
   const navigate = useNavigate();
   const [adminOptin, setAdminOptin] = useState(false);
   const [moderatorOptin, setModeratorOptin] = useState(false);
@@ -39,16 +39,10 @@ const LandingNavbar = () => {
     }
   }, [getUserDetails, authUser?.data?.user?.userRole]);
 
-  const handleLogout = async () => {
-    try {
-      await axiosInstance.post('/api/v1/user/logout');
-      toast.success('Logged out successfully');
-      useAuthStore.setState({ authUser: null });
-      navigate('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
-      toast.error('Error logging out');
-    }
+  const handleLogout = () => {
+    logout();
+    toast.success("Logged out successfully");
+    navigate("/login");
   };
 
   return (

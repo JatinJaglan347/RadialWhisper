@@ -14,7 +14,7 @@ import toast from "react-hot-toast";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
 const Navbar = () => {
-  const { authUser, getUserDetails } = useAuthStore();
+  const { authUser, getUserDetails,logout } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
   const [adminOptin, setAdminOptin] = useState(false);
@@ -49,16 +49,10 @@ const Navbar = () => {
     }
   }, [getUserDetails, authUser?.data?.user?.userRole]);
 
-  const handleLogout = async () => {
-    try {
-      await axiosInstance.post("/api/v1/user/logout");
-      toast.success("Logged out successfully");
-      useAuthStore.setState({ authUser: null });
-      navigate("/login");
-    } catch (error) {
-      console.error("Logout error:", error);
-      toast.error("Error logging out");
-    }
+  const handleLogout = () => {
+    logout();
+    toast.success("Logged out successfully");
+    navigate("/login");
   };
 
   return (
