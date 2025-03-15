@@ -26,7 +26,9 @@ export const useAuthStore = create((set, get) => ({
   usersData: [],
   totalPages: 1,
   currentPage: 1,
-
+  isSearchingUser: false,
+  searchedUser: null,
+  
 
 
   // Function to check if the user is authenticated
@@ -232,6 +234,31 @@ export const useAuthStore = create((set, get) => ({
       set({ isFetchingUsers: false });
     }
   },
+
+
+
+  adminSearchUser: async (searchQuery) => {
+    set({ isSearchingUser: true });
+
+    try {
+        const res = await axiosInstance.get(`/api/v1/op/adminsearchuser`, {
+            params: searchQuery, // Pass email or uniqueTag as query params
+        });
+
+        console.log("Admin Search User API:", res.data);
+        set({ searchedUser: res.data });
+
+        toast.success("User found successfully");
+    } catch (error) {
+        console.error("Error in adminSearchUser:", error);
+        const errorMessage = error.response?.data?.message || "Failed to fetch user";
+        toast.error(errorMessage);
+        set({ searchedUser: null });
+    } finally {
+        set({ isSearchingUser: false });
+    }
+},
+
 
 
 

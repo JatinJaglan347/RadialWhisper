@@ -305,7 +305,30 @@ const getAdminStats = asyncHandler(async (req, res) => {
 });
 
 
+// Admin search by email or uniqueTag
+const adminSearchUser = asyncHandler(async (req, res) => {
+    const { email, uniqueTag } = req.query;
+
+    if (!email && !uniqueTag) {
+        throw new ApiError(400, "Please provide either an email or a uniqueTag to search.");
+    }
+
+    try {
+        // Search for user by email or uniqueTag
+        const user = await User.findOne({
+            $or: [{ email }, { uniqueTag }]
+        }).select("-password -refreshToken") // Exclude sensitive fields
+          .lean();
+
+        if (!user) {
+            throw new ApiError(404, "User not found");
+        }
+
+        res.json(new ApiResponse(200, "User fetched successfully", user));
+    } catch (error) {
+        throw new ApiError(500, "Error searching for user");
+    }
+});
 
 
-
-export {banUnbanUser,getAdminStats ,getUsers};
+export {banUnbanUser,getAdminStats ,getUsers , adminSearchUser};
