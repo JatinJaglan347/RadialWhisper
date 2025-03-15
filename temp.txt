@@ -1,0 +1,103 @@
+radial-whisper/
+├─ .vscode/
+│  └─ settings.json
+├─ client/
+│  ├─ public/
+│  ├─ src/
+│  │  ├─ components/
+│  │  │  ├─ MainWebPage/
+│  │  │  │  ├─ LandingFooter.jsx
+│  │  │  │  ├─ LandingNavbar.jsx
+│  │  │  │  ├─ LandingViewSuggestions .jsx
+│  │  │  │  └─ LandingWriteSuggestion.jsx
+│  │  │  ├─ ModerationComponents/
+│  │  │  │  └─ AdminPanelNavbar.jsx
+│  │  │  ├─ Loader.jsx
+│  │  │  ├─ Loading.jsx
+│  │  │  ├─ Navbar.jsx
+│  │  │  └─ UpdateField.jsx
+│  │  ├─ lib/
+│  │  │  └─ axios.js
+│  │  ├─ pages/
+│  │  │  ├─ MainWebPage/
+│  │  │  │  ├─ LandingAbout.jsx
+│  │  │  │  ├─ LandingContact.jsx
+│  │  │  │  ├─ LandingFeatures.jsx
+│  │  │  │  ├─ LandingHome.jsx
+│  │  │  │  └─ LandingSuggestion.jsx
+│  │  │  ├─ ModerationPages/
+│  │  │  │  ├─ ConfigRulesPage.jsx
+│  │  │  │  └─ DashboardPage.jsx
+│  │  │  ├─ HomePage.jsx
+│  │  │  ├─ LoginPage.jsx
+│  │  │  ├─ NotFoundPage.jsx
+│  │  │  ├─ ProfilePage.jsx
+│  │  │  ├─ SettingPage.jsx
+│  │  │  ├─ SettingsPage.jsx
+│  │  │  └─ SignUpPage.jsx
+│  │  ├─ store/
+│  │  │  └─ useAuthStore.js
+│  │  ├─ App.jsx
+│  │  ├─ index.css
+│  │  └─ main.jsx
+│  ├─ .env
+│  ├─ .gitignore
+│  ├─ eslint.config.js
+│  ├─ index.html
+│  ├─ package-lock.json
+│  ├─ package.json
+│  ├─ postcss.config.js
+│  ├─ README.md
+│  ├─ tailwind.config.js
+│  └─ vite.config.js
+├─ server/
+│  ├─ public/
+│  │  └─ .gitkeep
+│  ├─ src/
+│  │  ├─ controllers/
+│  │  │  ├─ configurations.controller.js
+│  │  │  ├─ manageUser.controller.js
+│  │  │  ├─ nearbyUsers.controller.js
+│  │  │  ├─ socket.controller.js
+│  │  │  ├─ suggestions.controller.js
+│  │  │  ├─ user.controller.js
+│  │  │  ├─ userDetails.controller.js
+│  │  │  ├─ userDetailUpdate.controller.js
+│  │  │  └─ userInfoRules.controller.js
+│  │  ├─ db/
+│  │  │  └─ db.js
+│  │  ├─ middlewares/
+│  │  │  ├─ auth.middleware.js
+│  │  │  └─ role.middleware.js
+│  │  ├─ models/
+│  │  │  ├─ activeUserSnapshot.model.js
+│  │  │  ├─ chatMessage.model.js
+│  │  │  ├─ socketStats.model.js
+│  │  │  ├─ suggestion.model.js
+│  │  │  ├─ user.model.js
+│  │  │  └─ userInfoRules.model.js
+│  │  ├─ routes/
+│  │  │  ├─ infoUpdate.router.js
+│  │  │  ├─ manageUser.route.js
+│  │  │  ├─ socket.routes.js
+│  │  │  ├─ suggestion.route.js
+│  │  │  ├─ user.router.js
+│  │  │  └─ userInfoRules.router.js
+│  │  ├─ scheduler/
+│  │  │  └─ activeUserSnapshot.scheduler.js
+│  │  ├─ utils/
+│  │  │  ├─ ApiError.js
+│  │  │  ├─ ApiResponse.js
+│  │  │  ├─ asyncHandler.js
+│  │  │  └─ uniqueTagGen.js
+│  │  ├─ app.js
+│  │  ├─ constants.js
+│  │  └─ index.js
+│  ├─ .env
+│  ├─ .gitignore
+│  ├─ .prettierignore
+│  ├─ .prettierrc
+│  ├─ package-lock.json
+│  └─ package.json
+├─ README.md
+└─ temp.txt

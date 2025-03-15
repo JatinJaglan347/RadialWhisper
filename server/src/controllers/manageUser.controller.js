@@ -246,4 +246,66 @@ const getAdminStats = asyncHandler(async (req, res) => {
     });
   });
 
-export {banUnbanUser,getAdminStats};
+
+  const getUsers = asyncHandler(async (req, res) => {
+    let { page = 1, filters = {} } = req.query;
+    page = parseInt(page) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+
+    try {
+        const query = {};
+
+        // Filter by gender
+        if (filters.gender) {
+            query.gender = filters.gender;
+        }
+
+        // Filter by banned status
+        if (filters.bannedStatus !== undefined) {
+            query["banned.current.status"] = filters.bannedStatus === "true";
+        }
+
+        // Filter by role (multiple roles supported)
+        if (filters.role) {
+            query.userRole = { $in: filters.role.split(",") };
+        }
+
+        // Filter by registration date range
+        if (filters.registeredAfter || filters.registeredBefore) {
+            query.createdAt = {};
+            if (filters.registeredAfter) query.createdAt.$gte = new Date(filters.registeredAfter);
+            if (filters.registeredBefore) query.createdAt.$lte = new Date(filters.registeredBefore);
+        }
+
+        // Filter by age range (calculated from DOB)
+        if (filters.minAge || filters.maxAge) {
+            const currentYear = new Date().getFullYear();
+            const minDOB = filters.maxAge ? new Date(currentYear - filters.maxAge, 0, 1) : null;
+            const maxDOB = filters.minAge ? new Date(currentYear - filters.minAge, 11, 31) : null;
+
+            query.dateOfBirth = {};
+            if (minDOB) query.dateOfBirth.$lte = minDOB;
+            if (maxDOB) query.dateOfBirth.$gte = maxDOB;
+        }
+
+        const users = await User.find(query)
+            .select("-password -refreshToken")
+            .skip(skip)
+            .limit(limit)
+            .lean();
+
+        const totalUsers = await User.countDocuments(query);
+        const totalPages = Math.ceil(totalUsers / limit);
+
+        res.json(new ApiResponse(200, "Users fetched successfully", { users, totalPages, currentPage: page }));
+    } catch (error) {
+        throw new ApiError(500, "Error fetching users");
+    }
+});
+
+
+
+
+
+export {banUnbanUser,getAdminStats ,getUsers};

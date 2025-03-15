@@ -141,6 +141,7 @@ import DashboardPage from './pages/ModerationPages/DashboardPage.jsx';
 // import ManageReportsPage from './pages/ModerationPages/ManageReportsPage.jsx';
 // import ManageContactsPage from './pages/ModerationPages/ManageContactsPage.jsx';
 import AdminPanelNavbar, { SidebarContext } from './components/ModerationComponents/AdminPanelNavbar.jsx';
+import ManageUsersPage from './pages/ModerationPages/ManageUsersPage.jsx';
 // import LandingNavbar from './componenst/MainWebPage/LandingNavbar.js';
 
 function App() {
@@ -286,10 +287,10 @@ function App() {
               />
               
               {/* User Management */}
-              {/* <Route
+              <Route
                 path="users"
-                element={hasAdminAccess ? <ManageUsersPage /> : <Navigate to="/" />}
-              /> */}
+                element={hasAdminAccess ? <ManageUsersPage/> : <Navigate to="/" />}
+              />
               
               {/* Moderator Management */}
               {/* <Route

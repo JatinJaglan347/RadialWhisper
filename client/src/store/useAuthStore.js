@@ -22,6 +22,11 @@ export const useAuthStore = create((set, get) => ({
   suggestions: [], // Stores the list of all suggestions
   selectedSuggestion: null, // Stores a single selected suggestion
   opStats: {},
+  isFetchingUsers: false,
+  usersData: [],
+  totalPages: 1,
+  currentPage: 1,
+
 
 
   // Function to check if the user is authenticated
@@ -204,6 +209,29 @@ export const useAuthStore = create((set, get) => ({
 
 
 
+  getUsers: async (filters = {}, page = 1) => {
+    try {
+      set({ isFetchingUsers: true });
+
+      const res = await axiosInstance.get("/api/v1/op/getusers", {
+        params: { page, filters }
+      });
+
+      console.log("Fetched Users API");
+
+      set({
+        usersData: res.data?.message?.users || [],
+        totalPages: res.data?.message?.totalPages || 1,
+        currentPage: res.data?.message?.currentPage || 1,
+      });
+
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      toast.error(error.response?.data?.message || "Failed to fetch users");
+    } finally {
+      set({ isFetchingUsers: false });
+    }
+  },
 
 
 
