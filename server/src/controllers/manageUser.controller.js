@@ -337,4 +337,44 @@ const adminSearchUser = asyncHandler(async (req, res) => {
 });
 
 
-export {banUnbanUser,getAdminStats ,getUsers , adminSearchUser};
+const promoteDemoteUser = asyncHandler(async (req, res) => {
+    const { input, promote,  } = req.body;
+
+    if (!input) {
+        throw new ApiError(400, "Email or UniqueTag is required");
+    }
+
+    if (typeof promote !== "boolean") {
+        throw new ApiError(400, "Promote field must be a boolean (true/false)");
+    }
+
+    // Find the user by email or uniqueTag
+    const user = await User.findOne({
+        $or: [{ email: input }, { uniqueTag: input }]
+    }).select("-password -refreshToken");
+
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    // Only normal users can be promoted to moderators and vice versa
+    if (promote && user.userRole !== "normalUser") {
+        throw new ApiError(400, "Only normal users can be promoted to moderator");
+    }
+
+    if (!promote && user.userRole !== "moderator") {
+        throw new ApiError(400, "Only moderators can be demoted to normal users");
+    }
+
+    // Determine new role
+    const newRole = promote ? "moderator" : "normalUser";
+
+    // Update user role
+    user.userRole = newRole;
+    await user.save();
+
+    res.json(new ApiResponse(200, `User ${promote ? "promoted" : "demoted"} successfully`, { user }));
+});
+
+
+export {banUnbanUser,getAdminStats ,getUsers , adminSearchUser , promoteDemoteUser};

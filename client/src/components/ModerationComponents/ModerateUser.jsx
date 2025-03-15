@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
-import { Shield, ArrowLeft, UserX, UserCheck, AlertTriangle, RotateCcw, Clock } from 'lucide-react';
+import { Shield, ArrowLeft, UserX, UserCheck, AlertTriangle, RotateCcw, Clock, UserPlus, UserMinus } from 'lucide-react';
 import { format } from 'date-fns';
 
 const ModerateUser = () => {
@@ -12,12 +12,16 @@ const ModerateUser = () => {
     searchedUser, 
     isSearchingUser,
     banUnbanUser,
-    isUpdatingBanStatus
+    isUpdatingBanStatus,
+    promoteDemoteUser,
+    isUpdatingRole
   } = useAuthStore();
   const navigate = useNavigate();
   const [banReason, setBanReason] = useState('');
   const [showBanForm, setShowBanForm] = useState(false);
   const [showBanHistory, setShowBanHistory] = useState(false);
+  const [showRoleConfirmation, setShowRoleConfirmation] = useState(false);
+  const [roleAction, setRoleAction] = useState(null); // 'promote' or 'demote'
 
   useEffect(() => {
     if (userEmail) {
@@ -56,6 +60,37 @@ const ModerateUser = () => {
       console.error('Error while updating ban status:', error);
     }
   };
+
+  const showPromoteConfirmation = () => {
+    setRoleAction('promote');
+    setShowRoleConfirmation(true);
+  };
+
+  const showDemoteConfirmation = () => {
+    setRoleAction('demote');
+    setShowRoleConfirmation(true);
+  };
+  
+  const handlePromoteDemote = async () => {
+    try {
+      const data = {
+        input: searchedUser.email,
+        promote: roleAction === 'promote',
+        actionBy: localStorage.getItem('userId') || '65b9e2b0c5d4b6a1f2e8a3d8'
+      };
+      
+      await promoteDemoteUser(data);
+      
+      // Refresh user data after role change
+      adminSearchUser({ email: searchedUser.email });
+      
+      // Reset form state
+      setShowRoleConfirmation(false);
+      setRoleAction(null);
+    } catch (error) {
+      console.error('Error while updating user role:', error);
+    }
+  };
   
   const formatDate = (dateString) => {
     try {
@@ -82,6 +117,8 @@ const ModerateUser = () => {
       bio,
       profileImageURL
     } = searchedUser;
+    
+    const isModerator = userRole === 'moderator';
     
     return (
       <div className="grid grid-cols-1 gap-6">
@@ -128,7 +165,7 @@ const ModerateUser = () => {
             )}
           </div>
           
-          <div className="md:ml-auto mt-4 md:mt-0 flex items-center gap-2 self-start md:self-center">
+          <div className="md:ml-auto mt-4 md:mt-0 flex flex-wrap items-center gap-2 self-start md:self-center">
             {banned?.current?.status ? (
               <button 
                 onClick={() => handleBanUnban(false)} 
@@ -146,6 +183,28 @@ const ModerateUser = () => {
                 <UserX size={16} />
                 <span>Ban User</span>
               </button>
+            )}
+            
+            {/* Role Management Buttons */}
+            {userRole === 'normalUser' && (
+            <button 
+                onClick={showPromoteConfirmation}
+                disabled={isUpdatingRole || banned?.current?.status}
+                className="flex items-center gap-1 px-3 py-1.5 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-lg hover:bg-blue-500/30 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+                <UserPlus size={16} />
+                <span>Promote to Moderator</span>
+            </button>
+            )}
+            {userRole === 'moderator' && (
+            <button 
+                onClick={showDemoteConfirmation}
+                disabled={isUpdatingRole || banned?.current?.status}
+                className="flex items-center gap-1 px-3 py-1.5 bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 rounded-lg hover:bg-yellow-500/30 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+                <UserMinus size={16} />
+                <span>Demote to User</span>
+            </button>
             )}
           </div>
         </div>
@@ -192,6 +251,50 @@ const ModerateUser = () => {
           </div>
         )}
         
+        {/* Role Confirmation Dialog */}
+        {showRoleConfirmation && (
+          <div className={`p-4 ${roleAction === 'promote' ? 'bg-blue-500/10 border-blue-500/30' : 'bg-yellow-500/10 border-yellow-500/30'} border rounded-lg`}>
+            <h3 className={`text-lg font-medium mb-3 ${roleAction === 'promote' ? 'text-blue-400' : 'text-yellow-400'}`}>
+              {roleAction === 'promote' ? 'Promote User to Moderator' : 'Demote Moderator to User'}
+            </h3>
+            <p className="mb-3 text-[#FFF6E0]/80">
+              {roleAction === 'promote' 
+                ? 'This will give the user moderator privileges including the ability to review reports and moderate other users. Are you sure you want to continue?'
+                : 'This will remove moderator privileges from this user. They will no longer be able to perform moderation actions. Are you sure you want to continue?'
+              }
+            </p>
+            <div className="flex gap-2 justify-end">
+              <button 
+                onClick={() => setShowRoleConfirmation(false)}
+                className="px-3 py-1.5 bg-[#31333A] text-[#FFF6E0]/70 rounded-md hover:bg-[#31333A]/80 text-sm"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handlePromoteDemote}
+                disabled={isUpdatingRole}
+                className={`flex items-center gap-1 px-3 py-1.5 ${
+                  roleAction === 'promote' 
+                    ? 'bg-blue-500/20 text-blue-400 border-blue-500/30 hover:bg-blue-500/30' 
+                    : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30 hover:bg-yellow-500/30'
+                } border rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                {isUpdatingRole ? (
+                  <>
+                    <div className={`animate-spin h-4 w-4 border-2 ${roleAction === 'promote' ? 'border-blue-400' : 'border-yellow-400'} border-t-transparent rounded-full`}></div>
+                    <span>Processing...</span>
+                  </>
+                ) : (
+                  <>
+                    {roleAction === 'promote' ? <UserPlus size={16} /> : <UserMinus size={16} />}
+                    <span>Confirm {roleAction === 'promote' ? 'Promotion' : 'Demotion'}</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+        
         {/* User Details */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-[#31333A] rounded-lg border border-[#61677A]/30 p-4">
@@ -210,166 +313,153 @@ const ModerateUser = () => {
                 <div>
                   <p className="text-[#FFF6E0]/70 text-sm mb-1">Email</p>
                   <p className="text-[#FFF6E0]">{email || "N/A"}</p>
+                  </div>
+                  
+                  <div>
+                    <p className="text-[#FFF6E0]/70 text-sm mb-1">Unique Tag</p>
+                    <p className="text-[#FFF6E0]">{uniqueTag || "N/A"}</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-[#FFF6E0]/70 text-sm mb-1">Gender</p>
+                    <p className="text-[#FFF6E0]">{gender || "N/A"}</p>
+                  </div>
+                  
+                  <div>
+                    <p className="text-[#FFF6E0]/70 text-sm mb-1">Date of Birth</p>
+                    <p className="text-[#FFF6E0]">{dateOfBirth ? formatDate(dateOfBirth) : "N/A"}</p>
+                  </div>
                 </div>
                 
                 <div>
-                  <p className="text-[#FFF6E0]/70 text-sm mb-1">Unique Tag</p>
-                  <p className="text-[#FFF6E0]">{uniqueTag || "N/A"}</p>
+                  <p className="text-[#FFF6E0]/70 text-sm mb-1">Account Created</p>
+                  <p className="text-[#FFF6E0]">{formatDate(createdAt)}</p>
                 </div>
               </div>
+            </div>
+            
+            <div className="bg-[#31333A] rounded-lg border border-[#61677A]/30 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-lg font-medium flex items-center gap-2">
+                  <AlertTriangle size={18} />
+                  <span>Ban Status</span>
+                </h3>
+                <button 
+                  onClick={() => setShowBanHistory(!showBanHistory)}
+                  className="text-xs text-[#FFF6E0]/70 flex items-center gap-1 hover:text-[#FFF6E0]"
+                >
+                  <Clock size={14} />
+                  <span>{showBanHistory ? "Hide History" : "Show History"}</span>
+                </button>
+              </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-[#FFF6E0]/70 text-sm mb-1">Gender</p>
-                  <p className="text-[#FFF6E0]">{gender || "N/A"}</p>
+              <div className="p-3 rounded-md bg-[#272829]">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className={`w-3 h-3 rounded-full ${banned?.current?.status ? 'bg-red-500' : 'bg-green-500'}`}></div>
+                  <span className="font-medium">{banned?.current?.status ? 'Currently Banned' : 'Not Banned'}</span>
                 </div>
                 
-                <div>
-                  <p className="text-[#FFF6E0]/70 text-sm mb-1">Date of Birth</p>
-                  <p className="text-[#FFF6E0]">{dateOfBirth ? formatDate(dateOfBirth) : "N/A"}</p>
-                </div>
+                {banned?.current?.status && (
+                  <>
+                    <p className="text-[#FFF6E0]/70 text-sm mb-1 mt-3">Reason</p>
+                    <p className="text-[#FFF6E0] text-sm p-2 bg-[#31333A]/50 rounded-md">
+                      {banned.current.reason || "No reason provided"}
+                    </p>
+                    
+                    <div className="grid grid-cols-2 gap-4 mt-3">
+                      <div>
+                        <p className="text-[#FFF6E0]/70 text-sm mb-1">Ban Date</p>
+                        <p className="text-[#FFF6E0] text-sm">{formatDate(banned.current.date)}</p>
+                      </div>
+                      
+                      <div>
+                        <p className="text-[#FFF6E0]/70 text-sm mb-1">Action By</p>
+                        <p className="text-[#FFF6E0] text-sm">Admin ID: {banned.current.actionBy}</p>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
               
-              <div>
-                <p className="text-[#FFF6E0]/70 text-sm mb-1">Account Created</p>
-                <p className="text-[#FFF6E0]">{formatDate(createdAt)}</p>
-              </div>
+              {/* Ban History */}
+              {showBanHistory && banned?.history && banned.history.length > 0 && (
+                <div className="mt-4">
+                  <h4 className="text-md font-medium mb-2 text-[#FFF6E0]/90">Ban History</h4>
+                  <div className="max-h-60 overflow-y-auto pr-1">
+                    {banned.history.map((entry, index) => (
+                      <div 
+                        key={index} 
+                        className="p-3 rounded-md bg-[#272829] mb-2 border-l-2 border-l-[#FFF6E0]/20"
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          <div className={`w-2 h-2 rounded-full ${entry.status ? 'bg-red-500' : 'bg-green-500'}`}></div>
+                          <span className="font-medium text-sm">{entry.status ? 'Banned' : 'Unbanned'}</span>
+                          <span className="text-xs text-[#FFF6E0]/60 ml-auto">{formatDate(entry.date)}</span>
+                        </div>
+                        <p className="text-[#FFF6E0]/80 text-sm mt-1">{entry.reason}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           
-          <div className="bg-[#31333A] rounded-lg border border-[#61677A]/30 p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-medium flex items-center gap-2">
-                <AlertTriangle size={18} />
-                <span>Ban Status</span>
-              </h3>
-              <button 
-                onClick={() => setShowBanHistory(!showBanHistory)}
-                className="text-xs text-[#FFF6E0]/70 flex items-center gap-1 hover:text-[#FFF6E0]"
-              >
-                <Clock size={14} />
-                <span>{showBanHistory ? "Hide History" : "Show History"}</span>
-              </button>
+          
+        </div>
+      );
+    };
+  
+    return (
+      <div className="bg-[#272829] text-[#FFF6E0] p-4 md:p-6 min-h-screen">
+        {/* Header */}
+        <div className="flex flex-col mb-6">
+          <button 
+            onClick={goBack} 
+            className="flex items-center text-[#FFF6E0]/70 hover:text-[#FFF6E0] mb-2 w-fit"
+          >
+            <ArrowLeft size={16} className="mr-1" />
+            <span className="text-sm">Back to Users</span>
+          </button>
+          
+          <div className="flex items-center">
+            <div className="bg-gradient-to-r from-[#FFF6E0]/10 to-transparent p-1 inline-block rounded-full mb-2">
+              <span className="bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-[#272829] px-3 py-1 rounded-full text-xs md:text-sm font-medium">
+                Admin Panel
+              </span>
             </div>
-            
-            <div className="p-3 rounded-md bg-[#272829]">
-              <div className="flex items-center gap-2 mb-2">
-                <div className={`w-3 h-3 rounded-full ${banned?.current?.status ? 'bg-red-500' : 'bg-green-500'}`}></div>
-                <span className="font-medium">{banned?.current?.status ? 'Currently Banned' : 'Not Banned'}</span>
-              </div>
-              
-              {banned?.current?.status && (
-                <>
-                  <p className="text-[#FFF6E0]/70 text-sm mb-1 mt-3">Reason</p>
-                  <p className="text-[#FFF6E0] text-sm p-2 bg-[#31333A]/50 rounded-md">
-                    {banned.current.reason || "No reason provided"}
-                  </p>
-                  
-                  <div className="grid grid-cols-2 gap-4 mt-3">
-                    <div>
-                      <p className="text-[#FFF6E0]/70 text-sm mb-1">Ban Date</p>
-                      <p className="text-[#FFF6E0] text-sm">{formatDate(banned.current.date)}</p>
-                    </div>
-                    
-                    <div>
-                      <p className="text-[#FFF6E0]/70 text-sm mb-1">Action By</p>
-                      <p className="text-[#FFF6E0] text-sm">Admin ID: {banned.current.actionBy}</p>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-            
-            {/* Ban History */}
-            {showBanHistory && banned?.history && banned.history.length > 0 && (
-              <div className="mt-4">
-                <h4 className="text-md font-medium mb-2 text-[#FFF6E0]/90">Ban History</h4>
-                <div className="max-h-60 overflow-y-auto pr-1">
-                  {banned.history.map((entry, index) => (
-                    <div 
-                      key={index} 
-                      className="p-3 rounded-md bg-[#272829] mb-2 border-l-2 border-l-[#FFF6E0]/20"
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className={`w-2 h-2 rounded-full ${entry.status ? 'bg-red-500' : 'bg-green-500'}`}></div>
-                        <span className="font-medium text-sm">{entry.status ? 'Banned' : 'Unbanned'}</span>
-                        <span className="text-xs text-[#FFF6E0]/60 ml-auto">{formatDate(entry.date)}</span>
-                      </div>
-                      <p className="text-[#FFF6E0]/80 text-sm mt-1">{entry.reason}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
+          
+          <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-transparent bg-clip-text">
+            Moderate User
+          </h1>
         </div>
         
-        {/* Additional Moderation Actions */}
-        <div className="bg-[#31333A] rounded-lg border border-[#61677A]/30 p-4">
-          <h3 className="text-lg font-medium mb-3">Additional Moderation Actions</h3>
-          <div className="flex flex-wrap gap-2">
-            <button className="px-4 py-2 bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 rounded-lg hover:bg-yellow-500/30 text-sm flex items-center gap-1">
-              <AlertTriangle size={16} />
-              <span>Issue Warning</span>
-            </button>
-            <button className="px-4 py-2 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-lg hover:bg-blue-500/30 text-sm flex items-center gap-1">
-              <RotateCcw size={16} />
-              <span>Reset Password</span>
-            </button>
-          </div>
+        {/* User Display */}
+        <div className="bg-[#31333A]/70 rounded-lg border border-[#61677A]/30 p-4">
+          {isSearchingUser ? (
+            <div className="flex items-center justify-center p-8">
+              <div className="animate-spin mr-2 h-6 w-6 border-2 border-[#FFF6E0]/70 border-t-transparent rounded-full"></div>
+              <span className="text-[#FFF6E0]/70">Fetching user information...</span>
+            </div>
+          ) : searchedUser ? (
+            renderUserDetails()
+          ) : (
+            <div className="text-center p-8 text-[#FFF6E0]/70">
+              <p>No user found with email: {userEmail}</p>
+              <button 
+                onClick={goBack}
+                className="mt-4 px-4 py-2 bg-[#FFF6E0]/10 hover:bg-[#FFF6E0]/20 rounded-lg text-sm"
+              >
+                Go back to search for another user
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );
   };
-
-  return (
-    <div className="bg-[#272829] text-[#FFF6E0] p-4 md:p-6 min-h-screen">
-      {/* Header */}
-      <div className="flex flex-col mb-6">
-        <button 
-          onClick={goBack} 
-          className="flex items-center text-[#FFF6E0]/70 hover:text-[#FFF6E0] mb-2 w-fit"
-        >
-          <ArrowLeft size={16} className="mr-1" />
-          <span className="text-sm">Back to Users</span>
-        </button>
-        
-        <div className="flex items-center">
-          <div className="bg-gradient-to-r from-[#FFF6E0]/10 to-transparent p-1 inline-block rounded-full mb-2">
-            <span className="bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-[#272829] px-3 py-1 rounded-full text-xs md:text-sm font-medium">
-              Admin Panel
-            </span>
-          </div>
-        </div>
-        
-        <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-transparent bg-clip-text">
-          Moderate User
-        </h1>
-      </div>
-      
-      {/* User Display */}
-      <div className="bg-[#31333A]/70 rounded-lg border border-[#61677A]/30 p-4">
-        {isSearchingUser ? (
-          <div className="flex items-center justify-center p-8">
-            <div className="animate-spin mr-2 h-6 w-6 border-2 border-[#FFF6E0]/70 border-t-transparent rounded-full"></div>
-            <span className="text-[#FFF6E0]/70">Fetching user information...</span>
-          </div>
-        ) : searchedUser ? (
-          renderUserDetails()
-        ) : (
-          <div className="text-center p-8 text-[#FFF6E0]/70">
-            <p>No user found with email: {userEmail}</p>
-            <button 
-              onClick={goBack}
-              className="mt-4 px-4 py-2 bg-[#FFF6E0]/10 hover:bg-[#FFF6E0]/20 rounded-lg text-sm"
-            >
-              Go back to search for another user
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-export default ModerateUser;
+  
+  export default ModerateUser;

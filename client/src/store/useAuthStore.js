@@ -30,6 +30,7 @@ export const useAuthStore = create((set, get) => ({
   searchedUser: null,
   isUpdatingBanStatus: false,
   bannedUser: null,
+  isUpdatingRole: false,
 
 
 
@@ -283,6 +284,29 @@ banUnbanUser: async (data) => {
       set({ isUpdatingBanStatus: false });
   }
 },
+
+ // Promote/Demote User Function
+ promoteDemoteUser: async ({ input, promote, actionBy }) => {
+  set({ isUpdatingRole: true });
+
+  try {
+    const res = await axiosInstance.post('/api/v1/op/promotedemoteuser', {
+      input,
+      promote,
+      actionBy,
+    });
+
+    toast.success(`User ${promote ? 'promoted' : 'demoted'} successfully`);
+    return res.data;
+  } catch (error) {
+    console.error("Error updating user role:", error);
+    const errorMessage = error.response?.data?.message || "Failed to update user role";
+    toast.error(errorMessage);
+  } finally {
+    set({ isUpdatingRole: false });
+  }
+},
+
 
 
 
