@@ -6,7 +6,7 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 
 const ManageUsersPage = () => {
-  const { getUsers, usersData, totalPages, currentPage, isFetchingUsers } = useAuthStore();
+  const { getUsers, usersData, totalPages, currentPage, isFetchingUsers, adminSearchUser, searchedUser, isSearchingUser } = useAuthStore();
   const [filters, setFilters] = useState({
     gender: '',
     bannedStatus: '',
@@ -17,6 +17,8 @@ const ManageUsersPage = () => {
     maxAge: ''
   });
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchType, setSearchType] = useState('email'); // Default search by email
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -70,12 +72,25 @@ const ManageUsersPage = () => {
     }
   };
   
+  // Function to handle search
+  const handleSearch = (e) => {
+    e.preventDefault();
+    
+    if (!searchQuery.trim()) return;
+    
+    const searchParams = {};
+    searchParams[searchType] = searchQuery.trim();
+    
+    adminSearchUser(searchParams);
+  };
+  
   // Updated to only pass email to the modrateUser route
   const handleViewClick = (userEmail) => {
     navigate(`${location.pathname}/modrateUser`, { state: { userEmail } });
   };
   
-  
+  // Display combined data: searched user + paginated users
+  const displayData = searchedUser ? [searchedUser] : usersData;
 
   return (
     <div className="bg-[#272829] text-[#FFF6E0] p-4 md:p-6 h-full">
@@ -100,6 +115,61 @@ const ManageUsersPage = () => {
           {isFilterOpen ? <X size={18} /> : <Filter size={18} />}
         </button>
       </div>
+
+      {/* Search Bar */}
+      <form onSubmit={handleSearch} className="mb-4 bg-[#31333A]/70 rounded-lg border border-[#61677A]/30 p-3">
+        <div className="flex flex-col md:flex-row gap-2">
+          <div className="w-full md:w-32">
+            <select 
+              value={searchType} 
+              onChange={(e) => setSearchType(e.target.value)}
+              className="w-full bg-[#272829] text-[#FFF6E0] p-2 rounded-lg border border-[#61677A]/30 text-sm"
+            >
+              <option value="email">Email</option>
+              <option value="uniqueTag">Unique Tag</option>
+            </select>
+          </div>
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder={`Search by ${searchType}...`}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-[#272829] text-[#FFF6E0] p-2 rounded-lg border border-[#61677A]/30 text-sm"
+            />
+          </div>
+          <button
+            type="submit"
+            className="bg-[#FFF6E0] text-[#272829] py-2 px-4 rounded-lg font-medium hover:bg-[#D8D9DA] transition-colors text-sm flex items-center justify-center"
+            disabled={isSearchingUser || !searchQuery.trim()}
+          >
+            {isSearchingUser ? (
+              <span className="flex items-center justify-center">
+                <RefreshCw size={14} className="animate-spin mr-2" />
+                Searching...
+              </span>
+            ) : (
+              <span className="flex items-center justify-center">
+                <Search size={14} className="mr-2" />
+                Search
+              </span>
+            )}
+          </button>
+          {searchedUser && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearchQuery('');
+                useAuthStore.setState({ searchedUser: null });
+              }}
+              className="bg-[#272829] text-[#FFF6E0] py-2 px-4 rounded-lg hover:bg-[#272829]/70 transition-colors text-sm flex items-center justify-center"
+            >
+              <X size={14} className="mr-2" />
+              Clear Search
+            </button>
+          )}
+        </div>
+      </form>
 
       <div className="flex flex-col md:flex-row gap-4">
         {/* Filter Panel */}
@@ -240,18 +310,18 @@ const ManageUsersPage = () => {
         <div className="flex-1">
           {/* Stats Summary */}
           <div className="grid grid-cols-3 gap-2 md:gap-4 mb-4">
-            <StatCard icon={<Users size={20} />} label="Total Fetched" value={usersData?.length || 0} />
-            <StatCard icon={<Shield size={20} />} label="Page" value={currentPage} />
-            <StatCard icon={<UserX size={20} />} label="Total Pages" value={totalPages} />
+            <StatCard icon={<Users size={20} />} label="Total Fetched" value={displayData?.length || 0} />
+            <StatCard icon={<Shield size={20} />} label="Page" value={searchedUser ? 1 : currentPage} />
+            <StatCard icon={<UserX size={20} />} label="Total Pages" value={searchedUser ? 1 : totalPages} />
           </div>
           
           {/* Users Table */}
           <div className="bg-[#31333A]/70 rounded-lg border border-[#61677A]/30 overflow-hidden">
-            {isFetchingUsers && currentPage === 1 ? (
+            {(isFetchingUsers && currentPage === 1) || isSearchingUser ? (
               <div className="flex items-center justify-center p-8">
                 <RefreshCw size={24} className="animate-spin text-[#FFF6E0]/70" />
               </div>
-            ) : usersData?.length > 0 ? (
+            ) : displayData?.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
@@ -265,8 +335,8 @@ const ManageUsersPage = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {usersData.map((user) => (
-                      <tr key={user._id} className="border-t border-[#61677A]/20 hover:bg-[#272829]/30">
+                    {displayData.map((user) => (
+                      <tr key={user._id} className={`border-t border-[#61677A]/20 hover:bg-[#272829]/30 ${searchedUser && user._id === searchedUser._id ? 'bg-[#FFF6E0]/5' : ''}`}>
                         <td className="p-3">
                           <div className="flex items-center">
                             <div className="w-7 h-7 rounded-full bg-[#FFF6E0]/10 flex items-center justify-center mr-2 text-sm">
@@ -308,8 +378,8 @@ const ManageUsersPage = () => {
               </div>
             )}
             
-            {/* Pagination Controls */}
-            {usersData?.length > 0 && (
+            {/* Pagination Controls - Only show when not in search mode */}
+            {!searchedUser && usersData?.length > 0 && (
               <div className="flex flex-col sm:flex-row justify-between items-center border-t border-[#61677A]/20 p-3 gap-2">
                 <div className="text-xs text-[#FFF6E0]/70">
                   {usersData.length} users

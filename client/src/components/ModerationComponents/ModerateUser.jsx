@@ -166,24 +166,32 @@ const ModerateUser = () => {
           </div>
           
           <div className="md:ml-auto mt-4 md:mt-0 flex flex-wrap items-center gap-2 self-start md:self-center">
-            {banned?.current?.status ? (
-              <button 
-                onClick={() => handleBanUnban(false)} 
-                disabled={isUpdatingBanStatus}
-                className="flex items-center gap-1 px-3 py-1.5 bg-green-500/20 text-green-400 border border-green-500/30 rounded-lg hover:bg-green-500/30 text-sm font-medium transition-colors"
-              >
-                <UserCheck size={16} />
-                <span>Unban User</span>
-              </button>
+             {/* Ban/Unban Buttons - Hide for 'king' role */}
+            {userRole !== 'king' ? (
+                banned?.current?.status ? (
+                <button 
+                    onClick={() => handleBanUnban(false)} 
+                    disabled={isUpdatingBanStatus}
+                    className="flex items-center gap-1 px-3 py-1.5 bg-green-500/20 text-green-400 border border-green-500/30 rounded-lg hover:bg-green-500/30 text-sm font-medium transition-colors"
+                >
+                    <UserCheck size={16} />
+                    <span>Unban User</span>
+                </button>
+                ) : (
+                <button 
+                    onClick={() => setShowBanForm(true)} 
+                    className="flex items-center gap-1 px-3 py-1.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/30 text-sm font-medium transition-colors"
+                >
+                    <UserX size={16} />
+                    <span>Ban User</span>
+                </button>
+                )
             ) : (
-              <button 
-                onClick={() => setShowBanForm(true)} 
-                className="flex items-center gap-1 px-3 py-1.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/30 text-sm font-medium transition-colors"
-              >
-                <UserX size={16} />
-                <span>Ban User</span>
-              </button>
+                <span className="text-xs px-3 py-1.5 bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-lg">
+                King users cannot be banned
+                </span>
             )}
+  
             
             {/* Role Management Buttons */}
             {userRole === 'normalUser' && (
