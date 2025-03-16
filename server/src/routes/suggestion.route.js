@@ -18,7 +18,8 @@ router.route("/:id").get(getSuggestionById);
 
 // Protected Routes
 router.route("/create").post(verifyJWT, createSuggestion);
-router.route("/:id").put(verifyJWT, updateSuggestion).delete(verifyJWT, deleteSuggestion);
+router.put("/updatesuggestion/:id", updateSuggestion);
+router.delete("/deletesuggestion/:id", deleteSuggestion);
 router.route("/:id/like").post(verifyJWT, likeSuggestion);
 
 

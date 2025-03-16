@@ -31,7 +31,8 @@ export const useAuthStore = create((set, get) => ({
   isUpdatingBanStatus: false,
   bannedUser: null,
   isUpdatingRole: false,
-
+  isUpdatingSuggestion: false,
+  isDeletingSuggestion: false,
 
 
   // Function to check if the user is authenticated
@@ -373,6 +374,46 @@ likeSuggestion: async (id) => {
     toast.error(error.response?.data?.message || "Failed to update like");
   }
 },
+
+
+// Update Suggestion
+updateSuggestion: async ({ id, title, category, description }) => {
+  set({ isUpdatingSuggestion: true });
+
+  try {
+    const res = await axiosInstance.put(`/api/v1/suggestions/updatesuggestion/${id}`, {
+      title,
+      category,
+      description,
+    });
+
+    toast.success("Suggestion updated successfully");
+    return res.data;
+  } catch (error) {
+    console.error("Error updating suggestion:", error);
+    const errorMessage = error.response?.data?.message || "Failed to update suggestion";
+    toast.error(errorMessage);
+  } finally {
+    set({ isUpdatingSuggestion: false });
+  }
+},
+
+// Delete Suggestion
+deleteSuggestion: async (id) => {
+  set({ isDeletingSuggestion: true });
+
+  try {
+    await axiosInstance.delete(`api/v1/suggestions/deletesuggestion/${id}`);
+    toast.success("Suggestion deleted successfully");
+  } catch (error) {
+    console.error("Error deleting suggestion:", error);
+    const errorMessage = error.response?.data?.message || "Failed to delete suggestion";
+    toast.error(errorMessage);
+  } finally {
+    set({ isDeletingSuggestion: false });
+  }
+},
+
 
 
 
