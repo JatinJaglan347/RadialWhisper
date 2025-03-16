@@ -126,7 +126,7 @@ import ConfigRulesPage from './pages/ModerationPages/ConfigRulesPage.jsx';
 import toast from 'react-hot-toast';
 import LandingNavbar from './components/MainWebPage/LandingNavbar.jsx';
 import Navbar from './components/Navbar.jsx';
-// import AdminPanelNavbar from './components/AdminPanelNavbar.jsx';
+// import ModerationNavbar from './components/ModerationNavbar.jsx';
 import LandingHome from './pages/MainWebPage/LandingHome.jsx';
 import LandingAbout from './pages/MainWebPage/LandingAbout.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
@@ -140,7 +140,7 @@ import DashboardPage from './pages/ModerationPages/DashboardPage.jsx';
 // import ManageSuggestionsPage from './pages/ModerationPages/ManageSuggestionsPage.jsx';
 // import ManageReportsPage from './pages/ModerationPages/ManageReportsPage.jsx';
 // import ManageContactsPage from './pages/ModerationPages/ManageContactsPage.jsx';
-import AdminPanelNavbar, { SidebarContext } from './components/ModerationComponents/AdminPanelNavbar.jsx';
+import ModerationNavbar, { SidebarContext } from './components/ModerationComponents/ModerationNavbar.jsx';
 import ManageUsersPage from './pages/ModerationPages/ManageUsersPage.jsx';
 import ModerateUser from './components/ModerationComponents/ModerateUser.jsx';
 import ManageModeratorsPage from './pages/ModerationPages/ManageModeratorsPage.jsx';
@@ -243,7 +243,7 @@ function App() {
             onMobileMenuChange: handleMobileMenuChange
           }}>
             {/* <div className="fixed top-[var(--navbar-height)] left-0 h-[calc(100vh-var(--navbar-height))] z-20"> */}
-              <AdminPanelNavbar />
+              <ModerationNavbar />
             {/* </div> */}
           </SidebarContext.Provider>
         )}

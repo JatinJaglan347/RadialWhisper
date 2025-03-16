@@ -27,7 +27,7 @@ export const SidebarContext = createContext({
 
 export const useSidebar = () => useContext(SidebarContext);
 
-const AdminPanelNavbar = () => {
+const ModerationNavbar = () => {
   const location = useLocation();
   const { 
     isCollapsed, 
@@ -258,4 +258,4 @@ const AdminPanelNavbar = () => {
   );
 };
 
-export default AdminPanelNavbar;
+export default ModerationNavbar;

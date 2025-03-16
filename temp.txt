@@ -11,7 +11,7 @@ radial-whisper/
 │  │  │  │  ├─ LandingViewSuggestions .jsx
 │  │  │  │  └─ LandingWriteSuggestion.jsx
 │  │  │  ├─ ModerationComponents/
-│  │  │  │  └─ AdminPanelNavbar.jsx
+│  │  │  │  └─ ModerationNavbar.jsx
 │  │  │  ├─ Loader.jsx
 │  │  │  ├─ Loading.jsx
 │  │  │  ├─ Navbar.jsx
