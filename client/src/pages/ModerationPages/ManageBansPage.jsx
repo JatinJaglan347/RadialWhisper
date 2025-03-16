@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useAuthStore } from '../../store/useAuthStore.js';
 import { 
   Shield, Search, RefreshCw, ChevronLeft, ChevronRight, 
-  UserMinus, UserPlus, Users, BadgeCheck, BadgeMinus, X, Eye
+  UserCheck, UserX, Users, BadgeCheck, BadgeMinus, X, AlertCircle, History
 } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
 import { toast } from 'react-hot-toast';
 
-const ManageModeratorsPage = () => {
+const ManageBansPage = () => {
   const { 
     getUsers, 
     usersData, 
@@ -17,58 +17,59 @@ const ManageModeratorsPage = () => {
     adminSearchUser, 
     searchedUser, 
     isSearchingUser,
-    promoteDemoteUser,
-    isUpdatingRole
+    banUnbanUser,
+    isUpdatingBanStatus
   } = useAuthStore();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [searchType, setSearchType] = useState('email');
-  const [showPromoteConfirm, setShowPromoteConfirm] = useState(false);
-  const [showDemoteConfirm, setShowDemoteConfirm] = useState(false);
+  const [showBanConfirm, setShowBanConfirm] = useState(false);
+  const [showUnbanConfirm, setShowUnbanConfirm] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [banReason, setBanReason] = useState('');
+  const [unbanReason, setUnbanReason] = useState('Unbanned');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [showBanHistory, setShowBanHistory] = useState(false);
   
   const navigate = useNavigate();
   
-  // Fixed filters to only show moderators or users we can promote
-  const [activeTab, setActiveTab] = useState('moderators'); // 'moderators' or 'potential'
+  // Fixed filters to show banned or active users
+  const [activeTab, setActiveTab] = useState('banned'); // 'banned' or 'active'
   
   useEffect(() => {
     // When tab changes, update the filters and fetch users
-    const roleFilter = activeTab === 'moderators' ? 'moderator' : 'normalUser';
-    const bannedStatus = statusFilter !== 'all' ? statusFilter === 'active' ? 'false' : 'true' : '';
+    const bannedStatus = activeTab === 'banned' ? 'true' : 'false';
     
-    getUsers({ role: roleFilter, bannedStatus }, 1);
-  }, [activeTab, statusFilter]);
+    getUsers({ bannedStatus }, 1);
+  }, [activeTab]);
   
   useEffect(() => {
-    // Initial data fetch
-    getUsers({ role: 'moderator' }, 1);
+    // Initial data fetch - start with banned users
+    getUsers({ bannedStatus: 'true' }, 1);
   }, []);
   
-  const [moderatorStats, setModeratorStats] = useState({
+  const [userStats, setUserStats] = useState({
     total: 0,
-    active: 0,
-    inactive: 0
+    banned: 0,
+    active: 0
   });
   
   useEffect(() => {
     // Calculate stats from usersData
     if (usersData) {
-      const active = usersData.filter(user => !user.banned?.current?.status).length;
-      setModeratorStats({
+      const banned = usersData.filter(user => user.banned?.current?.status).length;
+      setUserStats({
         total: usersData.length,
-        active: active,
-        inactive: usersData.length - active
+        banned: banned,
+        active: usersData.length - banned
       });
     }
   }, [usersData]);
 
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
-      const roleFilter = activeTab === 'moderators' ? 'moderator' : 'normalUser';
-      const bannedStatus = statusFilter !== 'all' ? statusFilter === 'active' ? 'false' : 'true' : '';
-      getUsers({ role: roleFilter, bannedStatus }, page);
+      const bannedStatus = activeTab === 'banned' ? 'true' : 'false';
+      getUsers({ bannedStatus }, page);
     }
   };
   
@@ -80,65 +81,72 @@ const ManageModeratorsPage = () => {
     const searchParams = {};
     searchParams[searchType] = searchQuery.trim();
     
-    // Add role filter to search to maintain context
-    if (activeTab === 'moderators') {
-      searchParams.role = 'moderator';
-    } else if (activeTab === 'potential') {
-      searchParams.role = 'normalUser';
+    // Add ban status filter to search to maintain context
+    if (activeTab === 'banned') {
+      searchParams.bannedStatus = 'true';
+    } else if (activeTab === 'active') {
+      searchParams.bannedStatus = 'false';
     }
     
     adminSearchUser(searchParams);
   };
   
-  const initiatePromote = (user) => {
+  const initiateBan = (user) => {
     setSelectedUser(user);
-    setShowPromoteConfirm(true);
+    setShowBanConfirm(true);
   };
   
-  const initiateDemote = (user) => {
+  const initiateUnban = (user) => {
     setSelectedUser(user);
-    setShowDemoteConfirm(true);
+    setShowUnbanConfirm(true);
   };
   
-  const handlePromote = async () => {
-    if (!selectedUser) return;
+  const viewBanHistory = (user) => {
+    setSelectedUser(user);
+    setShowBanHistory(true);
+  };
+  
+  const handleBan = async () => {
+    if (!selectedUser || !banReason.trim()) return;
     
     try {
-      await promoteDemoteUser({
+      await banUnbanUser({
         input: selectedUser.email,
-        promote: true,
-        actionBy: { reason: "Promoted to moderator" }
+        banStatus: true,  // This should be banStatus, not status
+        banReason: banReason,  // This should be banReason, not reason
+        banActionBy: localStorage.getItem('userId')  // Add this field
       });
       
       // Refresh the list
-      const roleFilter = activeTab === 'moderators' ? 'moderator' : 'normalUser';
-      const bannedStatus = statusFilter !== 'all' ? statusFilter === 'active' ? 'false' : 'true' : '';
-      getUsers({ role: roleFilter, bannedStatus }, currentPage);
-      setShowPromoteConfirm(false);
+      const bannedStatus = activeTab === 'banned' ? 'true' : 'false';
+      getUsers({ bannedStatus }, currentPage);
+      setShowBanConfirm(false);
       setSelectedUser(null);
+      setBanReason('');
     } catch (error) {
-      console.error('Error during promotion', error);
+      console.error('Error during ban', error);
     }
   };
   
-  const handleDemote = async () => {
+  const handleUnban = async () => {
     if (!selectedUser) return;
     
     try {
-      await promoteDemoteUser({
+      await banUnbanUser({
         input: selectedUser.email,
-        promote: false,
-        actionBy: { reason: "Demoted from moderator" }
+        banStatus: false,  // This should be banStatus, not status
+        banReason: unbanReason,  // This should be banReason, not reason
+        banActionBy: localStorage.getItem('userId')  // Add this field
       });
       
       // Refresh the list
-      const roleFilter = activeTab === 'moderators' ? 'moderator' : 'normalUser';
-      const bannedStatus = statusFilter !== 'all' ? statusFilter === 'active' ? 'false' : 'true' : '';
-      getUsers({ role: roleFilter, bannedStatus }, currentPage);
-      setShowDemoteConfirm(false);
+      const bannedStatus = activeTab === 'banned' ? 'true' : 'false';
+      getUsers({ bannedStatus }, currentPage);
+      setShowUnbanConfirm(false);
       setSelectedUser(null);
+      setUnbanReason('Unbanned');
     } catch (error) {
-      console.error('Error during demotion', error);
+      console.error('Error during unban', error);
     }
   };
   
@@ -146,7 +154,7 @@ const ManageModeratorsPage = () => {
   const displayData = searchedUser ? [searchedUser] : usersData;
 
   return (
-    <div className="bg-[#272829] text-[#FFF6E0] p-4 md:p-6  min-h-screen">
+    <div className="bg-[#272829] text-[#FFF6E0] p-4 md:p-6  min-h-screen ">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
@@ -156,7 +164,7 @@ const ManageModeratorsPage = () => {
             </span>
           </div>
           <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-transparent bg-clip-text">
-            Manage Moderators
+            Manage User Bans
           </h1>
         </div>
       </div>
@@ -164,31 +172,31 @@ const ManageModeratorsPage = () => {
       {/* Tabs */}
       <div className="flex mb-4 border-b border-[#61677A]/30">
         <button 
-          className={`py-2 px-4 text-sm font-medium ${activeTab === 'moderators' 
+          className={`py-2 px-4 text-sm font-medium ${activeTab === 'banned' 
             ? 'border-b-2 border-[#FFF6E0] text-[#FFF6E0]' 
             : 'text-[#FFF6E0]/60 hover:text-[#FFF6E0]/80 transition-colors'}`}
-          onClick={() => setActiveTab('moderators')}
+          onClick={() => setActiveTab('banned')}
         >
           <span className="flex items-center">
-            <Shield size={16} className="mr-2" />
-            Current Moderators
+            <UserX size={16} className="mr-2" />
+            Banned Users
           </span>
         </button>
         
         <button 
-          className={`py-2 px-4 text-sm font-medium ${activeTab === 'potential' 
+          className={`py-2 px-4 text-sm font-medium ${activeTab === 'active' 
             ? 'border-b-2 border-[#FFF6E0] text-[#FFF6E0]' 
             : 'text-[#FFF6E0]/60 hover:text-[#FFF6E0]/80 transition-colors'}`}
-          onClick={() => setActiveTab('potential')}
+          onClick={() => setActiveTab('active')}
         >
           <span className="flex items-center">
-            <UserPlus size={16} className="mr-2" />
-            Potential Moderators
+            <UserCheck size={16} className="mr-2" />
+            Active Users
           </span>
         </button>
       </div>
 
-      {/* Search Bar and Status Filter */}
+      {/* Search Bar */}
       <div className="flex gap-4 mb-4">
         <form onSubmit={handleSearch} className="flex-1 flex gap-2 bg-[#31333A]/70 rounded-lg border border-[#61677A]/30 p-3">
           <div className="w-32">
@@ -204,7 +212,7 @@ const ManageModeratorsPage = () => {
           <div className="flex-1">
             <input
               type="text"
-              placeholder={`Search ${activeTab === 'moderators' ? 'moderators' : 'potential moderators'} by ${searchType}...`}
+              placeholder={`Search ${activeTab === 'banned' ? 'banned' : 'active'} users by ${searchType}...`}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-[#272829] text-[#FFF6E0] p-2 rounded-lg border border-[#61677A]/30 text-sm"
@@ -241,39 +249,16 @@ const ManageModeratorsPage = () => {
             </button>
           )}
         </form>
-        
-        {/* Status Filter */}
-        <div className="bg-[#31333A]/70 rounded-lg border border-[#61677A]/30 p-3 flex items-center">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full bg-[#272829] text-[#FFF6E0] p-2 rounded-lg border border-[#61677A]/30 text-sm"
-          >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-        </div>
       </div>
 
       {/* Stats Summary */}
       <div className="grid grid-cols-3 gap-4 mb-4">
-        {activeTab === 'moderators' ? (
-          <>
-            <StatCard icon={<Shield size={20} />} label="Total Moderators" value={moderatorStats.total} />
-            <StatCard icon={<BadgeCheck size={20} />} label="Active" value={moderatorStats.active} />
-            <StatCard icon={<BadgeMinus size={20} />} label="Inactive" value={moderatorStats.inactive} />
-          </>
-        ) : (
-          <>
-            <StatCard icon={<Users size={20} />} label="Potential Moderators" value={displayData?.length || 0} />
-            <StatCard icon={<BadgeCheck size={20} />} label="Page" value={searchedUser ? 1 : currentPage} />
-            <StatCard icon={<BadgeMinus size={20} />} label="Total Pages" value={searchedUser ? 1 : totalPages} />
-          </>
-        )}
+        <StatCard icon={<Users size={20} />} label="Total Users" value={displayData?.length || 0} />
+        <StatCard icon={<UserX size={20} />} label={`${activeTab === 'banned' ? 'Current' : 'Banned'}`} value={userStats.banned} />
+        <StatCard icon={<UserCheck size={20} />} label={`${activeTab === 'active' ? 'Current' : 'Active'}`} value={userStats.active} />
       </div>
       
-      {/* Moderators Table */}
+      {/* Users Table */}
       <div className="bg-[#31333A]/70 rounded-lg border border-[#61677A]/30 overflow-hidden">
         {(isFetchingUsers && currentPage === 1) || isSearchingUser ? (
           <div className="flex items-center justify-center p-8">
@@ -287,7 +272,8 @@ const ManageModeratorsPage = () => {
                   <th className="p-3 font-medium text-sm">Name</th>
                   <th className="p-3 font-medium text-sm">Email</th>
                   <th className="p-3 font-medium text-sm">Status</th>
-                  <th className="p-3 font-medium text-sm">Joined</th>
+                  <th className="p-3 font-medium text-sm">Reason</th>
+                  <th className="p-3 font-medium text-sm">Date</th>
                   <th className="p-3 font-medium text-sm">Actions</th>
                 </tr>
               </thead>
@@ -304,32 +290,46 @@ const ManageModeratorsPage = () => {
                     </td>
                     <td className="p-3 text-[#FFF6E0]/80 text-sm">{user.email}</td>
                     <td className="p-3">
-                      <StatusBadge isBanned={user.banned?.current?.status} />
+                      <StatusBadge isBanned={user.banned?.current?.status} role={user.userRole} />
                     </td>
                     <td className="p-3 text-[#FFF6E0]/80 text-sm">
-                      {new Date(user.createdAt).toLocaleDateString()}
+                      {user.banned?.current?.reason || "N/A"}
                     </td>
-                    <td className="p-3">
-                      {activeTab === 'moderators' ? (
+                    <td className="p-3 text-[#FFF6E0]/80 text-sm">
+                      {user.banned?.current?.date ? new Date(user.banned.current.date).toLocaleDateString() : "N/A"}
+                    </td>
+                    <td className="p-3 flex gap-1">
+                      {user.banned?.current?.status ? (
                         <button 
-                          onClick={() => initiateDemote(user)}
-                          className="p-1.5 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 flex items-center"
-                          disabled={isUpdatingRole}
-                          title="Demote to User"
+                          onClick={() => initiateUnban(user)}
+                          className="p-1.5 bg-green-500/10 text-green-400 rounded-lg hover:bg-green-500/20 flex items-center"
+                          disabled={isUpdatingBanStatus}
+                          title="Unban User"
                         >
-                          <UserMinus size={12} className="mr-1" />
-                          <span className="text-xs">Demote</span>
+                          <UserCheck size={12} className="mr-1" />
+                          <span className="text-xs">Unban</span>
                         </button>
                       ) : (
                         <button 
-                          onClick={() => initiatePromote(user)}
-                          className="p-1.5 bg-green-500/10 text-green-400 rounded-lg hover:bg-green-500/20 flex items-center"
-                          disabled={isUpdatingRole}
-                          title="Promote to Moderator"
+                          onClick={() => initiateBan(user)}
+                          className="p-1.5 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 flex items-center"
+                          disabled={isUpdatingBanStatus}
+                          title="Ban User"
                         >
-                          <UserPlus size={12} className="mr-1" />
-                          <span className="text-xs">Promote</span>
+                          <UserX size={12} className="mr-1" />
+                          <span className="text-xs">Ban</span>
                         </button>
+                      )}
+                      
+                      {user.banned?.history?.length > 0 && (
+                        <button 
+                          onClick={() => viewBanHistory(user)}
+                          className="p-1.5 bg-blue-500/10 text-blue-400 rounded-lg hover:bg-blue-500/20 flex items-center"
+                          title="View Ban History"
+                        >
+                          <History size={12} className="mr-1" />
+                          <span className="text-xs">History</span>
+                          </button>
                       )}
                     </td>
                   </tr>
@@ -339,8 +339,8 @@ const ManageModeratorsPage = () => {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-8 text-[#FFF6E0]/70">
-            <Shield size={32} className="mb-3 opacity-50" />
-            <p className="text-base">No {activeTab === 'moderators' ? 'moderators' : 'potential moderators'} found</p>
+            <UserX size={32} className="mb-3 opacity-50" />
+            <p className="text-base">No {activeTab === 'banned' ? 'banned' : 'active'} users found</p>
             <p className="text-xs">Try adjusting your search</p>
           </div>
         )}
@@ -349,7 +349,7 @@ const ManageModeratorsPage = () => {
         {!searchedUser && usersData?.length > 0 && (
           <div className="flex flex-col sm:flex-row justify-between items-center border-t border-[#61677A]/20 p-3 gap-2">
             <div className="text-xs text-[#FFF6E0]/70">
-              {usersData.length} {activeTab === 'moderators' ? 'moderators' : 'users'}
+              {usersData.length} {activeTab === 'banned' ? 'banned' : 'active'} users
             </div>
             
             <div className="flex items-center gap-1">
@@ -400,13 +400,13 @@ const ManageModeratorsPage = () => {
         )}
       </div>
       
-      {/* Promote Modal - Simplified without reason field */}
-      {showPromoteConfirm && (
+      {/* Ban User Modal */}
+      {showBanConfirm && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
           <div className="bg-[#31333A] rounded-lg p-4 md:p-6 max-w-md w-full mx-4 md:mx-0">
             <h3 className="text-xl font-bold mb-4 flex items-center">
-              <UserPlus size={20} className="mr-2 text-green-400" />
-              Promote to Moderator
+              <UserX size={20} className="mr-2 text-red-400" />
+              Ban User
             </h3>
             
             <div className="bg-[#272829] p-3 rounded-lg mb-4">
@@ -421,35 +421,48 @@ const ManageModeratorsPage = () => {
               </div>
             </div>
             
-            <p className="text-sm text-[#FFF6E0]/70 mb-4">
-              Are you sure you want to promote this user to moderator? They will have access to moderation tools and features.
-            </p>
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Reason for Ban</label>
+              <textarea
+                value={banReason}
+                onChange={(e) => setBanReason(e.target.value)}
+                className="w-full bg-[#272829] text-[#FFF6E0] p-2 rounded-lg border border-[#61677A]/30 text-sm min-h-24"
+                placeholder="Enter reason for banning this user..."
+              />
+              {!banReason.trim() && (
+                <p className="text-xs text-red-400 mt-1 flex items-center">
+                  <AlertCircle size={12} className="mr-1" />
+                  A reason is required for banning a user
+                </p>
+              )}
+            </div>
             
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => {
-                  setShowPromoteConfirm(false);
+                  setShowBanConfirm(false);
                   setSelectedUser(null);
+                  setBanReason('');
                 }}
                 className="px-4 py-2 bg-[#272829] text-[#FFF6E0] rounded-lg hover:bg-[#272829]/70 transition-colors text-sm"
-                disabled={isUpdatingRole}
+                disabled={isUpdatingBanStatus}
               >
                 Cancel
               </button>
               <button
-                onClick={handlePromote}
-                className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm flex items-center"
-                disabled={isUpdatingRole}
+                onClick={handleBan}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm flex items-center"
+                disabled={isUpdatingBanStatus || !banReason.trim()}
               >
-                {isUpdatingRole ? (
+                {isUpdatingBanStatus ? (
                   <span className="flex items-center">
                     <RefreshCw size={14} className="animate-spin mr-2" />
                     Processing...
                   </span>
                 ) : (
                   <span className="flex items-center">
-                    <UserPlus size={14} className="mr-2" />
-                    Confirm Promotion
+                    <UserX size={14} className="mr-2" />
+                    Confirm Ban
                   </span>
                 )}
               </button>
@@ -458,13 +471,13 @@ const ManageModeratorsPage = () => {
         </div>
       )}
       
-      {/* Demote Modal - Simplified without reason field */}
-      {showDemoteConfirm && (
+      {/* Unban User Modal */}
+      {showUnbanConfirm && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
           <div className="bg-[#31333A] rounded-lg p-4 md:p-6 max-w-md w-full mx-4 md:mx-0">
             <h3 className="text-xl font-bold mb-4 flex items-center">
-              <UserMinus size={20} className="mr-2 text-red-400" />
-              Demote Moderator
+              <UserCheck size={20} className="mr-2 text-green-400" />
+              Unban User
             </h3>
             
             <div className="bg-[#272829] p-3 rounded-lg mb-4">
@@ -479,37 +492,108 @@ const ManageModeratorsPage = () => {
               </div>
             </div>
             
-            <p className="text-sm text-[#FFF6E0]/70 mb-4">
-              This action will remove all moderator privileges from this user. They will become a normal user.
-            </p>
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Reason for Unban (Optional)</label>
+              <input
+                type="text"
+                value={unbanReason}
+                onChange={(e) => setUnbanReason(e.target.value)}
+                className="w-full bg-[#272829] text-[#FFF6E0] p-2 rounded-lg border border-[#61677A]/30 text-sm"
+                placeholder="Enter reason for unbanning..."
+              />
+            </div>
             
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => {
-                  setShowDemoteConfirm(false);
+                  setShowUnbanConfirm(false);
                   setSelectedUser(null);
+                  setUnbanReason('Unbanned');
                 }}
                 className="px-4 py-2 bg-[#272829] text-[#FFF6E0] rounded-lg hover:bg-[#272829]/70 transition-colors text-sm"
-                disabled={isUpdatingRole}
+                disabled={isUpdatingBanStatus}
               >
                 Cancel
               </button>
               <button
-                onClick={handleDemote}
-                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm flex items-center"
-                disabled={isUpdatingRole}
+                onClick={handleUnban}
+                className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm flex items-center"
+                disabled={isUpdatingBanStatus}
               >
-                {isUpdatingRole ? (
+                {isUpdatingBanStatus ? (
                   <span className="flex items-center">
                     <RefreshCw size={14} className="animate-spin mr-2" />
                     Processing...
                   </span>
                 ) : (
                   <span className="flex items-center">
-                    <UserMinus size={14} className="mr-2" />
-                    Confirm Demotion
+                    <UserCheck size={14} className="mr-2" />
+                    Confirm Unban
                   </span>
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Ban History Modal */}
+      {showBanHistory && selectedUser && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-[#31333A] rounded-lg p-4 md:p-6 max-w-2xl w-full mx-4 md:mx-0">
+            <h3 className="text-xl font-bold mb-4 flex items-center">
+              <History size={20} className="mr-2 text-blue-400" />
+              Ban History
+            </h3>
+            
+            <div className="bg-[#272829] p-3 rounded-lg mb-4">
+              <div className="flex items-center">
+                <div className="w-8 h-8 rounded-full bg-[#FFF6E0]/10 flex items-center justify-center mr-2">
+                  {selectedUser?.fullName?.charAt(0) || "U"}
+                </div>
+                <div>
+                  <p className="font-medium">{selectedUser?.fullName || "Unknown"}</p>
+                  <p className="text-xs text-[#FFF6E0]/70">{selectedUser?.email}</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-[#272829] rounded-lg p-3 mb-4 max-h-64 overflow-y-auto">
+              {selectedUser?.banned?.history?.length > 0 ? (
+                <div className="space-y-4">
+                  {selectedUser.banned.history.map((entry, index) => (
+                    <div key={index} className="border-b border-[#61677A]/20 pb-3 last:border-0 last:pb-0">
+                      <div className="flex justify-between items-start">
+                        <span className={`px-2 py-0.5 rounded text-xs ${entry.status ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'}`}>
+                          {entry.status ? 'Banned' : 'Unbanned'}
+                        </span>
+                        <span className="text-xs text-[#FFF6E0]/70">
+                          {new Date(entry.date).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="mt-2">
+                        <p className="text-sm font-medium">Reason:</p>
+                        <p className="text-xs text-[#FFF6E0]/80">{entry.reason || "No reason provided"}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4 text-[#FFF6E0]/60">
+                  <p>No history available</p>
+                </div>
+              )}
+            </div>
+            
+            <div className="flex justify-end">
+              <button
+                onClick={() => {
+                  setShowBanHistory(false);
+                  setSelectedUser(null);
+                }}
+                className="px-4 py-2 bg-[#FFF6E0] text-[#272829] rounded-lg hover:bg-[#D8D9DA] transition-colors text-sm"
+              >
+                Close
               </button>
             </div>
           </div>
@@ -520,16 +604,32 @@ const ManageModeratorsPage = () => {
 };
 
 // Status Badge Component
-const StatusBadge = ({ isBanned }) => {
-  return isBanned ? (
-    <span className="px-1.5 py-0.5 rounded text-xs bg-red-500/20 text-red-400 border border-red-500/30">
-      Inactive
-    </span>
-  ) : (
-    <span className="px-1.5 py-0.5 rounded text-xs bg-green-500/20 text-green-400 border border-green-500/30">
-      Active
-    </span>
-  );
+const StatusBadge = ({ isBanned, role }) => {
+  if (isBanned) {
+    return (
+      <span className="px-1.5 py-0.5 rounded text-xs bg-red-500/20 text-red-400 border border-red-500/30">
+        Banned
+      </span>
+    );
+  } else if (role === "moderator") {
+    return (
+      <span className="px-1.5 py-0.5 rounded text-xs bg-blue-500/20 text-blue-400 border border-blue-500/30">
+        Moderator
+      </span>
+    );
+  } else if (role === "admin") {
+    return (
+      <span className="px-1.5 py-0.5 rounded text-xs bg-purple-500/20 text-purple-400 border border-purple-500/30">
+        Admin
+      </span>
+    );
+  } else {
+    return (
+      <span className="px-1.5 py-0.5 rounded text-xs bg-green-500/20 text-green-400 border border-green-500/30">
+        Active
+      </span>
+    );
+  }
 };
 
 // Reusable Stat Card Component
@@ -547,4 +647,4 @@ const StatCard = ({ icon, label, value }) => (
   </div>
 );
 
-export default ManageModeratorsPage;
+export default ManageBansPage;

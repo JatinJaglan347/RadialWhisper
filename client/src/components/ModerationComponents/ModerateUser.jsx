@@ -45,7 +45,7 @@ const ModerateUser = () => {
         input: searchedUser.email,
         banStatus: status,
         banReason: status ? banReason : 'Unbanned',
-        banActionBy: localStorage.getItem('userId') || '65b9e2b0c5d4b6a1f2e8a3d8' // Default to a placeholder if not available
+        banActionBy: localStorage.getItem('userId')  // Default to a placeholder if not available
       };
       
       await banUnbanUser(data);
@@ -76,7 +76,7 @@ const ModerateUser = () => {
       const data = {
         input: searchedUser.email,
         promote: roleAction === 'promote',
-        actionBy: localStorage.getItem('userId') || '65b9e2b0c5d4b6a1f2e8a3d8'
+        actionBy: localStorage.getItem('userId') ,
       };
       
       await promoteDemoteUser(data);

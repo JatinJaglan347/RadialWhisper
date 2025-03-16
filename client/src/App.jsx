@@ -144,6 +144,7 @@ import AdminPanelNavbar, { SidebarContext } from './components/ModerationCompone
 import ManageUsersPage from './pages/ModerationPages/ManageUsersPage.jsx';
 import ModerateUser from './components/ModerationComponents/ModerateUser.jsx';
 import ManageModeratorsPage from './pages/ModerationPages/ManageModeratorsPage.jsx';
+import ManageBansPage from './pages/ModerationPages/ManageBansPage.jsx';
 // import LandingNavbar from './componenst/MainWebPage/LandingNavbar.js';
 
 function App() {
@@ -297,14 +298,14 @@ function App() {
               {/* Moderator Management */}
               <Route
                 path="moderators"
-                element={hasAdminAccess ? <ManageModeratorsPage/> : <Navigate to="/" />}
+                element={hasAdminAccess ? <ManageModeratorsPage/>: <Navigate to="/" />}
               />
               
               {/* Ban/Unban Management */}
-              {/* <Route
+              <Route
                 path="bans"
-                element={hasAdminAccess ? <BanUnbanUsersPage /> : <Navigate to="/" />}
-              /> */}
+                element={hasAdminAccess ? <ManageBansPage/> : <Navigate to="/" />}
+              />
               
               {/* Suggestions Management */}
               {/* <Route

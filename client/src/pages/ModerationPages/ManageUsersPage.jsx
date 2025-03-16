@@ -93,7 +93,7 @@ const ManageUsersPage = () => {
   const displayData = searchedUser ? [searchedUser] : usersData;
 
   return (
-    <div className="bg-[#272829] text-[#FFF6E0] p-4 md:p-6 h-full">
+    <div className="bg-[#272829] text-[#FFF6E0] p-4 md:p-6  min-h-screen">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
