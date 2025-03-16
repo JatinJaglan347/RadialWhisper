@@ -143,6 +143,7 @@ import DashboardPage from './pages/ModerationPages/DashboardPage.jsx';
 import AdminPanelNavbar, { SidebarContext } from './components/ModerationComponents/AdminPanelNavbar.jsx';
 import ManageUsersPage from './pages/ModerationPages/ManageUsersPage.jsx';
 import ModerateUser from './components/ModerationComponents/ModerateUser.jsx';
+import ManageModeratorsPage from './pages/ModerationPages/ManageModeratorsPage.jsx';
 // import LandingNavbar from './componenst/MainWebPage/LandingNavbar.js';
 
 function App() {
@@ -294,10 +295,10 @@ function App() {
               />
               
               {/* Moderator Management */}
-              {/* <Route
+              <Route
                 path="moderators"
-                element={hasAdminAccess ? <ManageModeratorsPage /> : <Navigate to="/" />}
-              /> */}
+                element={hasAdminAccess ? <ManageModeratorsPage/> : <Navigate to="/" />}
+              />
               
               {/* Ban/Unban Management */}
               {/* <Route
