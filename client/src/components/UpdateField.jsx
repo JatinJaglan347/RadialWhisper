@@ -3,10 +3,11 @@ import { useAuthStore } from "../store/useAuthStore";
 import { X, Info } from "lucide-react";
 
 const UpdateField = ({ initialValue, fieldLabel, fieldType, onClose, onUpdate }) => {
-  const { userInfoRules, fetchUserInfoRules } = useAuthStore();
+  const { userInfoRules, fetchUserInfoRules, updateUserField, isUpdating, authUser } = useAuthStore();
   const [value, setValue] = useState(initialValue || "");
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(!userInfoRules);
+  const [hasChanged, setHasChanged] = useState(false);
   
   // Fetch user info rules when component mounts
   useEffect(() => {
@@ -15,7 +16,7 @@ const UpdateField = ({ initialValue, fieldLabel, fieldType, onClose, onUpdate })
         setIsLoading(true);
         try {
           // Get the userId from the store
-          const userId = useAuthStore.getState().authUser?.data?.user?._id;
+          const userId = authUser?.data?.user?._id;
           if (userId) {
             await fetchUserInfoRules(userId);
           }
@@ -28,11 +29,12 @@ const UpdateField = ({ initialValue, fieldLabel, fieldType, onClose, onUpdate })
     };
     
     fetchData();
-  }, [fetchUserInfoRules, userInfoRules]);
+  }, [fetchUserInfoRules, userInfoRules, authUser]);
   
   // Set initial value when the component mounts
   useEffect(() => {
     setValue(initialValue || "");
+    setHasChanged(false);
   }, [initialValue]);
   
   // Convert fieldLabel to a key that matches userInfoRules structure
@@ -47,6 +49,34 @@ const UpdateField = ({ initialValue, fieldLabel, fieldType, onClose, onUpdate })
   
   const fieldKey = getFieldKey(fieldLabel);
   const rules = userInfoRules?.[fieldKey];
+
+  // Check if value has changed from initial value
+  const checkValueChanged = (newValue) => {
+    if (fieldKey === "bio") {
+      const initialBioArray = initialValue ? initialValue.split(", ").filter(Boolean).sort() : [];
+      const newBioArray = newValue ? newValue.split(", ").filter(Boolean).sort() : [];
+      
+      if (initialBioArray.length !== newBioArray.length) {
+        return true;
+      }
+      
+      for (let i = 0; i < initialBioArray.length; i++) {
+        if (initialBioArray[i] !== newBioArray[i]) {
+          return true;
+        }
+      }
+      
+      return false;
+    }
+    
+    return newValue !== initialValue;
+  };
+
+  // Handler for value changes
+  const handleValueChange = (newValue) => {
+    setValue(newValue);
+    setHasChanged(checkValueChanged(newValue));
+  };
 
   // Handle validation based on field type and rules
   const validateField = () => {
@@ -100,19 +130,30 @@ const UpdateField = ({ initialValue, fieldLabel, fieldType, onClose, onUpdate })
     return true;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    // First check if value has changed
+    if (!hasChanged) {
+      onClose();
+      return;
+    }
+    
     if (validateField()) {
-      // Create an object with the field name and its new value
       const updatedData = {
+        userId: authUser?.data?.user?._id,
         field: fieldKey,
         value: fieldKey === "bio" ? value.split(", ").filter(Boolean) : value,
       };
-      
+  
       console.log("Data being sent to API:", updatedData);
-      
-      // Then continue with the existing update logic
-      onUpdate(value);
-      onClose();
+  
+      try {
+        await updateUserField(updatedData);
+        onUpdate(value);
+        onClose();
+        window.location.reload();
+      } catch (error) {
+        console.error("Error updating field:", error);
+      }
     }
   };
   
@@ -175,7 +216,7 @@ const UpdateField = ({ initialValue, fieldLabel, fieldType, onClose, onUpdate })
           <select
             className="w-full p-3 bg-[#31333A] rounded-lg border border-[#61677A] text-[#D8D9DA] focus:outline-none focus:ring-2 focus:ring-[#FFF6E0] focus:border-transparent"
             value={value}
-            onChange={(e) => setValue(e.target.value)}
+            onChange={(e) => handleValueChange(e.target.value)}
           >
             <option value="">Select gender</option>
             {genderOptions.map((option) => (
@@ -203,7 +244,8 @@ const UpdateField = ({ initialValue, fieldLabel, fieldType, onClose, onUpdate })
                   onClick={() => {
                     const newBio = [...bioArray];
                     newBio.splice(index, 1);
-                    setValue(newBio.join(", "));
+                    const newValue = newBio.join(", ");
+                    handleValueChange(newValue);
                   }}
                 >
                   <X size={14} />
@@ -220,7 +262,8 @@ const UpdateField = ({ initialValue, fieldLabel, fieldType, onClose, onUpdate })
                 const newBio = [...bioArray];
                 if (!newBio.includes(e.target.value) && newBio.length < selectionLimit) {
                   newBio.push(e.target.value);
-                  setValue(newBio.join(", "));
+                  const newValue = newBio.join(", ");
+                  handleValueChange(newValue);
                 }
               }
             }}
@@ -247,7 +290,7 @@ const UpdateField = ({ initialValue, fieldLabel, fieldType, onClose, onUpdate })
           type="date"
           className="w-full p-3 bg-[#31333A] rounded-lg border border-[#61677A] text-[#D8D9DA] focus:outline-none focus:ring-2 focus:ring-[#FFF6E0] focus:border-transparent"
           value={value}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={(e) => handleValueChange(e.target.value)}
         />
       );
     } 
@@ -261,7 +304,7 @@ const UpdateField = ({ initialValue, fieldLabel, fieldType, onClose, onUpdate })
           type="number"
           className="w-full p-3 bg-[#31333A] rounded-lg border border-[#61677A] text-[#D8D9DA] focus:outline-none focus:ring-2 focus:ring-[#FFF6E0] focus:border-transparent"
           value={value}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={(e) => handleValueChange(e.target.value)}
           min={min}
           max={max}
         />
@@ -274,7 +317,7 @@ const UpdateField = ({ initialValue, fieldLabel, fieldType, onClose, onUpdate })
           type="text"
           className="w-full p-3 bg-[#31333A] rounded-lg border border-[#61677A] text-[#D8D9DA] focus:outline-none focus:ring-2 focus:ring-[#FFF6E0] focus:border-transparent"
           value={value}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={(e) => handleValueChange(e.target.value)}
           maxLength={rules?.maxLength}
         />
       );
@@ -318,16 +361,21 @@ const UpdateField = ({ initialValue, fieldLabel, fieldType, onClose, onUpdate })
               </button>
               <button
                 onClick={handleSubmit}
-                className="px-4 py-2 bg-gradient-to-r from-[#61677A] to-[#61677A]/70 text-[#FFF6E0] rounded-lg hover:opacity-90 transition-opacity"
-              >
-                Update
-              </button>
+                className={`px-4 py-2 ${
+                  hasChanged 
+                    ? "bg-gradient-to-r from-[#61677A] to-[#61677A]/70 text-[#FFF6E0]" 
+                    : "bg-[#31333A]/70 text-[#D8D9DA]/50 cursor-not-allowed"
+                  } rounded-lg hover:opacity-90 transition-opacity`}
+                  disabled={!hasChanged}
+                >
+                  {hasChanged ? "Update" : "No Changes"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-};
-
-export default UpdateField;
+    );
+  };
+  
+  export default UpdateField;

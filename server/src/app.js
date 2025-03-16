@@ -23,17 +23,19 @@ app.use(cookieparser());
 
 // Routes import
 import userRouter from './routes/user.router.js';
+import updateUserFieldRouter from './routes/updateUserField.routes.js';
 import updateRouter from './routes/infoUpdate.router.js';
 import opRouter from './routes/userInfoRules.router.js';
-import opRouterr from './routes/manageUser.route.js';
+import manageUserRouter from './routes/manageUser.route.js';
 import suggestionRouter from './routes/suggestion.route.js';
 import contact from './routes/contact.routes.js'
 
 // Routes declaration
 app.use("/api/v1/user", userRouter);
+app.use("/api/v1/user", updateUserFieldRouter);
 app.use("/api/v1/update", updateRouter);
 app.use("/api/v1/op", opRouter);
-app.use("/api/v1/op", opRouterr);
+app.use("/api/v1/op", manageUserRouter );
 app.use("/api/v1/suggestions", suggestionRouter);
 app.use("/api/v1/contact", contact);
 

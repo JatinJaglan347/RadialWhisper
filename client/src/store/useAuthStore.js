@@ -39,7 +39,7 @@ export const useAuthStore = create((set, get) => ({
   isUpdating: false,
   userInfoRules: null,
   isLoading: false,
-  isUpdating: false,
+  
 
 
   // Function to check if the user is authenticated
@@ -184,6 +184,34 @@ export const useAuthStore = create((set, get) => ({
     } catch (error) {
       console.error("Logout error:", error);
       toast.error("Error logging out");
+    }
+  },
+
+
+   // Update a user field dynamically
+   updateUserField: async ({ userId ,field, value }) => {
+    set({ isUpdating: true });
+
+    try {
+      const res = await axiosInstance.patch("/api/v1/user/update-field", { userId ,field, value });
+
+      toast.success("User field updated successfully");
+
+      // Optimistically update state
+      set((state) => ({
+        userData: {
+          ...state.userData,
+          [field]: value,
+        },
+      }));
+
+      return res.data;
+    } catch (error) {
+      console.error("Error updating user field:", error);
+      const errorMessage = error.response?.data?.message || "Failed to update user field";
+      toast.error(errorMessage);
+    } finally {
+      set({ isUpdating: false });
     }
   },
   
