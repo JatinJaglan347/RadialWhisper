@@ -5,8 +5,9 @@ import { useAuthStore } from '../../store/useAuthStore.js'; // Import the auth s
 import AOS from 'aos';
 import 'aos/dist/aos.css'; // Import AOS CSS
 
+
 const LandingContact = () => {
-  const { authUser } = useAuthStore(); // Get the authenticated user from store
+  const { authUser , submitContact } = useAuthStore(); // Get the authenticated user from store
 
   const [formState, setFormState] = useState({
     name: '',
@@ -48,7 +49,7 @@ const LandingContact = () => {
         isExistingUser: true // Set to true if user is logged in
       }));
     }
-  }, [authUser]);
+  }, [authUser, setFormState]);
   
   
   
@@ -59,26 +60,37 @@ const LandingContact = () => {
     });
   };
   
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSubmitted(true);
-      setFormState({
-        name: '',
-        email: '',
-        subject: '',
-        message: ''
+  
+    try {
+      await submitContact({
+        name: formState.name,
+        email: formState.email,
+        subject: formState.subject,
+        message: formState.message,
+        isExistingUser: formState.isExistingUser
       });
-      
+  
+      setIsSubmitted(true);
+      setFormState(prevState => ({
+        ...prevState,
+        name: authUser?.data?.user?.fullName || '',
+        email: authUser?.data?.user?.email || '',
+        subject: '',
+        message: '',
+      }))
+  
       // Reset success message after 5 seconds
       setTimeout(() => {
         setIsSubmitted(false);
       }, 5000);
-    }, 1500);
+    } catch (error) {
+      console.error('Error sending message:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   

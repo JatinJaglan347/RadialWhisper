@@ -33,6 +33,11 @@ export const useAuthStore = create((set, get) => ({
   isUpdatingRole: false,
   isUpdatingSuggestion: false,
   isDeletingSuggestion: false,
+  contacts: [],
+  isLoading: false,
+  isSubmitting: false,
+  isUpdating: false,
+
 
 
   // Function to check if the user is authenticated
@@ -434,7 +439,71 @@ fetchOpStats: async (range = 'daily') => {
 
 
 
+submitContact: async ({ name, email, subject, message, isExistingUser }) => {
+  set({ isSubmitting: true });
 
+  try {
+    const res = await axiosInstance.post("/api/v1/contact/submit", {
+      name,
+      email,
+      subject,
+      message,
+      isExistingUser,
+    });
+
+    toast.success("Contact request submitted successfully");
+    return res.data;
+  } catch (error) {
+    console.error("Error submitting contact:", error);
+    const errorMessage = error.response?.data?.message || "Failed to submit contact request";
+    toast.error(errorMessage);
+  } finally {
+    set({ isSubmitting: false });
+  }
+},
+
+// Fetch Contacts (Admin)
+fetchContacts: async ({ email, contactCompleted }) => {
+  set({ isLoading: true });
+
+  try {
+    let query = "/api/v1/contact/get";
+    if (email || contactCompleted !== undefined) {
+      query += `?${email ? `email=${email}&` : ""}${contactCompleted !== undefined ? `contactCompleted=${contactCompleted}` : ""}`;
+    }
+
+    const res = await axiosInstance.get(query);
+    set({ contacts: res.data.data });
+  } catch (error) {
+    console.error("Error fetching contacts:", error);
+    toast.error("Failed to fetch contacts");
+  } finally {
+    set({ isLoading: false });
+  }
+},
+
+// Update Contact Status (Admin)
+updateContactStatus: async (id, contactCompleted) => {
+  set({ isUpdating: true });
+
+  try {
+    await axiosInstance.put(`/api/v1/contact/update/${id}`, { contactCompleted });
+
+    // Optimistically update state
+    set((state) => ({
+      contacts: state.contacts.map((contact) =>
+        contact._id === id ? { ...contact, contactCompleted } : contact
+      ),
+    }));
+
+    toast.success("Contact status updated successfully");
+  } catch (error) {
+    console.error("Error updating contact status:", error);
+    toast.error("Failed to update contact status");
+  } finally {
+    set({ isUpdating: false });
+  }
+},
 
 
 

@@ -146,6 +146,7 @@ import ModerateUser from './components/ModerationComponents/ModerateUser.jsx';
 import ManageModeratorsPage from './pages/ModerationPages/ManageModeratorsPage.jsx';
 import ManageBansPage from './pages/ModerationPages/ManageBansPage.jsx';
 import ManageSuggestionsPage from './pages/ModerationPages/ManageSuggestionsPage.jsx';
+import ManageContactsPage from './pages/ModerationPages/ManageContactsPage.jsx';
 // import LandingNavbar from './componenst/MainWebPage/LandingNavbar.js';
 
 function App() {
@@ -321,10 +322,10 @@ function App() {
               /> */}
               
               {/* Contact Management */}
-              {/* <Route
+              <Route
                 path="contacts"
-                element={hasAdminAccess ? <ManageContactsPage /> : <Navigate to="/" />}
-              /> */}
+                element={hasAdminAccess ? <ManageContactsPage/> : <Navigate to="/" />}
+              />
               
               {/* Config/Rules Management */}
               <Route
