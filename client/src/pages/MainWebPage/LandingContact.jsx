@@ -12,9 +12,10 @@ const LandingContact = () => {
     name: '',
     email: '',
     subject: '',
-    message: ''
+    message: '',
+    isExistingUser: false,
   });
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -43,10 +44,12 @@ const LandingContact = () => {
       setFormState(prevState => ({
         ...prevState,
         name: user.fullName || '',
-        email: user.email || ''
+        email: user.email || '',
+        isExistingUser: true // Set to true if user is logged in
       }));
     }
   }, [authUser]);
+  
   
   
   const handleChange = (e) => {
@@ -201,29 +204,35 @@ const LandingContact = () => {
                     <div>
                       <label htmlFor="name" className="block text-sm font-medium mb-2">Your Name</label>
                       <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        value={formState.name}
-                        onChange={handleChange}
-                        required
-                        className="w-full bg-[#272829] border border-[#61677A] rounded-lg px-4 py-3 text-[#FFF6E0] placeholder-[#61677A] focus:outline-none focus:ring-2 focus:ring-[#FFF6E0]/50 transition-all"
-                        placeholder="John Doe"
-                      />
+  type="text"
+  id="name"
+  name="name"
+  value={formState.name}
+  onChange={handleChange}
+  required
+  disabled={formState.isExistingUser} // Disable field if user is logged in
+  className={`w-full bg-[#272829] border border-[#61677A] rounded-lg px-4 py-3 text-[#FFF6E0] placeholder-[#61677A] focus:outline-none focus:ring-2 focus:ring-[#FFF6E0]/50 transition-all ${
+    formState.isExistingUser ? 'opacity-50 cursor-not-allowed' : ''
+  }`}
+  placeholder="John Doe"
+/>
                     </div>
                     
                     <div>
                       <label htmlFor="email" className="block text-sm font-medium mb-2">Your Email</label>
                       <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={formState.email}
-                        onChange={handleChange}
-                        required
-                        className="w-full bg-[#272829] border border-[#61677A] rounded-lg px-4 py-3 text-[#FFF6E0] placeholder-[#61677A] focus:outline-none focus:ring-2 focus:ring-[#FFF6E0]/50 transition-all"
-                        placeholder="john@example.com"
-                      />
+  type="email"
+  id="email"
+  name="email"
+  value={formState.email}
+  onChange={handleChange}
+  required
+  disabled={formState.isExistingUser} // Disable field if user is logged in
+  className={`w-full bg-[#272829] border border-[#61677A] rounded-lg px-4 py-3 text-[#FFF6E0] placeholder-[#61677A] focus:outline-none focus:ring-2 focus:ring-[#FFF6E0]/50 transition-all ${
+    formState.isExistingUser ? 'opacity-50 cursor-not-allowed' : ''
+  }`}
+  placeholder="john@example.com"
+/>
                     </div>
                   </div>
                   
