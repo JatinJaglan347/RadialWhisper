@@ -37,7 +37,9 @@ export const useAuthStore = create((set, get) => ({
   isLoading: false,
   isSubmitting: false,
   isUpdating: false,
-
+  userInfoRules: null,
+  isLoading: false,
+  isUpdating: false,
 
 
   // Function to check if the user is authenticated
@@ -506,7 +508,41 @@ updateContactStatus: async (id, contactCompleted) => {
 },
 
 
+// Fetch User Info Rules
+fetchUserInfoRules: async (userId) => {
+  set({ isLoading: true });
 
+  try {
+    const res = await axiosInstance.post("/api/v1/op/user-info-rules", { userId });
+
+    set({ userInfoRules: res.data.data });
+    toast.success("User info rules fetched successfully");
+  } catch (error) {
+    console.error("Error fetching user info rules:", error);
+    const errorMessage = error.response?.data?.message || "Failed to fetch user info rules";
+    toast.error(errorMessage);
+  } finally {
+    set({ isLoading: false });
+  }
+},
+
+// Update User Info Rules
+updateUserInfoRules: async (updateData) => {
+  set({ isUpdating: true });
+
+  try {
+    const res = await axiosInstance.patch("/api/v1/op/update-user-info-rules", updateData);
+
+    set({ userInfoRules: res.data.data });
+    toast.success("User info rules updated successfully");
+  } catch (error) {
+    console.error("Error updating user info rules:", error);
+    const errorMessage = error.response?.data?.message || "Failed to update user info rules";
+    toast.error(errorMessage);
+  } finally {
+    set({ isUpdating: false });
+  }
+},
 
 
 

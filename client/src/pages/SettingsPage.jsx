@@ -114,6 +114,20 @@ const SettingPage = () => {
 
   return (
     <div className="min-h-screen bg-[#272829] py-8 px-4">
+
+
+      {/* Warning Banner */}
+<div className="container mx-auto max-w-6xl mb-6">
+  <div className="bg-amber-500/20 border border-amber-500/30 rounded-xl p-4 shadow-lg">
+    <div className="flex items-center gap-3">
+      <AlertTriangle size={24} className="text-amber-400 flex-shrink-0" />
+      <div>
+        <h3 className="font-medium text-amber-400">Development Notice</h3>
+        <p className="text-[#D8D9DA]">This settings page is currently under development. All functionality shown is for presentation purposes only.</p>
+      </div>
+    </div>
+  </div>
+</div>
       <div className="container mx-auto max-w-6xl">
         {/* Settings Header */}
         <div className="bg-[#272829] border border-[#61677A] rounded-xl shadow-xl p-6 mb-8">
