@@ -24,18 +24,32 @@ const createSuggestion = asyncHandler(async (req, res) => {
 });
 
 const getSuggestions = asyncHandler(async (req, res) => {
-    const suggestions = await Suggestion.find();
-    return res.status(200).json(new ApiResponse(200, suggestions, "Suggestions fetched successfully"));
+    try {
+        const suggestions = await Suggestion.find()
+            .populate("user", "_id uniqueTag fullName email profileImageURL") // Populating user with selected fields
+            .lean();
+
+        res.status(200).json(new ApiResponse(200, suggestions, "Suggestions fetched successfully"));
+    } catch (error) {
+        throw new ApiError(500, "Error fetching suggestions");
+    }
 });
+
 
 const getSuggestionById = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const suggestion = await Suggestion.findById(id);
+    
+    const suggestion = await Suggestion.findById(id)
+        .populate("user", "fullName email profileImageURL") // Fetch full user details
+        .lean();
+
     if (!suggestion) {
         throw new ApiError(404, "Suggestion not found");
     }
-    return res.status(200).json(new ApiResponse(200, suggestion, "Suggestion fetched successfully"));
+
+    res.status(200).json(new ApiResponse(200, suggestion, "Suggestion fetched successfully"));
 });
+
 
 const updateSuggestion = asyncHandler(async (req, res) => {
     const { id } = req.params;

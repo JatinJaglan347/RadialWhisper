@@ -145,6 +145,7 @@ import ManageUsersPage from './pages/ModerationPages/ManageUsersPage.jsx';
 import ModerateUser from './components/ModerationComponents/ModerateUser.jsx';
 import ManageModeratorsPage from './pages/ModerationPages/ManageModeratorsPage.jsx';
 import ManageBansPage from './pages/ModerationPages/ManageBansPage.jsx';
+import ManageSuggestionsPage from './pages/ModerationPages/ManageSuggestionsPage.jsx';
 // import LandingNavbar from './componenst/MainWebPage/LandingNavbar.js';
 
 function App() {
@@ -308,10 +309,10 @@ function App() {
               />
               
               {/* Suggestions Management */}
-              {/* <Route
+              <Route
                 path="suggestions"
-                element={hasAdminAccess ? <ManageSuggestionsPage /> : <Navigate to="/" />}
-              /> */}
+                element={hasAdminAccess ? <ManageSuggestionsPage/> : <Navigate to="/" />}
+              />
               
               {/* Reports Management */}
               {/* <Route
