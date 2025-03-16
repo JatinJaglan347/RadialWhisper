@@ -12,13 +12,16 @@ const ProfilePage = () => {
   const [fieldValue, setFieldValue] = useState("");
   const [fieldType, setFieldType] = useState("");
 
-  const handleEditClick = (field, value, type) => {
-    setEditField(field);
-    setFieldValue(value);
-    setFieldType(type);
-    setShowUpdateBox(true);
-  };
-
+  // In ProfilePage.jsx, add these logs in the handleEditClick function
+const handleEditClick = (field, value, type) => {
+  console.log('EditClick triggered:', { field, value, type });
+  console.log('userInfoRulesData:', userInfoRulesData); // Check if this data exists
+  console.log('Gender options:', userInfoRulesData?.genderList); // Check if gender list exists
+  setEditField(field);
+  setFieldValue(value);
+  setFieldType(type);
+  setShowUpdateBox(true);
+};
   console.count("Profile Page Render");
 
   const handleFieldUpdate = (newValue) => {
@@ -144,7 +147,7 @@ const ProfilePage = () => {
             <div className="flex items-center justify-between">
               <h2 className="text-4xl font-bold text-[#FFF6E0]">{fullName}</h2>
               <button
-                className="p-2 rounded-full hover:bg-[#FFF6E0]/10 transition-colors"
+                className="p-2 z-10 rounded-full hover:bg-[#FFF6E0]/10 transition-colors"
                 onClick={() => handleEditClick("Full Name", fullName, "text")}
               >
                 <Edit3 size={18} className="text-[#FFF6E0]" />
@@ -167,11 +170,11 @@ const ProfilePage = () => {
                     <span className="text-[#D8D9DA]">{gender}</span>
                   </div>
                   <button
-                    className="p-1 rounded-full hover:bg-[#FFF6E0]/10 transition-colors"
-                    onClick={() => handleEditClick("Gender", gender, "text")}
-                  >
-                    <Edit3 size={14} className="text-[#D8D9DA]" />
-                  </button>
+  className="p-1 rounded-full hover:bg-[#FFF6E0]/10 transition-colors"
+  onClick={() => handleEditClick("Gender", gender, "select")}
+>
+  <Edit3 size={14} className="text-[#D8D9DA]" />
+</button>
                 </div>
               </div>
               

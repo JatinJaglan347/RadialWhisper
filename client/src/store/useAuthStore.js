@@ -208,7 +208,7 @@ export const useAuthStore = create((set, get) => ({
   getUserInfoRules:async(data)=>{
     set({isGettingUserInfoRules:true});
     try{
-      const res = await axiosInstance.post('/api/v1/op/update-user-info-rules' ,data);
+      const res = await axiosInstance.patch('/api/v1/op/update-user-info-rules' ,data);
       console.log("Fetch UserInfor Rules");
       set({userInfoRulesData: res.data});
     }catch(err){
