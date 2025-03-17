@@ -32,16 +32,15 @@ const Navbar = () => {
     getUserDetails();
     if (authUser?.data?.user?.userRole === "king") {
       setKingOptin(true);
-      setAdminOptin(true);
-      setModeratorOptin(true);
+      
     } else if (authUser?.data?.user?.userRole === "admin") {
-      setKingOptin(false);
+      
       setAdminOptin(true);
-      setModeratorOptin(true);
+      
     } else if (authUser?.data?.user?.userRole === "moderator") {
-      setKingOptin(false);
+      
       setModeratorOptin(true);
-      setAdminOptin(false);
+      
     } else {
       setKingOptin(false);
       setAdminOptin(false);
@@ -124,7 +123,7 @@ const Navbar = () => {
               {kingOptin && (
                 <li>
                   <Link
-                    to="/king"
+                    to="/op/dashboard"
                     className="flex items-center text-[#FFF6E0] hover:bg-[#FFF6E0]/10"
                   >
                     <Crown size={16} className="text-[#FFF6E0]/70" />
@@ -146,7 +145,7 @@ const Navbar = () => {
               {moderatorOptin && (
                 <li>
                   <Link
-                    to="/moderator"
+                    to="/op/dashboard"
                     className="flex items-center text-[#FFF6E0] hover:bg-[#FFF6E0]/10"
                   >
                     <Scale size={16} className="text-[#FFF6E0]/70" />
@@ -244,7 +243,7 @@ const Navbar = () => {
               )}
               {kingOptin && (
                 <Link
-                  to="/king"
+                  to="/op/dashboard"
                   className="flex items-center px-4 py-2 text-[#FFF6E0] hover:bg-[#FFF6E0]/10 transition-colors"
                 >
                   <Crown size={16} className="mr-2 text-[#FFF6E0]/70" />
@@ -262,7 +261,7 @@ const Navbar = () => {
               )}
               {moderatorOptin && (
                 <Link
-                  to="/moderator"
+                  to="/op/dashboard"
                   className="flex items-center px-4 py-2 text-[#FFF6E0] hover:bg-[#FFF6E0]/10 transition-colors"
                 >
                   <Scale size={16} className="mr-2 text-[#FFF6E0]/70" />

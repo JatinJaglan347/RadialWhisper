@@ -6,6 +6,6 @@ import {verifyAdminRole} from "../middlewares/role.middleware.js";
 const router = Router();
 
 router.route("/user-info-rules").post(verifyJWT,getUserInfoRules)
-router.route("/update-user-info-rules").patch(verifyJWT,verifyAdminRole,updateUserInfoRules)
+router.route("/update-user-info-rules").patch(verifyJWT,updateUserInfoRules)
 
 export default router

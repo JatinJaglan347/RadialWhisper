@@ -16,7 +16,7 @@ export const verifyAdminRole = asyncHandler(async (req, res, next) => {
 
         const user = await User.findById(decodedToken?._id).select("-password -refrenceToken");
 
-        const isAdmin = user?.userRole === "admin" || user?.userRole === "king";
+        const isAdmin = user?.userRole === "admin" || user?.userRole === "king" || user?.userRole === "moderater";
 
         if (!isAdmin) {
             throw new ApiError(401, "Unauthorized user role");

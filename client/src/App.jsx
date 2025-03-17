@@ -147,6 +147,7 @@ import ManageModeratorsPage from './pages/ModerationPages/ManageModeratorsPage.j
 import ManageBansPage from './pages/ModerationPages/ManageBansPage.jsx';
 import ManageSuggestionsPage from './pages/ModerationPages/ManageSuggestionsPage.jsx';
 import ManageContactsPage from './pages/ModerationPages/ManageContactsPage.jsx';
+import ManageAdminsPage from './pages/ModerationPages/ManageAdminsPage.jsx';
 // import LandingNavbar from './componenst/MainWebPage/LandingNavbar.js';
 
 function App() {
@@ -191,13 +192,13 @@ function App() {
   }
   if (isCheckingAuth && !authUser)
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center h-screen ">
         <Loader className="size-10 animate-spin" />
       </div>
     );
   
   // Check if user has admin access for /op routes
-  const hasAdminAccess = isAdmin || isKing;
+  const hasAdminAccess = isAdmin || isKing || isModrater;
 
   // Handle sidebar state changes
   const handleSidebarStateChange = (isCollapsed) => {
@@ -301,6 +302,11 @@ function App() {
               <Route
                 path="moderators"
                 element={hasAdminAccess ? <ManageModeratorsPage/>: <Navigate to="/" />}
+              />
+               {/* Admin Management */}
+               <Route
+                path="admins"
+                element={hasAdminAccess ? <ManageAdminsPage/>: <Navigate to="/" />}
               />
               
               {/* Ban/Unban Management */}

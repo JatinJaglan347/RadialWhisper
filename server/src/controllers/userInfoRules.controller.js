@@ -32,8 +32,13 @@ const getUserInfoRules = asyncHandler(async (req, res) => {
         throw new ApiError(404, "User info rules not found");
     }
 
+    let genderArray = [];
+    if (userInfoRules.genderList && userInfoRules.genderList.length > 0) {
+        genderArray = Object.values(userInfoRules.genderList[0]);
+    }
+
     // Respond with the rules in a structured format
-    res.status(200).json(new ApiResponse(200, userInfoRules ,"User info rules fetched successfully"));
+    res.status(200).json(new ApiResponse(200, { ...userInfoRules.toObject(), genderList: genderArray }, "User info rules fetched successfully"));
 });
 
 const updateUserInfoRules = asyncHandler(async (req, res) => {

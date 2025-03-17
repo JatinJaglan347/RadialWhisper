@@ -13,7 +13,7 @@ const ModerateUser = () => {
     isSearchingUser,
     banUnbanUser,
     isUpdatingBanStatus,
-    promoteDemoteUser,
+   promoteDemoteToModerator,
     isUpdatingRole
   } = useAuthStore();
   const navigate = useNavigate();
@@ -79,7 +79,7 @@ const ModerateUser = () => {
         actionBy: localStorage.getItem('userId') ,
       };
       
-      await promoteDemoteUser(data);
+      await promoteDemoteToModerator(data);
       
       // Refresh user data after role change
       adminSearchUser({ email: searchedUser.email });

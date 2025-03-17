@@ -337,7 +337,7 @@ const adminSearchUser = asyncHandler(async (req, res) => {
 });
 
 
-const promoteDemoteUser = asyncHandler(async (req, res) => {
+const promoteDemoteToModerator = asyncHandler(async (req, res) => {
     const { input, promote,  } = req.body;
 
     if (!input) {
@@ -377,4 +377,45 @@ const promoteDemoteUser = asyncHandler(async (req, res) => {
 });
 
 
-export {banUnbanUser,getAdminStats ,getUsers , adminSearchUser , promoteDemoteUser};
+const promoteDemoteToAdmin = asyncHandler(async (req, res) => {
+  const { input, promote } = req.body;
+
+  if (!input) {
+      throw new ApiError(400, "Email or UniqueTag is required");
+  }
+
+  if (typeof promote !== "boolean") {
+      throw new ApiError(400, "Promote field must be a boolean (true/false)");
+  }
+
+  // Find the user by email or uniqueTag
+  const user = await User.findOne({
+      $or: [{ email: input }, { uniqueTag: input }]
+  }).select("-password -refreshToken");
+
+  if (!user) {
+      throw new ApiError(404, "User not found");
+  }
+
+  // Promoting to Admin: Allowed from both normalUser and moderator
+  if (promote && user.userRole === "admin") {
+      throw new ApiError(400, "User is already an admin");
+  }
+
+  // Demoting from Admin: Allowed only if user is an admin
+  if (!promote && user.userRole !== "admin") {
+      throw new ApiError(400, "Only admins can be demoted");
+  }
+
+  // Determine new role
+  const newRole = promote ? "admin" : "normalUser"; // Admin promotion, or demotion to normalUser
+
+  // Update user role
+  user.userRole = newRole;
+  await user.save();
+
+  res.json(new ApiResponse(200, `User ${promote ? "promoted to admin" : "demoted to normal user"} successfully`, { user }));
+});
+
+
+export {banUnbanUser,getAdminStats ,getUsers , adminSearchUser , promoteDemoteToModerator ,promoteDemoteToAdmin};

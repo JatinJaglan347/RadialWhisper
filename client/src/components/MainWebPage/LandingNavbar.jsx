@@ -20,18 +20,17 @@ const LandingNavbar = () => {
     // Set user role options based on the user role
     if (authUser?.data?.user?.userRole === 'king') {
       setKingOptin(true);
-      setAdminOptin(true);
-      setModeratorOptin(true);
+      
     }
     else if (authUser?.data?.user?.userRole === 'admin') {
-      setKingOptin(false);
+
       setAdminOptin(true);
-      setModeratorOptin(true);
+      
     }
     else if (authUser?.data?.user?.userRole === 'moderator') {
-      setKingOptin(false);
+
       setModeratorOptin(true);
-      setAdminOptin(false);
+     
     } else {
       setKingOptin(false);
       setAdminOptin(false);
@@ -83,7 +82,7 @@ const LandingNavbar = () => {
                 >
                   {kingOptin && (
                     <li>
-                      <Link to="/king">
+                      <Link to="/op/dashboard">
                         <Crown className="w-5 h-5" />KingPanal
                       </Link>
                     </li>
@@ -97,7 +96,7 @@ const LandingNavbar = () => {
                   )}
                   {moderatorOptin && (
                     <li>
-                      <Link to="/moderator">
+                      <Link to="/op/dashboard">
                         <Scale className="w-5 h-5"/>Moderate
                       </Link>
                     </li>
@@ -157,13 +156,13 @@ const LandingNavbar = () => {
             {authUser ? (
               <>
                 {kingOptin && (
-                  <Link to="/king" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">King Panel</Link>
+                  <Link to="/op/dashboard" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">King Panel</Link>
                 )}
                 {adminOptin && (
                   <Link to="/op/dashboard" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Admin Panel</Link>
                 )}
                 {moderatorOptin && (
-                  <Link to="/moderator" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Moderate</Link>
+                  <Link to="/op/dashboard" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Moderate</Link>
                 )}
                 <Link to="/chat/profile" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Profile</Link>
                 <Link to="/chat/settings" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Settings</Link>

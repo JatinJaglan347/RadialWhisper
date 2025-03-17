@@ -83,7 +83,8 @@ const handleEditClick = (field, value, type) => {
     genderIcon = "🚺";
   } else if (gender === "Transgender") {
     genderIcon = "🏳️‍⚧️";
-  } else {
+  } 
+  else {
     genderIcon = "🏳️‍🌈";
   }
 
