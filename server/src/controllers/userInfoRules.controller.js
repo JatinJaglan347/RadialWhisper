@@ -73,4 +73,32 @@ for (let field in updateData) {
 })
 
 
-export { getUserInfoRules , updateUserInfoRules };
+const getPublicUserInfoRules = asyncHandler(async (req, res) => {
+  // Fetch the user info rules document
+  const userInfoRules = await UserInfoRules.findOne();
+
+  // If no rules are found, return a 404 error
+  if (!userInfoRules) {
+      throw new ApiError(404, "User info rules not found");
+  }
+
+  // Extract gender list properly
+  let genderArray = [];
+  if (userInfoRules.genderList && userInfoRules.genderList.length > 0) {
+      genderArray = Object.values(userInfoRules.genderList[0]);
+  }
+
+  // Respond with the rules in a structured format
+  res.status(200).json(
+      new ApiResponse(200, { 
+          ...userInfoRules.toObject(), 
+          genderList: genderArray 
+      }, "User info rules fetched successfully")
+  );
+});
+
+
+
+
+
+export { getUserInfoRules , updateUserInfoRules,getPublicUserInfoRules };

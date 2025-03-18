@@ -236,7 +236,7 @@ export const useAuthStore = create((set, get) => ({
   getUserInfoRules:async(data)=>{
     set({isGettingUserInfoRules:true});
     try{
-      const res = await axiosInstance.patch('/api/v1/op/update-user-info-rules' ,data);
+      const res = await axiosInstance.post('/api/v1/op/user-info-rules' ,data);
       console.log("Fetch UserInfor Rules");
       set({userInfoRulesData: res.data});
     }catch(err){
@@ -590,6 +590,25 @@ updateUserInfoRules: async (updateData) => {
     set({ isUpdating: false });
   }
 },
+
+
+fetchPublicUserInfoRules: async () => {
+  set({ isLoading: true });
+
+  try {
+    const res = await axiosInstance.get("/api/v1/op/public-user-info-rules");
+
+    set({ userInfoRules: res.data.data });
+    toast.success("Public user info rules fetched successfully");
+  } catch (error) {
+    console.error("Error fetching public user info rules:", error);
+    const errorMessage = error.response?.data?.message || "Failed to fetch public user info rules";
+    toast.error(errorMessage);
+  } finally {
+    set({ isLoading: false });
+  }
+},
+
 
 
 

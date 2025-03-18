@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Mail,
   Lock,
@@ -32,68 +32,58 @@ function SignUpPage() {
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [isGenderDropdownOpen, setIsGenderDropdownOpen] = useState(false);
 
-  const { signup, isSigningUp } = useAuthStore();
+  // Get the auth store functions and state
+  const { signup, isSigningUp, fetchPublicUserInfoRules, userInfoRules, isLoading } = useAuthStore();
 
-  const genderOptions = [
-    "Male",
-    "Female",
-    "Non-binary",
-    "Genderfluid",
-    "Agender",
-    "Transgender",
-    "Intersex",
-    "Attack Helicopter",
-    "Cloud",
-    "Pussy(cat)",
-    "The Internet",
-    "Penguin in a Suit",
-    "Cock(male chicken)",
-    "Supercar",
-    "Tank",
-    "Pookie",
-    "Mig-31",
-    "usb cable 1m",
-    "USB CABLE 1.5M",
-  ];
+  // Fetch user info rules on component mount
+  useEffect(() => {
+    fetchPublicUserInfoRules();
+  }, [fetchPublicUserInfoRules]);
 
-  // Define bio options
-  const bioOptions = [
-    "Adventurous",
-    "Bookworm",
-    "Foodie",
-    "Fitness Enthusiast",
-    "Tech Geek",
-    "Music Lover",
-    "Travel Junkie",
-    "Nature Lover",
-    "Pet Friendly",
-    "Night Owl",
-    "Early Bird",
-    "Movie Buff",
-    "Art Enthusiast",
-    "Gamer",
-  ];
+  // Get the values from the API response
+  const genderOptions = userInfoRules?.genderList || [];
+  const bioOptions = userInfoRules?.bio?.options || [];
+  const bioSelectionLimit = userInfoRules?.bio?.selectionLimit || 6;
+  const nameMinLength = userInfoRules?.fullName?.minLength || 3;
+  const nameMaxLength = userInfoRules?.fullName?.maxLength || 44;
+  const passwordRules = userInfoRules?.password || {
+    minCharLength: 8,
+    requireUpperCase: true,
+    requireNumber: true,
+    requireSpecialChar: true
+  };
+  const ageRules = userInfoRules?.dateOfBirth || {
+    minAge: 18,
+    maxAge: 100
+  };
 
   const handleBioSelection = (option) => {
     let selectedOptions = [...formData.bio];
     if (selectedOptions.includes(option)) {
       // Remove the option if it's already selected
       selectedOptions = selectedOptions.filter((item) => item !== option);
-    } else if (selectedOptions.length < 6) {
+    } else if (selectedOptions.length < bioSelectionLimit) {
       // Add the option if it's not already selected and limit is not reached
       selectedOptions.push(option);
     } else {
-      toast.error("You can select up to 6 fields only.");
+      toast.error(`You can select up to ${bioSelectionLimit} fields only.`);
     }
     setFormData({ ...formData, bio: selectedOptions });
   };
 
   const validateForm = () => {
+    // Validate name
     if (!formData.fullName.trim()) {
       toast.error("Full name is required");
       return false;
     }
 
+    if (formData.fullName.length < nameMinLength || formData.fullName.length > nameMaxLength) {
+      toast.error(`Full name must be between ${nameMinLength} and ${nameMaxLength} characters`);
+      return false;
+    }
+
+    // Validate email
     if (!formData.email.trim()) {
       toast.error("Email is required");
       return false;
@@ -104,26 +94,71 @@ function SignUpPage() {
       return false;
     }
 
+    // Validate password
     if (!formData.password.trim()) {
       toast.error("Password is required");
       return false;
     }
 
+    if (formData.password.length < passwordRules.minCharLength) {
+      toast.error(`Password must be at least ${passwordRules.minCharLength} characters long`);
+      return false;
+    }
+
+    if (passwordRules.requireUpperCase && !/[A-Z]/.test(formData.password)) {
+      toast.error("Password must contain at least one uppercase letter");
+      return false;
+    }
+
+    if (passwordRules.requireNumber && !/[0-9]/.test(formData.password)) {
+      toast.error("Password must contain at least one number");
+      return false;
+    }
+
+    if (passwordRules.requireSpecialChar && !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password)) {
+      toast.error("Password must contain at least one special character");
+      return false;
+    }
+
+    // Validate gender
     if (!formData.gender.trim()) {
       toast.error("Gender is required");
       return false;
     }
 
+    // Validate date of birth
     if (!formData.dateOfBirth.trim()) {
       toast.error("Date of birth is required");
       return false;
     }
 
+    // Validate age
+    const birthDate = new Date(formData.dateOfBirth);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+
+    if (age < ageRules.minAge) {
+      toast.error(`You must be at least ${ageRules.minAge} years old to register`);
+      return false;
+    }
+
+    if (age > ageRules.maxAge) {
+      toast.error(`Age cannot exceed ${ageRules.maxAge} years`);
+      return false;
+    }
+
+    // Validate bio
     if (formData.bio.length === 0) {
       toast.error("Please select at least one bio field");
       return false;
     }
 
+    // Validate location
     if (
       useLiveLocation &&
       (!formData.currentLocation.latitude ||
@@ -262,6 +297,16 @@ function SignUpPage() {
         </div>
       )}
 
+      {/* Loading state */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-[#272829]/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="flex flex-col items-center">
+            <Loader2 className="h-10 w-10 text-[#FFF6E0] animate-spin" />
+            <p className="mt-4 text-[#FFF6E0] text-lg">Loading form data...</p>
+          </div>
+        </div>
+      )}
+
       {/* Content */}
       <div className="w-full max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-8 relative z-10 overflow-y-auto">
         <div className="text-center mb-6 sm:mb-8">
@@ -302,6 +347,9 @@ function SignUpPage() {
               <label className="text-xs sm:text-sm font-medium text-[#D8D9DA] mb-1 sm:mb-2 flex items-center">
                 <User className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 text-[#FFF6E0]/70" />
                 <span>Full Name</span>
+                <span className="ml-1 text-xs text-[#FFF6E0]/50">
+                  ({nameMinLength}-{nameMaxLength} chars)
+                </span>
               </label>
               <div className="relative">
                 <input
@@ -363,6 +411,14 @@ function SignUpPage() {
                   )}
                 </button>
               </div>
+              <div className="mt-1 text-xs text-[#FFF6E0]/50">
+                <ul className="list-disc ml-4">
+                  <li>At least {passwordRules.minCharLength} characters</li>
+                  {passwordRules.requireUpperCase && <li>One uppercase letter</li>}
+                  {passwordRules.requireNumber && <li>One number</li>}
+                  {passwordRules.requireSpecialChar && <li>One special character</li>}
+                </ul>
+              </div>
             </div>
 
             {/* Gender */}
@@ -392,7 +448,7 @@ function SignUpPage() {
                 </div>
                 <div className="absolute inset-0 border border-[#FFF6E0]/5 rounded-xl pointer-events-none"></div>
 
-                {isGenderDropdownOpen && (
+                {isGenderDropdownOpen && genderOptions.length > 0 && (
                   <div className="absolute z-20 mt-1 w-full py-2 bg-[#31333A] border border-[#61677A]/50 rounded-xl shadow-2xl max-h-36 sm:max-h-48 overflow-y-auto">
                     {genderOptions.map((gender, index) => (
                       <div
@@ -416,6 +472,9 @@ function SignUpPage() {
               <label className="text-xs sm:text-sm font-medium text-[#D8D9DA] mb-1 sm:mb-2 flex items-center">
                 <Calendar className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 text-[#FFF6E0]/70" />
                 <span>Date of Birth</span>
+                <span className="ml-1 text-xs text-[#FFF6E0]/50">
+                  (Age: {ageRules.minAge}-{ageRules.maxAge})
+                </span>
               </label>
               <div className="relative">
                 <input
@@ -432,9 +491,9 @@ function SignUpPage() {
             {/* Bio */}
             <div className="form-control col-span-1 sm:col-span-2">
               <label className="text-xs sm:text-sm font-medium text-[#D8D9DA] mb-2 sm:mb-3 flex items-center">
-                <span>Choose up to 6 fields that describe you</span>
+                <span>Choose up to {bioSelectionLimit} fields that describe you</span>
                 <span className="ml-2 text-xs text-[#FFF6E0]/50">
-                  ({formData.bio.length}/6 selected)
+                  ({formData.bio.length}/{bioSelectionLimit} selected)
                 </span>
               </label>
               <div className="flex flex-wrap gap-1.5 sm:gap-2">
@@ -500,7 +559,7 @@ function SignUpPage() {
           {/* Submit button */}
           <button
             type="submit"
-            disabled={isSigningUp}
+            disabled={isSigningUp || isLoading}
             className="group relative overflow-hidden w-full bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] hover:from-[#D8D9DA] hover:to-[#FFF6E0] text-[#272829] border-none px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-xl font-medium transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl mt-6 sm:mt-8"
           >
             <span className="relative z-10 flex items-center justify-center font-semibold text-sm sm:text-base">
