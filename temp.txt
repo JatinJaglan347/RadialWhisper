@@ -11,6 +11,7 @@ radial-whisper/
 │  │  │  │  ├─ LandingViewSuggestions .jsx
 │  │  │  │  └─ LandingWriteSuggestion.jsx
 │  │  │  ├─ ModerationComponents/
+│  │  │  │  ├─ ModerateUser.jsx
 │  │  │  │  └─ ModerationNavbar.jsx
 │  │  │  ├─ Loader.jsx
 │  │  │  ├─ Loading.jsx
@@ -27,12 +28,17 @@ radial-whisper/
 │  │  │  │  └─ LandingSuggestion.jsx
 │  │  │  ├─ ModerationPages/
 │  │  │  │  ├─ ConfigRulesPage.jsx
-│  │  │  │  └─ DashboardPage.jsx
+│  │  │  │  ├─ DashboardPage.jsx
+│  │  │  │  ├─ ManageAdminsPage.jsx
+│  │  │  │  ├─ ManageBansPage.jsx
+│  │  │  │  ├─ ManageContactsPage.jsx
+│  │  │  │  ├─ ManageModeratorsPage.jsx
+│  │  │  │  ├─ ManageSuggestionsPage.jsx
+│  │  │  │  └─ ManageUsersPage.jsx
 │  │  │  ├─ HomePage.jsx
 │  │  │  ├─ LoginPage.jsx
 │  │  │  ├─ NotFoundPage.jsx
 │  │  │  ├─ ProfilePage.jsx
-│  │  │  ├─ SettingPage.jsx
 │  │  │  ├─ SettingsPage.jsx
 │  │  │  └─ SignUpPage.jsx
 │  │  ├─ store/
@@ -56,10 +62,12 @@ radial-whisper/
 │  ├─ src/
 │  │  ├─ controllers/
 │  │  │  ├─ configurations.controller.js
+│  │  │  ├─ contact.controller.js
 │  │  │  ├─ manageUser.controller.js
 │  │  │  ├─ nearbyUsers.controller.js
 │  │  │  ├─ socket.controller.js
 │  │  │  ├─ suggestions.controller.js
+│  │  │  ├─ updateUserField.controller.js
 │  │  │  ├─ user.controller.js
 │  │  │  ├─ userDetails.controller.js
 │  │  │  ├─ userDetailUpdate.controller.js
@@ -72,15 +80,18 @@ radial-whisper/
 │  │  ├─ models/
 │  │  │  ├─ activeUserSnapshot.model.js
 │  │  │  ├─ chatMessage.model.js
+│  │  │  ├─ contact.model.js
 │  │  │  ├─ socketStats.model.js
 │  │  │  ├─ suggestion.model.js
 │  │  │  ├─ user.model.js
 │  │  │  └─ userInfoRules.model.js
 │  │  ├─ routes/
+│  │  │  ├─ contact.routes.js
 │  │  │  ├─ infoUpdate.router.js
 │  │  │  ├─ manageUser.route.js
 │  │  │  ├─ socket.routes.js
 │  │  │  ├─ suggestion.route.js
+│  │  │  ├─ updateUserField.routes.js
 │  │  │  ├─ user.router.js
 │  │  │  └─ userInfoRules.router.js
 │  │  ├─ scheduler/
@@ -99,5 +110,6 @@ radial-whisper/
 │  ├─ .prettierrc
 │  ├─ package-lock.json
 │  └─ package.json
+├─ LICENCE
 ├─ README.md
 └─ temp.txt

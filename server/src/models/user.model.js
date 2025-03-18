@@ -135,16 +135,21 @@ const userSchema = new Schema({
       updatedAt: {
         type: Date,
       },
-      onscreen: {
-        current:{
-          type: Boolean,
-          default: false,
-        },
-        lastOnscreen: {
-          type: Date,
-        }
+      // onscreen: {
+      //   current:{
+      //     type: Boolean,
+      //     default: false,
+      //   },
+      //   lastOnscreen: {
+      //     type: Date,
+      //   }
         
-         // Indicates if the user is currently active on the site
+      // },
+
+
+      activeStatus: {
+        isActive: { type: Boolean, default: false },
+        lastActive: { type: Date, default: Date.now }
       },
       banned: {
         current: {
