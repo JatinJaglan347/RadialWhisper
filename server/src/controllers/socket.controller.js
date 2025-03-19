@@ -1,5 +1,6 @@
 // server/src/socket/socket.controller.js
 import { ChatMessage } from "../models/chatMessage.model.js";
+import { User } from "../models/user.model.js"; // Import the User model
 
 const connectedUsers = new Map(); 
 const activeChats = new Map(); 
@@ -95,7 +96,6 @@ export async function joinChat(socket, data, io) {
   console.log(`Chat started in room ${roomId} between ${socket.userId} and ${data.targetUserId}`);
 }
 
-
 export async function handleMessage(socket, data, io) {
   if (!data.roomId || !data.message) {
     socket.emit("error", { message: "Invalid message data" });
@@ -163,7 +163,7 @@ export async function handleMessage(socket, data, io) {
         count: unreadCount
       });
 
-      // Important: Emit a separate messageDelivered event with updated status
+      // Emit a separate messageDelivered event with updated status
       const deliveredMessage = {
         messageId: newMessage._id,
         room: roomId,
@@ -173,13 +173,11 @@ export async function handleMessage(socket, data, io) {
       console.log("Message marked as delivered:", newMessage._id);
     }
  
-  }
-   catch (error) {
+  } catch (error) {
     console.error("Error saving message to DB:", error);
     socket.emit("error", { message: "Failed to send message" });
   }
 }
-
 
 export async function markMessagesAsRead(socket, data, io) {
   if (!data.roomId) {
@@ -210,7 +208,7 @@ export async function markMessagesAsRead(socket, data, io) {
       { 
         roomId: roomId,
         sender: sender,
-        status: { $ne: 'read' } // Only update messages that aren't already read
+        status: { $ne: 'read' }
       },
       { 
         $set: { status: 'read' } 
@@ -254,8 +252,8 @@ export function leaveChat(socket, data, io) {
   if (user) {
     user.activeChatRoom = null;
   }
-   // Check if the room is empty and remove it from activeRooms
-   if (!io.sockets.adapter.rooms.has(data.roomId)) {
+  // Check if the room is empty and remove it from activeRooms
+  if (!io.sockets.adapter.rooms.has(data.roomId)) {
     activeRooms.delete(data.roomId);
   }
   
@@ -264,9 +262,9 @@ export function leaveChat(socket, data, io) {
     userId: socket.userId, 
     message: "User has left the chat" 
   });
-
 }
-export function disconnect(socket, io) {
+
+export async function disconnect(socket, io) {
   const userId = socket.userId;
   if (userId && connectedUsers.has(userId)) {
     const user = connectedUsers.get(userId);
@@ -278,30 +276,53 @@ export function disconnect(socket, io) {
     }
     activeSockets.delete(socket.id);
     connectedUsers.delete(userId);
+    // **Update the database to mark the user as inactive**
+    try {
+      await User.findByIdAndUpdate(userId, {
+        activeStatus: { isActive: false, lastActive: new Date() }
+      });
+      console.log(`User ${userId} marked inactive in database on disconnect.`);
+    } catch (err) {
+      console.error("Error updating user inactive status on disconnect:", err);
+    }
   }
   console.log("Client disconnected:", socket.id);
 }
 
-
-
-export function initSocket (io)  {
+export function initSocket(io)  {
   io.on("connection", (socket) => {
       console.log(`User connected: ${socket.id}`);
       activeSockets.add(socket.id);
+
+      socket.on("registerUser", (data) => {
+        registerUser(socket, data);
+      });
 
       socket.on("join_room", (room) => {
           socket.join(room);
           activeRooms.add(room);
           console.log(`User joined room: ${room}`);
       });
+      
+      // Listen for userInactive event and update the DB
+      socket.on("userInactive", async (data) => {
+        console.log(`Socket Event: User ${data.userId} is inactive via socket`);
+        try {
+          await User.findByIdAndUpdate(data.userId, {
+            activeStatus: { isActive: false, lastActive: new Date() }
+          });
+          console.log(`User ${data.userId} marked inactive in database via socket event.`);
+        } catch (err) {
+          console.error("Error updating user inactive status via socket event:", err);
+        }
+      });
 
       socket.on("disconnect", () => {
           console.log(`User disconnected: ${socket.id}`);
-          
           activeSockets.delete(socket.id);
           if (socket.userId) {
             connectedUsers.delete(socket.userId);
-        }
+          }
       });
   });
 };
@@ -312,4 +333,3 @@ export function getSocketStats() {
     activeRooms: activeRooms.size,
   };
 }
-

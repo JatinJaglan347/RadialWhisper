@@ -256,11 +256,11 @@ export const useAuthStore = create((set, get) => ({
 
   // Method to update user's active status with debouncing to avoid too many updates
 // In your updateActivityStatus function in useAuthStore.js:
+// In client/src/store/useAuthStore.js (within your create store)
 updateActivityStatus: async (isActive, lastActive) => {
   console.log(`Setting status: isActive=${isActive}, lastActive=${lastActive}`);
   set({ isActive, lastActive });
   
-  // Only send update to server if user is authenticated
   const { authUser } = get();
   if (authUser?.data?.user?._id) {
     try {
@@ -276,6 +276,7 @@ updateActivityStatus: async (isActive, lastActive) => {
     }
   }
 },
+
 
 
 

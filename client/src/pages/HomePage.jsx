@@ -2,8 +2,10 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import toast from 'react-hot-toast';
 import { MessageCircle, Send, RefreshCw } from 'lucide-react';
+import { useUserActivity } from '../hooks/useUserActivity';
 
 const HomePage = () => {
+  useUserActivity();
   const { 
     authUser, 
     fetchNearbyUsers, 

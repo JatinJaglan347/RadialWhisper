@@ -8,6 +8,8 @@ import { registerUser, joinChat, handleMessage, disconnect, markMessagesAsRead }
  */
 export function initializeSocket(server) {
   const io = new Server(server, {
+    pingInterval: 30000, // 30 seconds between pings
+  pingTimeout: 5000,   // 5 seconds to receive a pong response
     cors: {
       origin: process.env.CORS_ORIGIN || "*", // Allow all origins for testing
       methods: ["GET", "POST"],
