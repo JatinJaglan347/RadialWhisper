@@ -29,10 +29,12 @@ import opRouter from './routes/userInfoRules.router.js';
 import manageUserRouter from './routes/manageUser.route.js';
 import suggestionRouter from './routes/suggestion.route.js';
 import contact from './routes/contact.routes.js'
+import activityStatus from './routes/activityStatus.routes.js'
 
 // Routes declaration
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/user", updateUserFieldRouter);
+app.use("/api/v1/user", activityStatus);
 app.use("/api/v1/update", updateRouter);
 app.use("/api/v1/op", opRouter);
 app.use("/api/v1/op", manageUserRouter );

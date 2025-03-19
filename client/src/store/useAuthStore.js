@@ -6,6 +6,7 @@ import { io } from 'socket.io-client'
 
 
 
+
 export const useAuthStore = create((set, get) => ({
   authUser: null,
   isAdmin: false,
@@ -34,12 +35,15 @@ export const useAuthStore = create((set, get) => ({
   isUpdatingSuggestion: false,
   isDeletingSuggestion: false,
   contacts: [],
-  isLoading: false,
   isSubmitting: false,
   isUpdating: false,
   userInfoRules: null,
   isLoading: false,
   
+
+  user: null,
+  isActive: false,
+  lastActive: null,
 
 
   // Function to check if the user is authenticated
@@ -72,6 +76,7 @@ export const useAuthStore = create((set, get) => ({
     } finally {
       set({ isCheckingAuth: false });
     }
+   
   },
 
   checkOpUser:()=>{
@@ -147,6 +152,7 @@ export const useAuthStore = create((set, get) => ({
 
   logout: async () => {
     try {
+      await get().updateActivityStatus(false, new Date());
       await axiosInstance.post("/api/v1/user/logout");
       toast.success("Logged out successfully");
   
@@ -176,7 +182,7 @@ export const useAuthStore = create((set, get) => ({
         socket.disconnect();
         set({ socket: null });
       }
-  
+      
       // Navigate to login page
       setTimeout(() => {
         window.location.href = "/login";
@@ -247,6 +253,29 @@ export const useAuthStore = create((set, get) => ({
       set({isGettingUserInfoRules:false});
     }
   },
+
+  // Method to update user's active status with debouncing to avoid too many updates
+// In your updateActivityStatus function in useAuthStore.js:
+updateActivityStatus: async (isActive, lastActive) => {
+  console.log(`Setting status: isActive=${isActive}, lastActive=${lastActive}`);
+  set({ isActive, lastActive });
+  
+  // Only send update to server if user is authenticated
+  const { authUser } = get();
+  if (authUser?.data?.user?._id) {
+    try {
+      console.log(`Sending activity update to server: ${isActive}`);
+      await axiosInstance.post('/api/v1/user/update-activity', {
+        userId: authUser.data.user._id,
+        isActive,
+        lastActive: lastActive || new Date()
+      });
+      console.log('Activity status updated successfully');
+    } catch (error) {
+      console.error('Failed to update activity status:', error);
+    }
+  }
+},
 
 
 
