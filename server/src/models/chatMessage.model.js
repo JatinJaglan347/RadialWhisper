@@ -8,7 +8,7 @@ const chatMessageSchema = new Schema({
   recipient: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   message: { type: String, required: true },
   status: { type: String, enum: ['sent', 'delivered', 'read'], default: 'sent' },
-  createdAt: { type: Date, default: Date.now, index: { expires: '24h' } }
+  createdAt: { type: Date, default: Date.now}
 });
 
 export const ChatMessage = mongoose.model('ChatMessage', chatMessageSchema);

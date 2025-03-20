@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import toast from 'react-hot-toast';
-import { MessageCircle, Send, RefreshCw } from 'lucide-react';
+import { MessageCircle, Send, RefreshCw,CheckCheck , Check } from 'lucide-react';
 import { useUserActivity } from '../hooks/useUserActivity';
 
 const HomePage = () => {
@@ -29,6 +29,7 @@ const HomePage = () => {
   const messagesEndRef = useRef(null);
   const isInitialFetchDone = useRef(false);
   const activeChatUserRef = useRef(activeChatUser);
+  const [onlineUsers, setOnlineUsers] = useState({});
 
 
 
@@ -43,6 +44,33 @@ const HomePage = () => {
     // Format: HH:MM AM/PM
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
+
+useEffect(() => {
+  if (!socket) return;
+
+  const handleUserOnline = (userId) => {
+    setOnlineUsers((prev) => ({ ...prev, [userId]: true }));
+  };
+
+  const handleUserOffline = (userId) => {
+    setOnlineUsers((prev) => {
+      const updatedUsers = { ...prev };
+      delete updatedUsers[userId];
+      return updatedUsers;
+    });
+  };
+
+  socket.on("userOnline", handleUserOnline);
+  socket.on("userOffline", handleUserOffline);
+
+  return () => {
+    socket.off("userOnline", handleUserOnline);
+    socket.off("userOffline", handleUserOffline);
+  };
+}, [socket]);
+  
+
+
 
   
   // Update ref whenever activeChatUser changes
@@ -581,43 +609,41 @@ return (
           {arrayOfNearbyUserData.length > 0 && (
             <div className="space-y-3">
               {arrayOfNearbyUserData.map((user, index) => {
-                const unreadCount = unreadMessages[user._id] || 0;
-                return (
-                  <div
-                    key={user._id}
-                    className={`flex items-center p-4 rounded-xl cursor-pointer transition-all duration-300 transform ${
-                      activeChatUser?._id === user._id 
-                        ? 'bg-gradient-to-r from-[#61677A] to-[#505460] shadow-lg scale-102' 
-                        : 'bg-[#272829]/40 hover:bg-[#61677A]/60 hover:scale-105'
-                    }`}
-                    style={{ animationDelay: `${index * 0.05}s` }}
-                    onClick={() => {
-                      handleStartChat(user);
-                      toggleSidebar();
-                    }}
-                  >
-                    <div className="relative">
-                      <div className="relative overflow-hidden rounded-full w-14 h-14 border-2 border-[#61677A]/50">
-                        <img
-                          src={user.profileImageURL || 'https://via.placeholder.com/150'}
-                          alt={`${user.fullName}'s profile`}
-                          className="w-full h-full object-cover transition-transform hover:scale-110 duration-500"
-                        />
-                      </div>
-                      <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-[#61677A] animate-pulse"></span>
-                    </div>
-                    <div className="flex-1 ml-3">
-                      <h3 className="text-lg font-semibold">{user.fullName}</h3>
-                      <p className="text-sm text-[#FFF6E0] opacity-75">{user.email}</p>
-                    </div>
-                    {unreadCount > 0 && (
-                      <div className="bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-[#272829] rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold animate-bounce">
-                        {unreadCount > 9 ? '9+' : unreadCount}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+  const unreadCount = unreadMessages[user._id] || 0;
+  const isOnline = onlineUsers[user._id] || false; // Use this for online status
+  return (
+    <div
+      key={user._id}
+      className={`flex items-center p-4 rounded-xl cursor-pointer transition-all duration-300 transform ${
+        activeChatUser?._id === user._id 
+          ? 'bg-gradient-to-r from-[#61677A] to-[#505460] shadow-lg scale-102' 
+          : 'bg-[#272829]/40 hover:bg-[#61677A]/60 hover:scale-105'
+      }`}
+      style={{ animationDelay: `${index * 0.05}s` }}
+      onClick={() => handleStartChat(user)}
+    >
+      <div className="relative">
+        <div className="relative overflow-hidden rounded-full w-14 h-14 border-2 border-[#61677A]/50">
+          <img
+            src={user.profileImageURL || 'https://via.placeholder.com/150'}
+            alt={`${user.fullName}'s profile`}
+            className="w-full h-full object-cover transition-transform hover:scale-110 duration-500"
+          />
+        </div>
+        <span className={`absolute bottom-0 right-0 w-3 h-3 ${isOnline ? "bg-green-500" : "bg-red-500" } rounded-full border-2 border-[#61677A] animate-pulse`}></span>
+      </div>
+      <div className="flex-1 ml-3">
+        <h3 className="text-lg font-semibold">{user.fullName}</h3>
+        <p className="text-sm text-[#FFF6E0] opacity-75">{user.email}</p>
+      </div>
+      {unreadCount > 0 && (
+        <div className="bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-[#272829] rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold animate-bounce">
+          {unreadCount > 9 ? '9+' : unreadCount}
+        </div>
+      )}
+    </div>
+  );
+})}
             </div>
           )}
         </div>
@@ -710,7 +736,7 @@ return (
                         className="w-full h-full object-cover transition-transform hover:scale-110 duration-500"
                       />
                     </div>
-                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-[#61677A] animate-pulse"></span>
+                    <span className={`absolute bottom-0 right-0 w-3 h-3 ${user.activeStatus.isActive ? "bg-green-500" : "bg-red-500" } rounded-full border-2 border-[#61677A] animate-pulse`}></span>
                   </div>
                   <div className="flex-1 ml-3">
                     <h3 className="text-lg font-semibold">{user.fullName}</h3>
@@ -734,24 +760,24 @@ return (
       {activeChatUser ? (
         <>
           {/* Chat Header - removed backdrop blur */}
-          <div className="p-4 border-b border-gray-200 bg-[#FFF6E0] shadow-sm sticky top-0 z-10 bg-opacity-80">
-            <div className="flex items-center">
-              <div className="relative overflow-hidden rounded-full w-10 h-10 border-2 border-[#61677A]/30">
-                <img
-                  src={activeChatUser.profileImageURL || 'https://via.placeholder.com/150'}
-                  alt={`${activeChatUser.fullName}'s profile`}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="ml-3">
-                <h2 className="text-lg font-bold">{activeChatUser.fullName}</h2>
-                <div className="flex items-center text-xs text-green-600">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></span>
-                  Online
-                </div>
-              </div>
-            </div>
-          </div>
+<div className="p-4 border-b border-gray-200 bg-[#FFF6E0] shadow-sm sticky top-0 z-10 bg-opacity-80">
+  <div className="flex items-center">
+    <div className="relative overflow-hidden rounded-full w-10 h-10 border-2 border-[#61677A]/30">
+      <img
+        src={activeChatUser.profileImageURL || 'https://via.placeholder.com/150'}
+        alt={`${activeChatUser.fullName}'s profile`}
+        className="w-full h-full object-cover"
+      />
+    </div>
+    <div className="ml-3">
+      <h2 className="text-lg font-bold">{activeChatUser.fullName}</h2>
+      <div className={`flex items-center text-xs ${onlineUsers[activeChatUser._id] ? "text-green-600" : "text-red-600" }`}>
+        <span className={`w-2 h-2 ${onlineUsers[activeChatUser._id] ? "bg-green-500" : "bg-red-500" } rounded-full mr-1 animate-pulse`}></span>
+        {onlineUsers[activeChatUser._id] ? "online" : "offline"}
+      </div>
+    </div>
+  </div>
+</div>
           
           {/* Messages Area with gradient background and soft pattern */}
           <div className="flex-1 overflow-y-auto p-4 relative">
@@ -786,10 +812,12 @@ return (
                             <span>{formatTime(msg.timestamp)}</span>
                             {isMe && (
                               <span className="ml-2">
-                                {msg.status === 'sent' && '✓'}
-                                {msg.status === 'delivered' && '✓✓'}
+                                {msg.status === 'sent' && <Check size={17} />}
+                                {msg.status === 'delivered' && <CheckCheck size={17} />}
                                 {msg.status === 'read' && (
-                                  <span className="text-blue-400">✓✓</span>
+                                  <span className="text-blue-400">
+                                    <CheckCheck size={17}/>
+                                  </span>
                                 )}
                               </span>
                             )}
