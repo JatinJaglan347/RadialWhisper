@@ -148,6 +148,7 @@ import ManageBansPage from './pages/ModerationPages/ManageBansPage.jsx';
 import ManageSuggestionsPage from './pages/ModerationPages/ManageSuggestionsPage.jsx';
 import ManageContactsPage from './pages/ModerationPages/ManageContactsPage.jsx';
 import ManageAdminsPage from './pages/ModerationPages/ManageAdminsPage.jsx';
+import PremiumPlan from './pages/PremiumPlan.jsx';
 // import LandingNavbar from './componenst/MainWebPage/LandingNavbar.js';
 
 function App() {
@@ -270,6 +271,7 @@ function App() {
             <Route path="/about" element={<LandingAbout/>} />
             <Route path="/contact" element={<LandingContact/>} />
             <Route path="/suggestion" element={<LandingSuggestion/>} />
+            <Route path="/premium" element={<PremiumPlan/>} />
             
             {/* Authentication routes at root level */}
             <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/chat" />} />
