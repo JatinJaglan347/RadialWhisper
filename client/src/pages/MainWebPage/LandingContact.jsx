@@ -35,7 +35,7 @@ const LandingContact = () => {
     AOS.refresh();
   }, [isSubmitted]); // Refresh when content changes (like form submission)
   
-  // Use effect to pre-fill form when user is logged in
+  // Use effect to pre-fill form when use`r is logged in
   useEffect(() => {
     console.log("authUser updated:", authUser);
     if (authUser?.data?.user) {

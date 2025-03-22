@@ -149,6 +149,7 @@ import ManageSuggestionsPage from './pages/ModerationPages/ManageSuggestionsPage
 import ManageContactsPage from './pages/ModerationPages/ManageContactsPage.jsx';
 import ManageAdminsPage from './pages/ModerationPages/ManageAdminsPage.jsx';
 import PremiumPlan from './pages/PremiumPlan.jsx';
+import LandingFooter from './components/MainWebPage/LandingFooter.jsx';
 // import LandingNavbar from './componenst/MainWebPage/LandingNavbar.js';
 
 function App() {
@@ -348,6 +349,7 @@ function App() {
           <Toaster />
         </main>
       </div>
+      {!isChatRoute  ? <LandingFooter/> : null}
     </div>
   );
 }

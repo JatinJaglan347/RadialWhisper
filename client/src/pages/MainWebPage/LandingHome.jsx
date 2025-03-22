@@ -12,16 +12,22 @@ import {
   Star,
   ArrowRight,
   Smartphone,
-  BellRing
+  BellRing,
+  AlertCircle, 
+  X
 } from 'lucide-react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import LandingFooter from '../../components/MainWebPage/LandingFooter';
-
+import { useAuthStore } from '../../store/useAuthStore';
+import toast from 'react-hot-toast';
 
 function LandingHome() {
-
+  const {authUser} = useAuthStore();
   const [seed , setSeed]= useState();
+  const [newsLetterEmail, setNewsLetterEmail]=useState({
+    email: '',
+    ifExistingUser: false,
+  });
 
   useEffect(()=>{
     setSeed(Math.random()*100);
@@ -33,6 +39,8 @@ function LandingHome() {
       once: true,
       offset: 100
     });
+
+    
     
     // Parallax effect on scroll
     const handleScroll = () => {
@@ -47,6 +55,61 @@ function LandingHome() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (authUser?.data?.user) {
+      setNewsLetterEmail(prevState=>({
+        ...prevState,
+        email: authUser.data.user.email,
+        ifExistingUser: true
+      }));
+    }
+  }, [authUser , setNewsLetterEmail]);
+
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    // Show professional toast notification with immediate dismissal
+    toast.custom((t) => (
+      <div className={`${
+        t.visible ? 'animate-enter' : 'animate-leave'
+      } max-w-md w-full bg-gradient-to-r from-gray-900 to-gray-800 shadow-xl rounded-lg pointer-events-auto flex overflow-hidden`}>
+        <div className="flex-1 p-4">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <AlertCircle className="h-6 w-6 text-yellow-400" />
+            </div>
+            <div className="ml-3 flex-1">
+              <p className="text-sm font-semibold text-white">
+                Coming Soon
+              </p>
+              <p className="mt-1 text-xs text-gray-300">
+                We're working on this feature. Thank you for your interest.
+              </p>
+            </div>
+            <div className="ml-4 flex-shrink-0 flex">
+              <button
+                onClick={() => {
+                  // Force immediate dismissal
+                  toast.remove(t.id);
+                }}
+                className="bg-transparent text-gray-400 hover:text-white focus:outline-none"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+        <div className="w-1 bg-yellow-400"></div>
+      </div>
+    ), 
+    {
+      duration: 4000,
+      position: 'top-center',
+    });
+  
+  };
 
   return (
     <div className="bg-[#272829] text-[#FFF6E0] overflow-hidden">
@@ -694,12 +757,17 @@ function LandingHome() {
                 </p>
               </div>
               
-              <form className="max-w-xl mx-auto">
+              <form onSubmit={handleSubmit} className="max-w-xl mx-auto">
                 <div className="flex flex-col sm:flex-row gap-4">
                   <input 
                     type="email" 
+                    id="email"
+                    value={newsLetterEmail.email}
+                    onChange={(e) => setNewsLetterEmail(e.target.value)}
+                    required
+                    disabled={newsLetterEmail.ifExistingUser}
                     placeholder="Enter your email" 
-                    className="flex-grow px-6 py-4 rounded-full bg-[#272829]/80 text-[#FFF6E0] border border-[#FFF6E0]/20 focus:border-[#FFF6E0]/50 focus:outline-none"
+                    className={`flex-grow px-6 py-4 rounded-full bg-[#272829]/80 text-[#FFF6E0] border border-[#FFF6E0]/20 focus:border-[#FFF6E0]/50 focus:outline-none ${newsLetterEmail.ifExistingUser ? 'cursor-not-allowed opacity-50 ' : ''}`}
                   />
                   <button type="submit" className="btn bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] hover:from-[#D8D9DA] hover:to-[#FFF6E0] text-[#272829] px-8 py-4 rounded-full font-medium transition-all duration-300 shadow-lg">
                     Subscribe
@@ -713,8 +781,6 @@ function LandingHome() {
           </div>
         </div>
       </div>
-      
-   <LandingFooter/>
     </div>
   );
 }

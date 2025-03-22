@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-// import LandingFooter from '../../components/MainWebPage/LandingFooter';
+
 
 function PremiumPlan() {
   const [seed, setSeed] = useState();
@@ -23,18 +23,19 @@ function PremiumPlan() {
       duration: 800,
       easing: 'ease-out',
       once: true,
+      startEvent: 'DOMContentLoaded',
       offset: 100
     });
-
+    window.scrollTo(0, 0);
     // Parallax effect on scroll
     const handleScroll = () => {
-      const parallaxElements = document.querySelectorAll('.parallax');
-      parallaxElements.forEach(element => {
-        const speed = element.getAttribute('data-speed') || 0.5;
-        const yPos = -(window.scrollY * speed);
-        element.style.transform = `translateY(${yPos}px)`;
-      });
-    };
+        const parallaxElements = document.querySelectorAll('.parallax');
+        parallaxElements.forEach(element => {
+          const speed = element.getAttribute('data-speed') || 0.5;
+          const yPos = -(window.scrollY * speed);
+          element.style.transform = `translateY(${yPos}px)`;
+        });
+      };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -50,7 +51,7 @@ function PremiumPlan() {
         {/* Warning Banner */}
 <div className="bg-yellow-500/90 text-[#272829] p-4 text-center font-medium">
   <div className="max-w-6xl mx-auto flex items-center justify-center gap-2">
-    <BellRing className="h-5 w-5" />
+    <BellRing className="md:h-5 md:w-5 sm:h-10 sm:w-10 h-15 w-15 " />
     <p>RadialWhisper Premium is currently under development. Some premium features are temporarily available to all users during this testing phase.</p>
   </div>
 </div>
@@ -548,9 +549,6 @@ function PremiumPlan() {
           </div>
         </div>
       </div>
-
-      {/* Footer */}
-      {/* <LandingFooter /> */}
     </div>
   );
 }
