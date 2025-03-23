@@ -57,7 +57,7 @@ function LandingHome() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
+  window.scrollTo(0, 0);
   useEffect(() => {
     if (authUser?.data?.user) {
       setNewsLetterEmail((prevState) => ({

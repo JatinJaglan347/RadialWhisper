@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { Home, ArrowLeft, Radio, MapPin } from 'lucide-react';
 
 const NotFoundPage = () => {
+
+  window.scrollTo(0, 0);
   return (
     <div className="min-h-screen bg-[#272829] text-[#FFF6E0] relative overflow-hidden flex items-center justify-center">
       {/* Background elements */}

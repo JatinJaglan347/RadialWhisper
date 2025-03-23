@@ -29,7 +29,7 @@ const LandingContact = () => {
       easing: 'ease-out-cubic',
     });
   }, []);
-
+  window.scrollTo(0, 0);
   // Refresh AOS on route changes or when DOM changes
   useEffect(() => {
     AOS.refresh();

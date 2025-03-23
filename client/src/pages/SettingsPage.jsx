@@ -48,6 +48,7 @@ const SettingPage = () => {
       phoneVerified: false,
     }
   });
+  window.scrollTo(0, 0);
 
   // Save settings to backend
   const saveSettings = () => {

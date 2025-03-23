@@ -19,7 +19,7 @@ const LandingSuggestion = () => {
         return <LandingViewSuggestions key="view" />;
     }
   };
-  
+  window.scrollTo(0, 0);
   
   return (
     <div className="min-h-screen bg-[#272829] text-[#FFF6E0]">

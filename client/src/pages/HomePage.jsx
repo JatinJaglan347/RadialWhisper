@@ -49,7 +49,7 @@ const HomePage = () => {
     // Format: HH:MM AM/PM
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
-
+  window.scrollTo(0, 0);
   useEffect(() => {
     if (!socket) return;
 

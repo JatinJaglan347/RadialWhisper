@@ -150,6 +150,7 @@ import ManageContactsPage from './pages/ModerationPages/ManageContactsPage.jsx';
 import ManageAdminsPage from './pages/ModerationPages/ManageAdminsPage.jsx';
 import PremiumPlan from './pages/PremiumPlan.jsx';
 import LandingFooter from './components/MainWebPage/LandingFooter.jsx';
+import FounderPage from './pages/FounderPage.jsx';
 // import LandingNavbar from './componenst/MainWebPage/LandingNavbar.js';
 
 function App() {
@@ -273,7 +274,8 @@ function App() {
             <Route path="/contact" element={<LandingContact/>} />
             <Route path="/suggestion" element={<LandingSuggestion/>} />
             <Route path="/premium" element={<PremiumPlan/>} />
-            
+            <Route path="/anonymous" element={<FounderPage/>} />
+
             {/* Authentication routes at root level */}
             <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/chat" />} />
             <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to="/chat" />} />
