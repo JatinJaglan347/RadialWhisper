@@ -22,6 +22,7 @@ const HomePage = () => {
     sendMessage,
     messages,
     unreadMessagesBySender,
+    
   } = useAuthStore();
 
   const [locationPermissionDenied, setLocationPermissionDenied] =
@@ -226,70 +227,52 @@ const HomePage = () => {
 
   useEffect(() => {
     if (!socket) return;
-
+  
     const messageReceivedHandler = (data) => {
-      console.log("Received message payload:", data);
-
-      // Get current state directly from store
+      console.log("Received newMessage:", {
+        messageRoom: data.room,
+        activeChatRoom,
+        messageSender: data.sender,
+        activeChatUserId: activeChatUser?._id,
+        currentUserId: authUser.data.user._id,
+      });
+  
       const currentState = useAuthStore.getState();
-      const currentActiveChatUser = activeChatUserRef.current?._id;
       const currentUserId = currentState.authUser?.data?.user?._id;
-
-      // Don't count messages sent by the current user
-      if (data.sender !== currentUserId) {
-        // Update the messages array if it's for the active chat
-        if (data.sender === currentActiveChatUser) {
-          // Add to messages only if not a duplicate
-          useAuthStore.setState((state) => {
-            const isDuplicate = state.messages.some(
-              (msg) =>
-                msg.timestamp === data.timestamp && msg.sender === data.sender
-            );
-
-            if (!isDuplicate) {
-              return {
-                messages: [...state.messages, data],
-              };
-            }
-            return state;
-          });
-
-          // Mark as read immediately if this is the active chat
-          if (socket && data.room) {
-            socket.emit("markMessagesAsRead", { roomId: data.room });
+      const activeChatRoom = currentState.activeChatRoom;
+  
+      if (data.sender === currentUserId) {
+        console.log("Message from self, skipping");
+        return;
+      }
+  
+      if (data.room === activeChatRoom && data.sender === activeChatUser?._id) {
+        console.log("Message matches active chat, adding to state:", data);
+        useAuthStore.setState((state) => {
+          const isDuplicate = state.messages.some((msg) => msg._id === data._id);
+          if (!isDuplicate) {
+            return { messages: [...state.messages, data] };
           }
-        }
-        // If message is from someone other than active chat user, increment unread count
-        else {
-          // Use the sender's ID to track unread messages
-          setUnreadMessages((prev) => ({
-            ...prev,
-            [data.sender]: (prev[data.sender] || 0) + 1,
-          }));
-
-          // Update localStorage to persist between sessions
-          try {
-            const storedUnread = JSON.parse(
-              localStorage.getItem("unreadMessages") || "{}"
-            );
-            storedUnread[data.sender] = (storedUnread[data.sender] || 0) + 1;
-            localStorage.setItem(
-              "unreadMessages",
-              JSON.stringify(storedUnread)
-            );
-          } catch (error) {
-            console.error("Error storing unread messages:", error);
-          }
-        }
+          return state;
+        });
+      } else {
+        console.log("Message not for active chat:", {
+          receivedRoom: data.room,
+          activeRoom: activeChatRoom,
+          sender: data.sender,
+        });
+        setUnreadMessages((prev) => {
+          const newCount = (prev[data.sender] || 0) + 1;
+          const newUnread = { ...prev, [data.sender]: newCount };
+          localStorage.setItem("unreadMessages", JSON.stringify(newUnread));
+          return newUnread;
+        });
       }
     };
-
+  
     socket.on("newMessage", messageReceivedHandler);
-
-    return () => {
-      socket.off("newMessage", messageReceivedHandler);
-    };
-  }, [socket]);
+    return () => socket.off("newMessage", messageReceivedHandler);
+  }, [socket, activeChatUser, activeChatRoom]);
 
   // Update the useEffect for socket registration to include the user ID in the state
   useEffect(() => {
@@ -330,51 +313,29 @@ const HomePage = () => {
   // Modify handleStartChat to properly clear unread messages
   const handleStartChat = (user) => {
     const currentSocket = useAuthStore.getState().socket;
-
-    // Reset messages when starting a new chat
-    useAuthStore.setState({
-      messages: [],
-      activeChatRoom: null,
-    });
-
+  
     if (currentSocket && activeChatRoom) {
-      currentSocket.emit("leaveChat", { roomId: activeChatRoom });
-      console.log("Requested to leave previous chat room:", activeChatRoom);
+      currentSocket.emit("leaveAllRooms", () => {
+        console.log("Left all previous chat rooms");
+      });
     }
-
-    // Clear unread messages for ONLY this user (not all users)
+  
+    useAuthStore.setState({ messages: [], activeChatRoom: null });
+    setActiveChatUser(user);
+  
     setUnreadMessages((prev) => {
-      const newUnread = { ...prev };
-      newUnread[user._id] = 0;
-
-      // Update localStorage too
-      try {
-        const storedUnread = JSON.parse(
-          localStorage.getItem("unreadMessages") || "{}"
-        );
-        storedUnread[user._id] = 0;
-        localStorage.setItem("unreadMessages", JSON.stringify(storedUnread));
-      } catch (error) {
-        console.error("Error updating stored unread messages:", error);
-      }
-
+      const newUnread = { ...prev, [user._id]: 0 };
+      localStorage.setItem("unreadMessages", JSON.stringify(newUnread));
       return newUnread;
     });
-
-    setActiveChatUser(user);
+  
     if (currentSocket) {
+      const newRoomId = [authUser.data.user._id, user._id].sort().join("_");
+      setActiveChatRoom(newRoomId);
+      console.log(`Starting chat with ${user._id}, setting activeChatRoom to ${newRoomId}`);
       currentSocket.emit("joinChat", { targetUserId: user._id });
-      console.log("Joining chat with user:", user._id);
-
-      // Auto-close sidebar on mobile when selecting a chat
-      if (window.innerWidth < 768) {
-        setSidebarOpen(false);
-      }
-    } else {
-      toast.error("Socket is not connected.");
     }
   };
-
   // Add this useEffect to update the document title with unread count
   useEffect(() => {
     const totalUnread = Object.values(unreadMessagesBySender).reduce(
@@ -391,23 +352,49 @@ const HomePage = () => {
   // Send a message to the active chat
   const handleSendMessage = () => {
     if (!chatMessage.trim()) return;
-
+  
     if (socket && activeChatRoom) {
-      // Send message through socket
+      const expectedRoomId = [authUser.data.user._id, activeChatUser._id].sort().join("_");
+      if (activeChatRoom !== expectedRoomId) {
+        console.error("Room mismatch! Expected:", expectedRoomId, "Got:", activeChatRoom);
+        toast.error("Chat room not ready. Please try again.");
+        return;
+      }
+  
       socket.emit("message", {
         roomId: activeChatRoom,
         message: chatMessage,
       });
-
-      console.log("Message sent:", chatMessage);
-      console.log("Current Active Chat Room:", activeChatRoom);
-
-      // Clear message input after sending
+      console.log("Message sent to room:", activeChatRoom, "Message:", chatMessage);
       setChatMessage("");
     } else {
       toast.error("No active chat room. Please start a chat first.");
     }
   };
+
+  // Add updateUnreadCount listener
+useEffect(() => {
+  if (!socket) return;
+
+  const updateUnreadCountHandler = ({ sender, count }) => {
+    console.log("Received unread count update:", sender, count);
+    setUnreadMessages((prev) => {
+      const newUnread = { ...prev, [sender]: count };
+      try {
+        localStorage.setItem("unreadMessages", JSON.stringify(newUnread));
+      } catch (error) {
+        console.error("Error updating localStorage:", error);
+      }
+      return newUnread;
+    });
+  };
+
+  socket.on("updateUnreadCount", updateUnreadCountHandler);
+
+  return () => {
+    socket.off("updateUnreadCount", updateUnreadCountHandler);
+  };
+}, [socket]);
 
   // Refresh the list of nearby users
   const handleRefreshNearby = () => {
@@ -496,11 +483,18 @@ const HomePage = () => {
       console.log("Marking messages as read in room:", activeChatRoom);
     }
   };
-  useEffect(() => {
-    if (activeChatRoom && messages.length > 0) {
+// Adjust markMessagesAsRead trigger
+useEffect(() => {
+  if (activeChatRoom && activeChatUser && messages.length > 0) {
+    // Only mark messages as read if there are unread messages from the other user
+    const hasUnread = messages.some(
+      (msg) => msg.sender === activeChatUser._id && msg.status !== "read"
+    );
+    if (hasUnread) {
       markMessagesAsRead();
     }
-  }, [activeChatRoom, messages.length]);
+  }
+}, [activeChatRoom, activeChatUser, messages]);
 
   return (
     <div className="h-screen flex flex-col md:flex-row overflow-hidden relative">

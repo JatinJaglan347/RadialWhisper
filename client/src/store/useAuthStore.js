@@ -669,65 +669,64 @@ fetchPublicUserInfoRules: async () => {
   activeChatRoom: null,
   unreadMessagesBySender: {},
   currentUserId: null,
+  messagesByRoom: {},
 
   connectSocket: () => {
     const { socket } = get();
     if (socket) return;
-
+  
     const newSocket = io(import.meta.env.VITE_API_BASE_URL, {
       transports: ["websocket"],
       withCredentials: true,
     });
-
+  
     newSocket.on("connect", () => {
       console.log("🟢 Connected to Socket.io server:", newSocket.id);
     });
-
+  
     try {
       const storedUnread = JSON.parse(localStorage.getItem('unreadMessagesBySender') || '{}');
       set({ unreadMessagesBySender: storedUnread });
     } catch (error) {
       console.error("Error loading stored unread messages:", error);
     }
-
-
+  
+    newSocket.on("chatHistory", (data) => {
+      console.log("📜 Chat history received:", data);
+      set({ messages: data.history, activeChatRoom: data.roomId });
+    });
+  
     newSocket.on("newMessage", (data) => {
-      console.log("📩 New message received:", data);
-      
-      const state = get();
-      const { activeChatRoom, currentUserId } = state;
-      
-      // If I'm the sender, just add to messages
-      if (data.sender === currentUserId) {
-        set(state => ({ messages: [...state.messages, data] }));
-        return;
-      }
-      
-      // Always add to messages array
-      set(state => ({ messages: [...state.messages, data] }));
-      
-      // Important change: Track unread messages for ALL senders except the active chat
-      if (data.room !== activeChatRoom) {
-        set(state => {
-          const newUnreadMessagesBySender = {
-            ...state.unreadMessagesBySender,
-            [data.sender]: (state.unreadMessagesBySender[data.sender] || 0) + 1
-          };
-          
-          // Save to localStorage for persistence
-          localStorage.setItem('unreadMessagesBySender', JSON.stringify(newUnreadMessagesBySender));
-          
-          return { unreadMessagesBySender: newUnreadMessagesBySender };
-        });
-      } else {
-        // Mark as read if this is the active chat
-        if (get().socket) {
-          get().socket.emit("markMessagesAsRead", { roomId: activeChatRoom });
+      console.log("Store received newMessage:", {
+        room: data.room,
+        activeChatRoom: get().activeChatRoom,
+        sender: data.sender,
+      });
+    
+      const { activeChatRoom, currentUserId } = get();
+    
+      if (data.sender !== currentUserId) {
+        if (data.room === activeChatRoom) {
+          set(state => ({
+            messages: state.messages.some(msg => msg._id === data._id)
+              ? state.messages
+              : [...state.messages, data]
+          }));
+          console.log("Message added to active chat:", data);
+        } else {
+          set(state => {
+            const newUnreadMessagesBySender = {
+              ...state.unreadMessagesBySender,
+              [data.sender]: (state.unreadMessagesBySender[data.sender] || 0) + 1
+            };
+            localStorage.setItem('unreadMessagesBySender', JSON.stringify(newUnreadMessagesBySender));
+            console.log("Incrementing unread for sender:", data.sender);
+            return { unreadMessagesBySender: newUnreadMessagesBySender };
+          });
         }
       }
     });
-
-
+  
     newSocket.on("messageDelivered", (data) => {
       console.log("📩 Message delivery status updated:", data);
       set(state => ({
@@ -736,29 +735,66 @@ fetchPublicUserInfoRules: async () => {
         )
       }));
     });
-
+  
     newSocket.on("messagesRead", (data) => {
       console.log("📩 Messages marked as read:", data);
-      set(state => ({
-        messages: state.messages.map(msg => 
+      set(state => {
+        const updatedMessages = state.messages.map(msg => 
           (data.messageIds || []).includes(msg._id) ? { ...msg, status: 'read' } : msg
-        )
-      }));
+        );
+        if (data.roomId === state.activeChatRoom && data.reader !== state.currentUserId) {
+          const sender = state.messages.find(msg => msg._id === data.messageIds[0])?.sender;
+          if (sender) {
+            const newUnreadMessagesBySender = {
+              ...state.unreadMessagesBySender,
+              [sender]: 0
+            };
+            localStorage.setItem('unreadMessagesBySender', JSON.stringify(newUnreadMessagesBySender));
+            return {
+              messages: updatedMessages,
+              unreadMessagesBySender: newUnreadMessagesBySender
+            };
+          }
+        }
+        return { messages: updatedMessages };
+      });
     });
-
+  
+    newSocket.on("updateUnreadCount", ({ sender, count }) => {
+      console.log("📊 Unread count updated:", sender, count);
+      set(state => {
+        const newUnreadMessagesBySender = {
+          ...state.unreadMessagesBySender,
+          [sender]: count
+        };
+        localStorage.setItem('unreadMessagesBySender', JSON.stringify(newUnreadMessagesBySender));
+        return { unreadMessagesBySender: newUnreadMessagesBySender };
+      });
+    });
+  
     set({ socket: newSocket });
   },
-
- 
+  
+  sendMessage: (message, roomId) => {
+    const { socket, activeChatRoom, currentUserId } = get();
+    const targetRoom = roomId || activeChatRoom;
+    console.log("sendMessage - message:", message, "roomId:", roomId, "targetRoom:", targetRoom, "sender:", currentUserId, "socket:", !!socket);
+    if (socket && targetRoom && currentUserId) {
+      socket.emit("message", { roomId: targetRoom, message, sender: currentUserId });
+      console.log("📤 Message sent to room:", targetRoom, "Message:", message, "Sender:", currentUserId);
+    } else {
+      console.warn("⚠️ Socket, room, or user ID not available! Socket:", socket, "Room:", targetRoom, "User:", currentUserId);
+      toast.error("Cannot send message: Chat not properly initialized");
+    }
+  },
+  
   markMessagesAsReadForSender: (senderId) => {
     set(state => {
-   
       const newUnreadMessagesBySender = {
         ...state.unreadMessagesBySender,
-        [senderId]: 0 // Reset count for this sender
+        [senderId]: 0
       };
-            localStorage.setItem('unreadMessagesBySender', JSON.stringify(newUnreadMessagesBySender));
-      
+      localStorage.setItem('unreadMessagesBySender', JSON.stringify(newUnreadMessagesBySender));
       return { unreadMessagesBySender: newUnreadMessagesBySender };
     });
   },
@@ -771,15 +807,18 @@ fetchPublicUserInfoRules: async () => {
     set({ currentUserId: userId });
   },
 
-  sendMessage: (message) => {
-    const { socket } = get();
-    if (socket) {
-      socket.emit("message", { text: message });
-      console.log("📤 Message sent:", message);
-    } else {
-      console.warn("⚠️ Socket not connected!");
-    }
-  },
+  sendMessage: (message, roomId) => {
+  const { socket, activeChatRoom, currentUserId } = get();
+  const targetRoom = roomId || activeChatRoom;
+  console.log("sendMessage - message:", message, "roomId:", roomId, "targetRoom:", targetRoom, "sender:", currentUserId, "socket:", !!socket);
+  if (socket && targetRoom && currentUserId) {
+    socket.emit("message", { roomId: targetRoom, message, sender: currentUserId });
+    console.log("📤 Message sent to room:", targetRoom, "Message:", message, "Sender:", currentUserId);
+  } else {
+    console.warn("⚠️ Socket, room, or user ID not available! Socket:", socket, "Room:", targetRoom, "User:", currentUserId);
+    toast.error("Cannot send message: Chat not properly initialized");
+  }
+},
 
   disconnectSocket: () => {
     const { socket } = get();
