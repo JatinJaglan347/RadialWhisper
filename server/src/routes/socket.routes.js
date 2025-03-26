@@ -52,6 +52,18 @@ export function initializeSocket(server) {
       markMessagesAsRead(socket, data, io);
     });
 
+    // Add leaveAllRooms handler
+    socket.on("leaveAllRooms", (callback) => {
+      const rooms = Array.from(socket.rooms);
+      rooms.forEach((room) => {
+        if (room !== socket.id) { // Don’t leave the socket’s own ID room
+          socket.leave(room);
+          console.log(`Socket ${socket.id} left room ${room}`);
+        }
+      });
+      if (typeof callback === "function") callback();
+    });
+
     // Handle disconnect event.
     socket.on("disconnect", (reason) => {
       console.log(`❌ Client disconnected: ${socket.id} | Reason: ${reason}`);

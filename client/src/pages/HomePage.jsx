@@ -20,9 +20,10 @@ const HomePage = () => {
     connectSocket,
     socket,
     sendMessage,
-    messages,
     unreadMessagesBySender,
-    
+    messagesByRoom,
+    markMessagesAsReadForSender,
+
   } = useAuthStore();
 
   const [locationPermissionDenied, setLocationPermissionDenied] =
@@ -38,6 +39,7 @@ const HomePage = () => {
   const isInitialFetchDone = useRef(false);
   const activeChatUserRef = useRef(activeChatUser);
   const [onlineUsers, setOnlineUsers] = useState({});
+  const currentMessages = messagesByRoom[activeChatRoom] || {};
 
   const formatTime = (timestamp) => {
     if (!timestamp) return "";
@@ -93,8 +95,7 @@ const HomePage = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
-
+  }, [currentMessages]);
   // Connect socket when user is authenticated
   useEffect(() => {
     if (authUser) {
@@ -183,7 +184,7 @@ const HomePage = () => {
     if (!socket) return;
 
     const chatStartedHandler = (data) => {
-      setActiveChatRoom(data.roomId);
+      // setActiveChatRoom(data.roomId);
       console.log("Chat started in room:", data.roomId);
     };
 
@@ -229,50 +230,64 @@ const HomePage = () => {
     if (!socket) return;
   
     const messageReceivedHandler = (data) => {
-      console.log("Received newMessage:", {
-        messageRoom: data.room,
-        activeChatRoom,
-        messageSender: data.sender,
-        activeChatUserId: activeChatUser?._id,
-        currentUserId: authUser.data.user._id,
-      });
-  
       const currentState = useAuthStore.getState();
       const currentUserId = currentState.authUser?.data?.user?._id;
-      const activeChatRoom = currentState.activeChatRoom;
+      const storeActiveChatRoom = currentState.activeChatRoom;
   
+      // Log for debugging
+      console.log("Received newMessage:", {
+        messageRoom: data.room,
+        activeChatRoom: storeActiveChatRoom,
+        localActiveChatRoom: activeChatRoom,
+        messageSender: data.sender,
+        activeChatUserId: activeChatUser?._id,
+        currentUserId,
+      });
+  
+      // Check 1: Ignore messages from self to avoid duplication
       if (data.sender === currentUserId) {
-        console.log("Message from self, skipping");
+        console.log("Message from self, skipping UI update");
         return;
       }
   
-      if (data.room === activeChatRoom && data.sender === activeChatUser?._id) {
-        console.log("Message matches active chat, adding to state:", data);
-        useAuthStore.setState((state) => {
-          const isDuplicate = state.messages.some((msg) => msg._id === data._id);
-          if (!isDuplicate) {
-            return { messages: [...state.messages, data] };
-          }
-          return state;
-        });
-      } else {
-        console.log("Message not for active chat:", {
-          receivedRoom: data.room,
-          activeRoom: activeChatRoom,
-          sender: data.sender,
-        });
+      // Check 2: Ensure message room matches the locally active chat room
+      if (data.room !== activeChatRoom) {
+        console.log("Message not for current local active chat room, updating unread only");
         setUnreadMessages((prev) => {
           const newCount = (prev[data.sender] || 0) + 1;
           const newUnread = { ...prev, [data.sender]: newCount };
           localStorage.setItem("unreadMessages", JSON.stringify(newUnread));
           return newUnread;
         });
+        return;
       }
+  
+      // Check 3: Verify sender matches the active chat user
+      if (data.sender !== activeChatUser?._id) {
+        console.log("Sender does not match active chat user, skipping");
+        return;
+      }
+  
+      // Check 4: Ensure store's activeChatRoom matches local activeChatRoom
+      if (storeActiveChatRoom !== activeChatRoom) {
+        console.log("Store activeChatRoom mismatch, skipping UI update");
+        return;
+      }
+  
+      // Check 5: Prevent duplicate messages in the UI
+      const isDuplicate = currentMessages.some((msg) => msg._id === data._id);
+      if (isDuplicate) {
+        console.log("Duplicate message detected in UI, skipping");
+        return;
+      }
+  
+      console.log("Message valid for active chat, relying on store update");
+      // No need to update state here; the store's "newMessage" handler already adds to messagesByRoom
     };
   
     socket.on("newMessage", messageReceivedHandler);
     return () => socket.off("newMessage", messageReceivedHandler);
-  }, [socket, activeChatUser, activeChatRoom]);
+  }, [socket, activeChatUser, activeChatRoom, currentMessages]);
 
   // Update the useEffect for socket registration to include the user ID in the state
   useEffect(() => {
@@ -313,27 +328,23 @@ const HomePage = () => {
   // Modify handleStartChat to properly clear unread messages
   const handleStartChat = (user) => {
     const currentSocket = useAuthStore.getState().socket;
-  
-    if (currentSocket && activeChatRoom) {
+    if (currentSocket) {
       currentSocket.emit("leaveAllRooms", () => {
         console.log("Left all previous chat rooms");
+        const newRoomId = [authUser.data.user._id, user._id].sort().join("_");
+        setActiveChatUser(user);
+        useAuthStore.getState().setActiveChatRoom(newRoomId);
+        setActiveChatRoom(newRoomId);
+        markMessagesAsReadForSender(user._id);
+        setUnreadMessages((prev) => {
+          const newUnread = { ...prev, [user._id]: 0 };
+          localStorage.setItem("unreadMessages", JSON.stringify(newUnread));
+          return newUnread;
+        });
+        currentSocket.emit("joinChat", { targetUserId: user._id });
       });
-    }
-  
-    useAuthStore.setState({ messages: [], activeChatRoom: null });
-    setActiveChatUser(user);
-  
-    setUnreadMessages((prev) => {
-      const newUnread = { ...prev, [user._id]: 0 };
-      localStorage.setItem("unreadMessages", JSON.stringify(newUnread));
-      return newUnread;
-    });
-  
-    if (currentSocket) {
-      const newRoomId = [authUser.data.user._id, user._id].sort().join("_");
-      setActiveChatRoom(newRoomId);
-      console.log(`Starting chat with ${user._id}, setting activeChatRoom to ${newRoomId}`);
-      currentSocket.emit("joinChat", { targetUserId: user._id });
+    } else {
+      toast.error("Socket not connected");
     }
   };
   // Add this useEffect to update the document title with unread count
@@ -352,7 +363,7 @@ const HomePage = () => {
   // Send a message to the active chat
   const handleSendMessage = () => {
     if (!chatMessage.trim()) return;
-  
+
     if (socket && activeChatRoom) {
       const expectedRoomId = [authUser.data.user._id, activeChatUser._id].sort().join("_");
       if (activeChatRoom !== expectedRoomId) {
@@ -360,12 +371,8 @@ const HomePage = () => {
         toast.error("Chat room not ready. Please try again.");
         return;
       }
-  
-      socket.emit("message", {
-        roomId: activeChatRoom,
-        message: chatMessage,
-      });
-      console.log("Message sent to room:", activeChatRoom, "Message:", chatMessage);
+
+      sendMessage(chatMessage, activeChatRoom);
       setChatMessage("");
     } else {
       toast.error("No active chat room. Please start a chat first.");
@@ -422,79 +429,69 @@ useEffect(() => {
   // Add this effect to listen for messagesRead events
   useEffect(() => {
     if (!socket) return;
-
+  
     const messagesReadHandler = (data) => {
       console.log("Messages marked as read:", data);
-
-      // Update message status in the store
       useAuthStore.setState((state) => {
-        const updatedMessages = state.messages.map((msg) => {
-          // Check if this message is in the list of read messages
-          if (data.messageIds.includes(msg._id)) {
-            return { ...msg, status: "read" };
-          }
-          return msg;
-        });
-
-        return { messages: updatedMessages };
+        const roomMessages = state.messagesByRoom[data.roomId] || [];
+        const updatedMessages = roomMessages.map((msg) =>
+          data.messageIds.includes(msg._id) ? { ...msg, status: "read" } : msg
+        );
+        return {
+          messagesByRoom: {
+            ...state.messagesByRoom,
+            [data.roomId]: updatedMessages,
+          },
+        };
       });
     };
-
+  
     socket.on("messagesRead", messagesReadHandler);
-
-    return () => {
-      socket.off("messagesRead", messagesReadHandler);
-    };
+    return () => socket.off("messagesRead", messagesReadHandler);
   }, [socket]);
 
   // Add this to your HomePage.jsx component
   useEffect(() => {
     if (!socket) return;
-
+  
     const messageDeliveredHandler = (data) => {
       console.log("Message delivered:", data);
-
-      // Update message status in the store
       useAuthStore.setState((state) => {
-        const updatedMessages = state.messages.map((msg) => {
-          // Check if this message ID matches the delivered message
-          if (msg._id === data.messageId) {
-            return { ...msg, status: "delivered" };
-          }
-          return msg;
-        });
-
-        return { messages: updatedMessages };
+        const roomMessages = state.messagesByRoom[data.room] || [];
+        const updatedMessages = roomMessages.map((msg) =>
+          msg._id === data.messageId ? { ...msg, status: "delivered" } : msg
+        );
+        return {
+          messagesByRoom: {
+            ...state.messagesByRoom,
+            [data.room]: updatedMessages,
+          },
+        };
       });
     };
-
+  
     socket.on("messageDelivered", messageDeliveredHandler);
-
-    return () => {
-      socket.off("messageDelivered", messageDeliveredHandler);
-    };
+    return () => socket.off("messageDelivered", messageDeliveredHandler);
   }, [socket]);
 
   // Add this function to mark messages as read when viewing a chat
   const markMessagesAsRead = () => {
     if (socket && activeChatRoom && activeChatUser) {
-      // Only mark messages as read if they're from the other user
       socket.emit("markMessagesAsRead", { roomId: activeChatRoom });
       console.log("Marking messages as read in room:", activeChatRoom);
     }
   };
 // Adjust markMessagesAsRead trigger
 useEffect(() => {
-  if (activeChatRoom && activeChatUser && messages.length > 0) {
-    // Only mark messages as read if there are unread messages from the other user
-    const hasUnread = messages.some(
+  if (activeChatRoom && activeChatUser && currentMessages.length > 0) {
+    const hasUnread = currentMessages.some(
       (msg) => msg.sender === activeChatUser._id && msg.status !== "read"
     );
     if (hasUnread) {
       markMessagesAsRead();
     }
   }
-}, [activeChatRoom, activeChatUser, messages]);
+}, [activeChatRoom, activeChatUser, currentMessages]);
 
   return (
     <div className="h-screen flex flex-col md:flex-row overflow-hidden relative">
@@ -842,33 +839,18 @@ useEffect(() => {
 
             {/* Messages Area with gradient background and soft pattern */}
             <div className="flex-1 overflow-y-auto p-4 relative">
-              {/* Background pattern for messages area */}
-              <div className="absolute inset-0 opacity-5">
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    backgroundImage:
-                      "radial-gradient(circle, #272829 1px, transparent 1px)",
-                    backgroundSize: "20px 20px",
-                  }}
-                ></div>
-              </div>
-
               {activeChatRoom ? (
                 <div className="space-y-4 relative z-10">
-                  {messages.length > 0 ? (
-                    messages.map((msg, idx) => {
+                  {currentMessages.length > 0 ? (
+                    currentMessages.map((msg, idx) => {
                       const isMe = msg.sender === authUser.data.user._id;
                       return (
                         <div
                           key={idx}
-                          className={`flex ${
-                            isMe ? "justify-end" : "justify-start"
-                          } animate-fadeIn`}
-                          style={{ animationDelay: `${idx * 0.05}s` }}
+                          className={`flex ${isMe ? "justify-end" : "justify-start"} animate-fadeIn`}
                         >
                           <div
-                            className={`max-w-xs md:max-w-md p-4 rounded-2xl shadow-md transition-all duration-300 hover:shadow-lg ${
+                            className={`max-w-xs md:max-w-md p-4 rounded-2xl shadow-md ${
                               isMe
                                 ? "bg-gradient-to-r from-[#272829] to-[#31333A] text-[#FFF6E0]"
                                 : "bg-gradient-to-r from-[#61677A] to-[#505460] text-[#FFF6E0]"
@@ -880,9 +862,7 @@ useEffect(() => {
                               {isMe && (
                                 <span className="ml-2">
                                   {msg.status === "sent" && <Check size={17} />}
-                                  {msg.status === "delivered" && (
-                                    <CheckCheck size={17} />
-                                  )}
+                                  {msg.status === "delivered" && <CheckCheck size={17} />}
                                   {msg.status === "read" && (
                                     <span className="text-blue-400">
                                       <CheckCheck size={17} />
@@ -897,32 +877,15 @@ useEffect(() => {
                     })
                   ) : (
                     <div className="flex items-center justify-center h-full text-[#61677A]">
-                      <div className="text-center p-8 bg-[#272829]/5 rounded-xl border border-[#61677A]/10 shadow-md transform transition-all duration-700 hover:scale-105">
-                        <MessageCircle
-                          size={40}
-                          className="mx-auto mb-2 opacity-50"
-                        />
-                        <p className="text-lg font-medium mb-2">
-                          Start a conversation
-                        </p>
-                        <p className="text-sm opacity-75">
-                          Send a message to connect with{" "}
-                          {activeChatUser.fullName}
-                        </p>
-                      </div>
+                      <p>Start a conversation with {activeChatUser.fullName}</p>
                     </div>
                   )}
                   <div ref={messagesEndRef} />
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-full text-[#61677A]">
-                  <div className="text-center">
-                    <RefreshCw
-                      size={30}
-                      className="mx-auto mb-2 animate-spin"
-                    />
-                    <p>Establishing secure connection...</p>
-                  </div>
+                  <RefreshCw size={30} className="mx-auto mb-2 animate-spin" />
+                  <p>Establishing secure connection...</p>
                 </div>
               )}
             </div>
