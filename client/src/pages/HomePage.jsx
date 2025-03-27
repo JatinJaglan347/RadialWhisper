@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useUserActivity } from "../hooks/useUserActivity";
 import EmojiPicker from "../components/EmojiPicker";
+import UserInfoPopup from "../components/UserInfoPopup";
 
 const HomePage = () => {
   useUserActivity();
@@ -55,6 +56,7 @@ const HomePage = () => {
 
   // Add these state variables if they don't exist yet
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showUserInfoPopup, setShowUserInfoPopup] = useState(false);
 
   const formatTime = (timestamp) => {
     if (!timestamp) return "";
@@ -666,7 +668,7 @@ useEffect(() => {
       </div>
 
       {/* Mobile Burger Menu */}
-      {!sidebarOpen && (
+      {!sidebarOpen && !showUserInfoPopup && (
         <button
           className="md:hidden absolute top-4 right-4 z-30 bg-[#272829] text-[#FFF6E0] p-3 rounded-full shadow-md hover:bg-[#31333A] transition-all duration-300"
           onClick={toggleSidebar}
@@ -943,7 +945,7 @@ useEffect(() => {
             {/* Chat Header - removed backdrop blur */}
             <div className="p-4 border-b border-gray-200 bg-[#FFF6E0] shadow-sm sticky top-0 z-10 bg-opacity-80">
               <div className="flex items-center">
-                <div className="relative overflow-hidden rounded-full w-10 h-10 border-2 border-[#61677A]/30">
+                <div className="relative overflow-hidden rounded-full w-10 h-10 border-2 border-[#61677A]/30 cursor-pointer" onClick={() => setShowUserInfoPopup(true)}>
                   <img
                     src={
                       activeChatUser.profileImageURL ||
@@ -1150,6 +1152,15 @@ useEffect(() => {
                 </button>
               </div>
             </div>
+
+            {showUserInfoPopup && (
+      <UserInfoPopup
+          className="z-100"
+        user={activeChatUser}
+        isOnline={onlineUsers[activeChatUser._id] || false}
+        onClose={() => setShowUserInfoPopup(false)}
+      />
+    )}
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-[#272829] p-8 relative">
