@@ -9,6 +9,7 @@ import {
   Check,
 } from "lucide-react";
 import { useUserActivity } from "../hooks/useUserActivity";
+import EmojiPicker from "../components/EmojiPicker";
 
 const HomePage = () => {
   useUserActivity();
@@ -40,6 +41,20 @@ const HomePage = () => {
   const activeChatUserRef = useRef(activeChatUser);
   const [onlineUsers, setOnlineUsers] = useState({});
   const currentMessages = messagesByRoom[activeChatRoom] || {};
+
+  // Add this new state for tracking expanded messages
+  const [expandedMessages, setExpandedMessages] = useState({});
+
+  // Add state for selected message and context menu
+  const [selectedMessage, setSelectedMessage] = useState(null);
+  const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
+  const [showContextMenu, setShowContextMenu] = useState(false);
+  
+  // Add refs for tracking clicks
+  const contextMenuRef = useRef(null);
+
+  // Add these state variables if they don't exist yet
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const formatTime = (timestamp) => {
     if (!timestamp) return "";
@@ -493,8 +508,133 @@ useEffect(() => {
   }
 }, [activeChatRoom, activeChatUser, currentMessages]);
 
+  // Add this function to toggle message expansion
+  const toggleMessageExpansion = (messageId) => {
+    setExpandedMessages(prev => ({
+      ...prev,
+      [messageId]: !prev[messageId]
+    }));
+  };
+  
+  // Add this function to truncate long messages
+  const truncateMessage = (message, maxLength = 150) => {
+    if (message.length <= maxLength) return message;
+    return message.substring(0, maxLength) + "...";
+  };
+
+  // Function to handle message click and show context menu
+  const handleMessageClick = (e, message) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    
+    // Position the menu near the click but ensure it doesn't go off-screen
+    const x = Math.min(e.clientX, window.innerWidth - 200);
+    const y = Math.min(e.clientY, window.innerHeight - 150);
+    
+    setContextMenuPosition({ x, y });
+    setSelectedMessage(message);
+    setShowContextMenu(true);
+  };
+  
+  // Function to copy message text
+  const copyMessageText = () => {
+    if (!selectedMessage) return;
+    
+    navigator.clipboard.writeText(selectedMessage.message)
+      .then(() => {
+        toast.success("Message copied to clipboard");
+        setShowContextMenu(false);
+      })
+      .catch(() => {
+        toast.error("Failed to copy message");
+      });
+  };
+  
+  // Function to show message info
+  const showMessageInfo = () => {
+    if (!selectedMessage) return;
+    
+    // Build info message based on message status
+    let statusText = "Sent";
+    if (selectedMessage.status === "delivered") statusText = "Delivered";
+    if (selectedMessage.status === "read") statusText = "Read";
+    
+    const sender = selectedMessage.sender === authUser.data.user._id 
+      ? "You" 
+      : activeChatUser?.fullName || "User";
+    
+    const dateTime = new Date(selectedMessage.timestamp);
+    const formattedDateTime = dateTime.toLocaleString();
+    
+    // Show toast with message info
+    toast(
+      <div className="space-y-2">
+        <p><strong>Sender:</strong> {sender}</p>
+        <p><strong>Time:</strong> {formattedDateTime}</p>
+        <p><strong>Status:</strong> {statusText}</p>
+      </div>,
+      {
+        duration: 5000,
+        style: {
+          background: "#272829",
+          color: "#FFF6E0",
+          maxWidth: "none",
+        },
+      }
+    );
+    
+    setShowContextMenu(false);
+  };
+  
+  // Close context menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (contextMenuRef.current && !contextMenuRef.current.contains(event.target)) {
+        setShowContextMenu(false);
+      }
+    };
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // Add this function to group messages by date
+  const groupMessagesByDate = (messages) => {
+    const groups = {};
+    
+    messages.forEach(message => {
+      const date = new Date(message.timestamp);
+      const dateString = date.toLocaleDateString(undefined, { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+      
+      if (!groups[dateString]) {
+        groups[dateString] = [];
+      }
+      
+      groups[dateString].push(message);
+    });
+    
+    return groups;
+  };
+
+  // Update this function to handle emoji selection properly
+  const handleEmojiSelect = (emoji) => {
+    if (emoji) {
+      setChatMessage(prevMessage => prevMessage + emoji.native);
+    } else {
+      // Close the picker if emoji is null (click outside)
+      setShowEmojiPicker(false);
+    }
+  };
+
   return (
-    <div className="h-screen flex flex-col md:flex-row overflow-hidden relative">
+    <div className="h-full flex flex-col md:flex-row overflow-hidden relative" onClick={() => setShowContextMenu(false)}>
       {/* Dynamic background elements - removed blur */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-[#272829] opacity-90"></div>
@@ -838,79 +978,175 @@ useEffect(() => {
             </div>
 
             {/* Messages Area with gradient background and soft pattern */}
-            <div className="flex-1 overflow-y-auto p-4 relative">
+            <div className="flex-1 overflow-y-auto p-4 relative bg-[url('/src/assets/images/chat-bg-pattern.png')] bg-repeat bg-[#E9E9E9]/20">
               {activeChatRoom ? (
                 <div className="space-y-4 relative z-10">
                   {currentMessages.length > 0 ? (
-                    currentMessages.map((msg, idx) => {
-                      const isMe = msg.sender === authUser.data.user._id;
-                      return (
-                        <div
-                          key={idx}
-                          className={`flex ${isMe ? "justify-end" : "justify-start"} animate-fadeIn`}
-                        >
-                          <div
-                            className={`max-w-xs md:max-w-md p-4 rounded-2xl shadow-md ${
-                              isMe
-                                ? "bg-gradient-to-r from-[#272829] to-[#31333A] text-[#FFF6E0]"
-                                : "bg-gradient-to-r from-[#61677A] to-[#505460] text-[#FFF6E0]"
-                            }`}
-                          >
-                            <p className="leading-relaxed">{msg.message}</p>
-                            <div className="text-xs mt-2 text-right opacity-70 flex justify-end items-center">
-                              <span>{formatTime(msg.timestamp)}</span>
-                              {isMe && (
-                                <span className="ml-2">
-                                  {msg.status === "sent" && <Check size={17} />}
-                                  {msg.status === "delivered" && <CheckCheck size={17} />}
-                                  {msg.status === "read" && (
-                                    <span className="text-blue-400">
-                                      <CheckCheck size={17} />
-                                    </span>
-                                  )}
-                                </span>
-                              )}
-                            </div>
+                    Object.entries(groupMessagesByDate(currentMessages)).map(([dateString, messages]) => (
+                      <div key={dateString} className="mb-6">
+                        {/* Date Header */}
+                        <div className="flex justify-center mb-4">
+                          <div className="bg-[#D8D9DA] text-[#272829] text-xs font-medium px-3 py-1.5 rounded-full shadow-sm">
+                            {dateString}
                           </div>
                         </div>
-                      );
-                    })
+                        
+                        {/* Messages for this date */}
+                        <div className="space-y-1">
+                          {messages.map((msg, idx) => {
+                            const isMe = msg.sender === authUser.data.user._id;
+                            const isExpanded = expandedMessages[msg._id] || false;
+                            const isLongMessage = msg.message.length > 150;
+                            const prevMsg = idx > 0 ? messages[idx - 1] : null;
+                            const nextMsg = idx < messages.length - 1 ? messages[idx + 1] : null;
+                            
+                            // Check if messages are from the same sender
+                            const isFirstInGroup = !prevMsg || prevMsg.sender !== msg.sender;
+                            const isLastInGroup = !nextMsg || nextMsg.sender !== msg.sender;
+                            
+                            return (
+                              <div key={msg._id || idx} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
+                                {/* Show avatar only for first message in group from others */}
+                                {!isMe && isFirstInGroup && (
+                                  <div className="self-end mb-2 mr-2">
+                                    <div className="w-8 h-8 rounded-full overflow-hidden border border-[#61677A]/30">
+                                      <img
+                                        src={activeChatUser.profileImageURL || "https://via.placeholder.com/150"}
+                                        alt={`${activeChatUser.fullName}`}
+                                        className="w-full h-full object-cover"
+                                      />
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                <div className={`group relative max-w-[75%] ${!isFirstInGroup && !isMe ? 'ml-10' : ''}`}>
+                                  <div
+                                    className={`
+                                      p-3 
+                                      shadow-sm 
+                                      hover:shadow-md 
+                                      transition-shadow 
+                                      cursor-pointer
+                                      ${isMe 
+                                        ? "bg-[#272829] text-[#FFF6E0]" 
+                                        : "bg-[#61677A] text-[#FFF6E0]"}
+                                      ${isFirstInGroup && isMe ? 'rounded-tl-xl rounded-tr-xl rounded-bl-xl rounded-br-sm' : ''}
+                                      ${isFirstInGroup && !isMe ? 'rounded-tr-xl rounded-tl-sm rounded-bl-xl rounded-br-xl' : ''}
+                                      ${isLastInGroup && isMe ? 'rounded-tl-xl rounded-tr-sm rounded-bl-xl rounded-br-xl' : ''}
+                                      ${isLastInGroup && !isMe ? 'rounded-tr-xl rounded-tl-xl rounded-bl-sm rounded-br-xl' : ''}
+                                      ${!isFirstInGroup && !isLastInGroup && isMe ? 'rounded-tl-xl rounded-tr-sm rounded-bl-xl rounded-br-sm' : ''}
+                                      ${!isFirstInGroup && !isLastInGroup && !isMe ? 'rounded-tr-xl rounded-tl-sm rounded-bl-sm rounded-br-xl' : ''}
+                                      ${isFirstInGroup && isLastInGroup && isMe ? 'rounded-tl-xl rounded-tr-xl rounded-bl-xl rounded-br-xl' : ''}
+                                      ${isFirstInGroup && isLastInGroup && !isMe ? 'rounded-tr-xl rounded-tl-xl rounded-bl-xl rounded-br-xl' : ''}
+                                    `}
+                                    onClick={(e) => handleMessageClick(e, msg)}
+                                  >
+                                    <p className="leading-relaxed text-sm md:text-base">
+                                      {isLongMessage && !isExpanded 
+                                        ? truncateMessage(msg.message) 
+                                        : msg.message}
+                                    </p>
+                                    
+                                    {isLongMessage && (
+                                      <button 
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          toggleMessageExpansion(msg._id);
+                                        }}
+                                        className="text-xs mt-1 text-[#FFF6E0]/70 hover:text-[#FFF6E0] transition-colors duration-300 underline focus:outline-none"
+                                      >
+                                        {isExpanded ? "Read less" : "Read more"}
+                                      </button>
+                                    )}
+                                    
+                                    <div className="text-[10px] mt-1 text-right flex justify-end items-center opacity-70">
+                                      <span>{formatTime(msg.timestamp)}</span>
+                                      {isMe && (
+                                        <span className="ml-1">
+                                          {msg.status === "sent" && <Check size={12} />}
+                                          {msg.status === "delivered" && <CheckCheck size={12} />}
+                                          {msg.status === "read" && (
+                                            <span className="text-blue-400">
+                                              <CheckCheck size={12} />
+                                            </span>
+                                          )}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))
                   ) : (
-                    <div className="flex items-center justify-center h-full text-[#61677A]">
-                      <p>Start a conversation with {activeChatUser.fullName}</p>
+                    <div className="flex items-center justify-center h-full py-20 text-[#61677A]">
+                      <div className="text-center p-6 bg-[#FFF6E0]/30 rounded-2xl">
+                        <MessageCircle size={40} className="mx-auto mb-4 text-[#61677A]/50" />
+                        <p>Start a conversation with {activeChatUser.fullName}</p>
+                        <p className="text-xs mt-2 text-[#61677A]/70">Messages are end-to-end encrypted</p>
+                      </div>
                     </div>
                   )}
                   <div ref={messagesEndRef} />
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-full text-[#61677A]">
-                  <RefreshCw size={30} className="mx-auto mb-2 animate-spin" />
-                  <p>Establishing secure connection...</p>
+                  <div className="text-center">
+                    <RefreshCw size={30} className="mx-auto mb-2 animate-spin" />
+                    <p>Establishing secure connection...</p>
+                  </div>
                 </div>
               )}
             </div>
 
-            {/* Message Input with modern styling and animation - removed backdrop blur */}
-            <div className="p-4 border-t border-gray-200 bg-[#FFF6E0] sticky bottom-0 left-0 right-0 bg-opacity-80 shadow-md">
-              <div className="flex gap-2">
+            {/* Message Input with modern styling and animation - simplified version */}
+            <div className="p-3 border-t border-gray-200 bg-[#FFF6E0] sticky bottom-0 left-0 right-0 bg-opacity-90 shadow-md z-40">
+              <div className="flex gap-2 items-end">
+                {/* Emoji button with position relative for proper positioning */}
+                <div className="relative z-[9000]">
+                  <button 
+                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    className="p-2 rounded-full hover:bg-[#D8D9DA] transition-colors text-[#272829]"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                      <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                      <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                    </svg>
+                  </button>
+                  
+                  <EmojiPicker
+                    visible={showEmojiPicker}
+                    onEmojiSelect={(emoji) => {
+                      if (emoji) {
+                        setChatMessage(prevMessage => prevMessage + emoji.native);
+                      } else {
+                        setShowEmojiPicker(false);
+                      }
+                    }}
+                    position="top"
+                  />
+                </div>
+                
                 <input
                   type="text"
                   value={chatMessage}
                   onChange={(e) => setChatMessage(e.target.value)}
                   onKeyDown={handleKeyPress}
-                  className="flex-1 bg-[#272829] text-[#FFF6E0] border-none rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#61677A] transition-all duration-300 shadow-inner placeholder-[#FFF6E0]/50 transform focus:scale-102"
+                  className="flex-1 bg-[#272829] text-[#FFF6E0] border-none rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#61677A] transition-all duration-300 shadow-inner placeholder-[#FFF6E0]/50 min-h-[44px]"
                   placeholder="Type a message..."
                 />
+                
                 <button
                   onClick={handleSendMessage}
-                  className="group relative overflow-hidden bg-gradient-to-r from-[#272829] to-[#31333A] text-[#FFF6E0] px-5 py-3 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
+                  className="p-3 rounded-full bg-[#272829] text-[#FFF6E0] hover:bg-[#31333A] transition-colors duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={!activeChatRoom || !chatMessage.trim()}
                 >
-                  <Send
-                    size={18}
-                    className="mr-2 group-hover:translate-x-1 transition-transform duration-300"
-                  />
-                  <span>Send</span>
+                  <Send size={20} />
                 </button>
               </div>
             </div>
@@ -1001,6 +1237,62 @@ useEffect(() => {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Message Context Menu */}
+      {showContextMenu && (
+        <div
+          ref={contextMenuRef}
+          className="fixed bg-[#272829] text-[#FFF6E0] rounded-lg shadow-lg py-2 z-50 animate-scaleIn w-48"
+          style={{
+            top: `${contextMenuPosition.y}px`,
+            left: `${contextMenuPosition.x}px`,
+          }}
+        >
+          <button
+            className="w-full text-left px-4 py-2 hover:bg-[#31333A] transition-colors duration-200 flex items-center"
+            onClick={copyMessageText}
+          >
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="16" 
+              height="16" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              className="mr-2"
+            >
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            Copy
+          </button>
+          <button
+            className="w-full text-left px-4 py-2 hover:bg-[#31333A] transition-colors duration-200 flex items-center"
+            onClick={showMessageInfo}
+          >
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="16" 
+              height="16" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              className="mr-2"
+            >
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            Info
+          </button>
         </div>
       )}
 
