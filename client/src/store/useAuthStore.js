@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import { axiosInstance } from '../lib/axios'; // axios instance for API calls
 import toast from 'react-hot-toast';
 import { io } from 'socket.io-client'
@@ -44,6 +43,12 @@ export const useAuthStore = create((set, get) => ({
   user: null,
   isActive: false,
   lastActive: null,
+
+
+  friends: [],
+  friendRequests: [],
+  isFetchingFriends: false,
+  isFetchingFriendRequests: false,
 
 
   // Function to check if the user is authenticated
@@ -170,6 +175,8 @@ export const useAuthStore = create((set, get) => ({
         unreadMessagesBySender: {},
         activeChatRoom: null,
         currentUserId: null,
+        friends: [], 
+        friendRequests: [],
       });
   
       // Clear stored user data
@@ -638,6 +645,135 @@ fetchPublicUserInfoRules: async () => {
     set({ isLoading: false });
   }
 },
+
+
+
+
+
+// New actions for friend management
+  fetchFriends: async () => {
+    set({ isFetchingFriends: true });
+    const { authUser } = get();
+    if (!authUser?.data?.user?._id) {
+      set({ isFetchingFriends: false });
+      toast.error("You must be logged in to fetch friends");
+      return;
+    }
+    try {
+      const res = await axiosInstance.get(`/api/v1/friend/listFriends/${authUser.data.user._id}`);
+      set({ friends: res.data.friends });
+    } catch (error) {
+      console.error("Error fetching friends:", error);
+      toast.error(error.response?.data?.message || "Failed to fetch friends");
+    } finally {
+      set({ isFetchingFriends: false });
+    }
+  },
+
+  fetchFriendRequests: async () => {
+    set({ isFetchingFriendRequests: true });
+    const { authUser } = get();
+    if (!authUser?.data?.user?._id) {
+      set({ isFetchingFriendRequests: false });
+      toast.error("You must be logged in to fetch friend requests");
+      return;
+    }
+    try {
+      const res = await axiosInstance.get(`/api/v1/friend/requests/${authUser.data.user._id}`);
+      set({ friendRequests: res.data.friendRequests });
+    } catch (error) {
+      console.error("Error fetching friend requests:", error);
+      toast.error(error.response?.data?.message || "Failed to fetch friend requests");
+    } finally {
+      set({ isFetchingFriendRequests: false });
+    }
+  },
+
+  sendFriendRequest: async (receiverId) => {
+    const { authUser } = get();
+    if (!authUser?.data?.user?._id) {
+      toast.error("You must be logged in to send a friend request");
+      return;
+    }
+    try {
+      await axiosInstance.post('/api/v1/friend/request', {
+        senderId: authUser.data.user._id,
+        receiverId,
+      });
+      toast.success("Friend request sent successfully");
+      // Note: No immediate state update here; receiver's friendRequests will update via API/server
+    } catch (error) {
+      console.error("Error sending friend request:", error);
+      const errorMessage = error.response?.data?.message || "Failed to send friend request";
+      toast.error(errorMessage);
+    }
+  },
+
+  acceptFriendRequest: async (senderId) => {
+    const { authUser } = get();
+    if (!authUser?.data?.user?._id) {
+      toast.error("You must be logged in to accept a friend request");
+      return;
+    }
+    try {
+      await axiosInstance.post('/api/v1/friend/accept', {
+        senderId,
+        receiverId: authUser.data.user._id,
+      });
+      toast.success("Friend request accepted successfully");
+      // Refetch friends and friend requests to reflect the updated state
+      get().fetchFriends();
+      get().fetchFriendRequests();
+    } catch (error) {
+      console.error("Error accepting friend request:", error);
+      const errorMessage = error.response?.data?.message || "Failed to accept friend request";
+      toast.error(errorMessage);
+    }
+  },
+
+  rejectFriendRequest: async (senderId) => {
+    const { authUser } = get();
+    if (!authUser?.data?.user?._id) {
+      toast.error("You must be logged in to reject a friend request");
+      return;
+    }
+    try {
+      await axiosInstance.post('/api/v1/friend/reject', {
+        senderId,
+        receiverId: authUser.data.user._id,
+      });
+      toast.success("Friend request rejected successfully");
+      // Refetch friend requests to reflect the updated state
+      get().fetchFriendRequests();
+    } catch (error) {
+      console.error("Error rejecting friend request:", error);
+      const errorMessage = error.response?.data?.message || "Failed to reject friend request";
+      toast.error(errorMessage);
+    }
+  },
+
+  removeFriend: async (friendId) => {
+    const { authUser } = get();
+    if (!authUser?.data?.user?._id) {
+      toast.error("You must be logged in to remove a friend");
+      return;
+    }
+    try {
+      await axiosInstance.delete('/api/v1/friend/remove', {
+        data: {
+          userId: authUser.data.user._id,
+          friendId,
+        },
+      });
+      toast.success("Friend removed successfully");
+      // Refetch friends to reflect the updated state
+      get().fetchFriends();
+    } catch (error) {
+      console.error("Error removing friend:", error);
+      const errorMessage = error.response?.data?.message || "Failed to remove friend";
+      toast.error(errorMessage);
+    }
+  },
 
 
 

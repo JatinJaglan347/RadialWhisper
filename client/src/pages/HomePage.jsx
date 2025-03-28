@@ -7,10 +7,43 @@ import {
   RefreshCw,
   CheckCheck,
   Check,
+  UserPlus,
+  UserCheck,
+  UserX,
 } from "lucide-react";
 import { useUserActivity } from "../hooks/useUserActivity";
 import EmojiPicker from "../components/EmojiPicker";
 import UserInfoPopup from "../components/UserInfoPopup";
+import { 
+  FaUserFriends, 
+  FaSearch, 
+  FaTimes, 
+  FaChevronDown,
+  FaSmile,
+  FaHeart,
+  FaUser,
+  FaUserPlus,
+  FaUserCheck,
+  FaUserMinus,
+  FaChevronUp,
+  FaPaperPlane,
+  FaEllipsisV,
+  FaRegCopy,
+  FaInfoCircle
+} from 'react-icons/fa';
+import { 
+  MdRefresh, 
+  MdExpandMore, 
+  MdExpandLess,
+  MdPersonAddAlt1,
+  MdPersonRemove,
+  MdClose,
+  MdMenu,
+  MdMessage
+} from 'react-icons/md';
+import { RiUserReceivedLine } from 'react-icons/ri';
+import { GiBowTie } from 'react-icons/gi';
+import { IoCheckmark, IoCheckmarkDone } from 'react-icons/io5';
 
 const HomePage = () => {
   useUserActivity();
@@ -25,7 +58,14 @@ const HomePage = () => {
     unreadMessagesBySender,
     messagesByRoom,
     markMessagesAsReadForSender,
-
+    fetchFriends, // Added to fetch friends list
+    fetchFriendRequests, // Added to fetch friend requests
+    friends, // Added to check friendship status
+    sendFriendRequest,
+    friendRequests,
+    acceptFriendRequest,
+    rejectFriendRequest,
+    removeFriend,
   } = useAuthStore();
 
   const [locationPermissionDenied, setLocationPermissionDenied] =
@@ -36,27 +76,50 @@ const HomePage = () => {
   const [chatMessage, setChatMessage] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState({});
-
+  const [showFriendRequestPopup, setShowFriendRequestPopup] = useState(false);
   const messagesEndRef = useRef(null);
   const isInitialFetchDone = useRef(false);
   const activeChatUserRef = useRef(activeChatUser);
   const [onlineUsers, setOnlineUsers] = useState({});
   const currentMessages = messagesByRoom[activeChatRoom] || {};
-
+  const [openMenuFriendId, setOpenMenuFriendId] = useState(null); // Tracks which friend's menu is open
+  const [friendToRemove, setFriendToRemove] = useState(null); // Tracks the friend to be removed
   // Add this new state for tracking expanded messages
   const [expandedMessages, setExpandedMessages] = useState({});
 
   // Add state for selected message and context menu
   const [selectedMessage, setSelectedMessage] = useState(null);
-  const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
+  const [contextMenuPosition, setContextMenuPosition] = useState({
+    x: 0,
+    y: 0,
+  });
   const [showContextMenu, setShowContextMenu] = useState(false);
-  
+
   // Add refs for tracking clicks
   const contextMenuRef = useRef(null);
+
+  // Add refs for friend list items
+  const mobileFriendRefs = useRef({});
+  const desktopFriendRefs = useRef({});
 
   // Add these state variables if they don't exist yet
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showUserInfoPopup, setShowUserInfoPopup] = useState(false);
+  const [viewMode, setViewMode] = useState("nearby");
+
+  // Add this state to manage friend search
+  const [friendSearchTerm, setFriendSearchTerm] = useState("");
+
+  // Add this function to filter friends based on search term
+  const filteredFriends = friendSearchTerm.trim() === "" 
+    ? friends 
+    : friends.filter(friend => 
+        friend.friendId.fullName.toLowerCase().includes(friendSearchTerm.toLowerCase()) ||
+        friend.friendId.email.toLowerCase().includes(friendSearchTerm.toLowerCase())
+      );
+
+  // Add this state to manage the friend requests dropdown
+  const [isFriendRequestsExpanded, setIsFriendRequestsExpanded] = useState(false);
 
   const formatTime = (timestamp) => {
     if (!timestamp) return "";
@@ -70,6 +133,16 @@ const HomePage = () => {
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
   window.scrollTo(0, 0);
+
+  useEffect(() => {
+    if (authUser ) {
+      fetchFriends();
+      fetchFriendRequests();
+    }
+  }, [authUser, fetchFriends, fetchFriendRequests]);
+
+  const isFriend = friends.some((friend) => friend.friendId._id === activeChatUser?._id);
+
   useEffect(() => {
     if (!socket) return;
 
@@ -245,12 +318,12 @@ const HomePage = () => {
 
   useEffect(() => {
     if (!socket) return;
-  
+
     const messageReceivedHandler = (data) => {
       const currentState = useAuthStore.getState();
       const currentUserId = currentState.authUser?.data?.user?._id;
       const storeActiveChatRoom = currentState.activeChatRoom;
-  
+
       // Log for debugging
       console.log("Received newMessage:", {
         messageRoom: data.room,
@@ -260,16 +333,18 @@ const HomePage = () => {
         activeChatUserId: activeChatUser?._id,
         currentUserId,
       });
-  
+
       // Check 1: Ignore messages from self to avoid duplication
       if (data.sender === currentUserId) {
         console.log("Message from self, skipping UI update");
         return;
       }
-  
+
       // Check 2: Ensure message room matches the locally active chat room
       if (data.room !== activeChatRoom) {
-        console.log("Message not for current local active chat room, updating unread only");
+        console.log(
+          "Message not for current local active chat room, updating unread only"
+        );
         setUnreadMessages((prev) => {
           const newCount = (prev[data.sender] || 0) + 1;
           const newUnread = { ...prev, [data.sender]: newCount };
@@ -278,33 +353,45 @@ const HomePage = () => {
         });
         return;
       }
-  
+
       // Check 3: Verify sender matches the active chat user
       if (data.sender !== activeChatUser?._id) {
         console.log("Sender does not match active chat user, skipping");
         return;
       }
-  
+
       // Check 4: Ensure store's activeChatRoom matches local activeChatRoom
       if (storeActiveChatRoom !== activeChatRoom) {
         console.log("Store activeChatRoom mismatch, skipping UI update");
         return;
       }
-  
+
       // Check 5: Prevent duplicate messages in the UI
       const isDuplicate = currentMessages.some((msg) => msg._id === data._id);
       if (isDuplicate) {
         console.log("Duplicate message detected in UI, skipping");
         return;
       }
-  
+
       console.log("Message valid for active chat, relying on store update");
       // No need to update state here; the store's "newMessage" handler already adds to messagesByRoom
     };
-  
+
     socket.on("newMessage", messageReceivedHandler);
     return () => socket.off("newMessage", messageReceivedHandler);
   }, [socket, activeChatUser, activeChatRoom, currentMessages]);
+
+  useEffect(() => {
+    if (friendToRemove) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    // Cleanup on unmount or when popup closes
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [friendToRemove]);
 
   // Update the useEffect for socket registration to include the user ID in the state
   useEffect(() => {
@@ -382,9 +469,16 @@ const HomePage = () => {
     if (!chatMessage.trim()) return;
 
     if (socket && activeChatRoom) {
-      const expectedRoomId = [authUser.data.user._id, activeChatUser._id].sort().join("_");
+      const expectedRoomId = [authUser.data.user._id, activeChatUser._id]
+        .sort()
+        .join("_");
       if (activeChatRoom !== expectedRoomId) {
-        console.error("Room mismatch! Expected:", expectedRoomId, "Got:", activeChatRoom);
+        console.error(
+          "Room mismatch! Expected:",
+          expectedRoomId,
+          "Got:",
+          activeChatRoom
+        );
         toast.error("Chat room not ready. Please try again.");
         return;
       }
@@ -397,28 +491,28 @@ const HomePage = () => {
   };
 
   // Add updateUnreadCount listener
-useEffect(() => {
-  if (!socket) return;
+  useEffect(() => {
+    if (!socket) return;
 
-  const updateUnreadCountHandler = ({ sender, count }) => {
-    console.log("Received unread count update:", sender, count);
-    setUnreadMessages((prev) => {
-      const newUnread = { ...prev, [sender]: count };
-      try {
-        localStorage.setItem("unreadMessages", JSON.stringify(newUnread));
-      } catch (error) {
-        console.error("Error updating localStorage:", error);
-      }
-      return newUnread;
-    });
-  };
+    const updateUnreadCountHandler = ({ sender, count }) => {
+      console.log("Received unread count update:", sender, count);
+      setUnreadMessages((prev) => {
+        const newUnread = { ...prev, [sender]: count };
+        try {
+          localStorage.setItem("unreadMessages", JSON.stringify(newUnread));
+        } catch (error) {
+          console.error("Error updating localStorage:", error);
+        }
+        return newUnread;
+      });
+    };
 
-  socket.on("updateUnreadCount", updateUnreadCountHandler);
+    socket.on("updateUnreadCount", updateUnreadCountHandler);
 
-  return () => {
-    socket.off("updateUnreadCount", updateUnreadCountHandler);
-  };
-}, [socket]);
+    return () => {
+      socket.off("updateUnreadCount", updateUnreadCountHandler);
+    };
+  }, [socket]);
 
   // Refresh the list of nearby users
   const handleRefreshNearby = () => {
@@ -446,7 +540,7 @@ useEffect(() => {
   // Add this effect to listen for messagesRead events
   useEffect(() => {
     if (!socket) return;
-  
+
     const messagesReadHandler = (data) => {
       console.log("Messages marked as read:", data);
       useAuthStore.setState((state) => {
@@ -462,7 +556,7 @@ useEffect(() => {
         };
       });
     };
-  
+
     socket.on("messagesRead", messagesReadHandler);
     return () => socket.off("messagesRead", messagesReadHandler);
   }, [socket]);
@@ -470,7 +564,7 @@ useEffect(() => {
   // Add this to your HomePage.jsx component
   useEffect(() => {
     if (!socket) return;
-  
+
     const messageDeliveredHandler = (data) => {
       console.log("Message delivered:", data);
       useAuthStore.setState((state) => {
@@ -486,7 +580,7 @@ useEffect(() => {
         };
       });
     };
-  
+
     socket.on("messageDelivered", messageDeliveredHandler);
     return () => socket.off("messageDelivered", messageDeliveredHandler);
   }, [socket]);
@@ -498,26 +592,26 @@ useEffect(() => {
       console.log("Marking messages as read in room:", activeChatRoom);
     }
   };
-// Adjust markMessagesAsRead trigger
-useEffect(() => {
-  if (activeChatRoom && activeChatUser && currentMessages.length > 0) {
-    const hasUnread = currentMessages.some(
-      (msg) => msg.sender === activeChatUser._id && msg.status !== "read"
-    );
-    if (hasUnread) {
-      markMessagesAsRead();
+  // Adjust markMessagesAsRead trigger
+  useEffect(() => {
+    if (activeChatRoom && activeChatUser && currentMessages.length > 0) {
+      const hasUnread = currentMessages.some(
+        (msg) => msg.sender === activeChatUser._id && msg.status !== "read"
+      );
+      if (hasUnread) {
+        markMessagesAsRead();
+      }
     }
-  }
-}, [activeChatRoom, activeChatUser, currentMessages]);
+  }, [activeChatRoom, activeChatUser, currentMessages]);
 
   // Add this function to toggle message expansion
   const toggleMessageExpansion = (messageId) => {
-    setExpandedMessages(prev => ({
+    setExpandedMessages((prev) => ({
       ...prev,
-      [messageId]: !prev[messageId]
+      [messageId]: !prev[messageId],
     }));
   };
-  
+
   // Add this function to truncate long messages
   const truncateMessage = (message, maxLength = 150) => {
     if (message.length <= maxLength) return message;
@@ -529,21 +623,22 @@ useEffect(() => {
     e.preventDefault();
     e.stopPropagation();
     const rect = e.currentTarget.getBoundingClientRect();
-    
+
     // Position the menu near the click but ensure it doesn't go off-screen
     const x = Math.min(e.clientX, window.innerWidth - 200);
     const y = Math.min(e.clientY, window.innerHeight - 150);
-    
+
     setContextMenuPosition({ x, y });
     setSelectedMessage(message);
     setShowContextMenu(true);
   };
-  
+
   // Function to copy message text
   const copyMessageText = () => {
     if (!selectedMessage) return;
-    
-    navigator.clipboard.writeText(selectedMessage.message)
+
+    navigator.clipboard
+      .writeText(selectedMessage.message)
       .then(() => {
         toast.success("Message copied to clipboard");
         setShowContextMenu(false);
@@ -552,29 +647,36 @@ useEffect(() => {
         toast.error("Failed to copy message");
       });
   };
-  
+
   // Function to show message info
   const showMessageInfo = () => {
     if (!selectedMessage) return;
-    
+
     // Build info message based on message status
     let statusText = "Sent";
     if (selectedMessage.status === "delivered") statusText = "Delivered";
     if (selectedMessage.status === "read") statusText = "Read";
-    
-    const sender = selectedMessage.sender === authUser.data.user._id 
-      ? "You" 
-      : activeChatUser?.fullName || "User";
-    
+
+    const sender =
+      selectedMessage.sender === authUser.data.user._id
+        ? "You"
+        : activeChatUser?.fullName || "User";
+
     const dateTime = new Date(selectedMessage.timestamp);
     const formattedDateTime = dateTime.toLocaleString();
-    
+
     // Show toast with message info
     toast(
       <div className="space-y-2">
-        <p><strong>Sender:</strong> {sender}</p>
-        <p><strong>Time:</strong> {formattedDateTime}</p>
-        <p><strong>Status:</strong> {statusText}</p>
+        <p>
+          <strong>Sender:</strong> {sender}
+        </p>
+        <p>
+          <strong>Time:</strong> {formattedDateTime}
+        </p>
+        <p>
+          <strong>Status:</strong> {statusText}
+        </p>
       </div>,
       {
         duration: 5000,
@@ -585,18 +687,21 @@ useEffect(() => {
         },
       }
     );
-    
+
     setShowContextMenu(false);
   };
-  
+
   // Close context menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (contextMenuRef.current && !contextMenuRef.current.contains(event.target)) {
+      if (
+        contextMenuRef.current &&
+        !contextMenuRef.current.contains(event.target)
+      ) {
         setShowContextMenu(false);
       }
     };
-    
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -606,37 +711,47 @@ useEffect(() => {
   // Add this function to group messages by date
   const groupMessagesByDate = (messages) => {
     const groups = {};
-    
-    messages.forEach(message => {
+
+    messages.forEach((message) => {
       const date = new Date(message.timestamp);
-      const dateString = date.toLocaleDateString(undefined, { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
+      const dateString = date.toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       });
-      
+
       if (!groups[dateString]) {
         groups[dateString] = [];
       }
-      
+
       groups[dateString].push(message);
     });
-    
+
     return groups;
   };
 
   // Update this function to handle emoji selection properly
   const handleEmojiSelect = (emoji) => {
     if (emoji) {
-      setChatMessage(prevMessage => prevMessage + emoji.native);
+      setChatMessage(
+        (prevMessage) => prevMessage + emoji.native
+      );
     } else {
       // Close the picker if emoji is null (click outside)
       setShowEmojiPicker(false);
     }
   };
 
+  // Add this helper function to check if a user is a friend
+  const isUserFriend = (userId) => {
+    return friends.some(friend => friend.friendId._id === userId);
+  };
+
   return (
-    <div className="h-full flex flex-col md:flex-row overflow-hidden relative" onClick={() => setShowContextMenu(false)}>
+    <div
+      className="h-full flex flex-col md:flex-row overflow-hidden relative"
+      onClick={() => setShowContextMenu(false)}
+    >
       {/* Dynamic background elements - removed blur */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-[#272829] opacity-90"></div>
@@ -674,11 +789,11 @@ useEffect(() => {
           onClick={toggleSidebar}
           aria-label="Open menu"
         >
-          <Menu size={20} />
+          <MdMenu size={20} />
         </button>
       )}
 
-      {/* Mobile Overlay Sidebar with improved animation - removed backdrop blur */}
+      {/* Mobile Overlay Sidebar with improved animation and design */}
       <div
         className={`
         md:hidden 
@@ -698,125 +813,415 @@ useEffect(() => {
       `}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close Button with hover effect */}
+        {/* Mobile Sidebar Header - improved design */}
+        <div className="sticky top-0 z-10 p-3 bg-gradient-to-r from-[#272829] to-[#31333A] border-b border-[#3a3b3c] shadow-md">
+          <div className="flex flex-col space-y-3">
+            <div className="flex items-center justify-between px-3 pt-2">
+              <h2 className="font-semibold text-[#FFF6E0] text-lg">ChatApp</h2>
         <button
-          className="absolute top-4 right-4 bg-[#272829]/50 p-2 rounded-full text-[#FFF6E0] hover:bg-[#61677A] hover:rotate-90 transition-all duration-300"
+                className="p-2 rounded-full hover:bg-[#3a3b3c] transition-all duration-300 text-[#FFF6E0]"
           onClick={toggleSidebar}
           aria-label="Close menu"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
+          <MdClose size={24} />
         </button>
-
-        {/* Mobile Nearby Users List - removed backdrop blur */}
-        <aside className="h-full flex flex-col text-[#FFF6E0] overflow-hidden">
-          {/* Navbar for users section */}
-          <div className="sticky top-0 z-10 p-6 bg-[#272829]/70 border-b border-[#3a3b3c] shadow-sm">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold flex items-center">
-                <MessageCircle className="mr-2" />
-                <span className="bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-transparent bg-clip-text">
-                  Nearby Users
-                </span>
-              </h2>
+          </div>
+            
+            {/* Improved tab navigation with better contrast and visual cues */}
+            <div className="flex bg-[#1e1f20]/40 p-1 rounded-lg mx-3">
+                <button
+                className={`flex-1 px-4 py-2.5 rounded-lg transition-all duration-300 flex items-center justify-center ${
+                    viewMode === "nearby"
+                    ? "bg-[#61677A] text-[#FFF6E0] shadow-md"
+                    : "text-[#FFF6E0]/70 hover:text-[#FFF6E0] hover:bg-[#31333A]/50"
+                  }`}
+                  onClick={() => setViewMode("nearby")}
+                >
+                <FaUser className="mr-2" size={18} />
+                Nearby
+              </button>
               <button
-                onClick={handleRefreshNearby}
-                className="p-2 rounded-full hover:bg-[#3a3b3c] transition-all duration-300 hover:rotate-180"
-                title="Refresh nearby users"
+                className={`flex-1 px-4 py-2.5 rounded-lg transition-all duration-300 flex items-center justify-center ${
+                  viewMode === "friends"
+                    ? "bg-[#61677A] text-[#FFF6E0] shadow-md"
+                    : "text-[#FFF6E0]/70 hover:text-[#FFF6E0] hover:bg-[#31333A]/50"
+                }`}
+                onClick={() => setViewMode("friends")}
               >
-                <RefreshCw size={20} />
+                <FaUserFriends className="mr-2" size={18} />
+                Friends
               </button>
             </div>
-          </div>
-
-          {/* User List with animation on each item */}
-          <div className="flex-1 overflow-y-auto p-4">
-            {isFetchingNearbyUsers && (
-              <div className="p-4 text-center text-[#FFF6E0] opacity-75">
-                <RefreshCw size={24} className="animate-spin mx-auto mb-2" />
-                <p>Discovering nearby connections...</p>
-              </div>
-            )}
-
-            {!isFetchingNearbyUsers && arrayOfNearbyUserData.length === 0 && (
-              <div className="p-8 text-center text-[#FFF6E0] opacity-75">
-                <div className="bg-[#272829]/30 p-6 rounded-xl border border-[#61677A]/30 shadow-lg">
-                  <p className="mb-4">No nearby users found.</p>
-                  <button
-                    onClick={handleRefreshNearby}
-                    className="px-4 py-2 bg-gradient-to-r from-[#FFF6E0]/20 to-[#D8D9DA]/20 hover:from-[#FFF6E0]/30 hover:to-[#D8D9DA]/30 rounded-lg transition-all duration-300 text-[#FFF6E0] transform hover:scale-105"
-                  >
-                    <RefreshCw size={16} className="inline mr-2" /> Try Again
-                  </button>
+            
+            {/* Search bar only in friends view */}
+            {viewMode === "friends" && (
+              <div className="relative px-3 pb-1">
+                <div className="relative flex items-center">
+                  <input
+                    type="text"
+                    placeholder="Search friends..."
+                    value={friendSearchTerm}
+                    onChange={(e) => setFriendSearchTerm(e.target.value)}
+                    className="w-full bg-[#1e1f20]/40 rounded-lg px-3 py-2 pl-10 text-sm text-[#FFF6E0] placeholder-[#FFF6E0]/40 focus:outline-none focus:ring-1 focus:ring-[#61677A]/50"
+                  />
+                  <FaSearch className="absolute left-3 text-[#FFF6E0]/40" size={16} />
+                  {friendSearchTerm && (
+                    <button
+                      onClick={() => setFriendSearchTerm("")}
+                      className="absolute right-3 p-1 rounded-full hover:bg-[#3a3b3c] text-[#FFF6E0]/70 hover:text-[#FFF6E0]"
+                    >
+                      <FaTimes size={14} />
+                    </button>
+                  )}
                 </div>
               </div>
             )}
-
-            {arrayOfNearbyUserData.length > 0 && (
-              <div className="space-y-3">
-                {arrayOfNearbyUserData.map((user, index) => {
-                  const unreadCount = unreadMessages[user._id] || 0;
-                  const isOnline = onlineUsers[user._id] || false; // Use this for online status
-                  return (
-                    <div
-                      key={user._id}
-                      className={`flex items-center p-4 rounded-xl cursor-pointer transition-all duration-300 transform ${
-                        activeChatUser?._id === user._id
-                          ? "bg-gradient-to-r from-[#61677A] to-[#505460] shadow-lg scale-102"
-                          : "bg-[#272829]/40 hover:bg-[#61677A]/60 hover:scale-105"
-                      }`}
-                      style={{ animationDelay: `${index * 0.05}s` }}
-                      onClick={() => handleStartChat(user)}
-                    >
-                      <div className="relative">
-                        <div className="relative overflow-hidden rounded-full w-14 h-14 border-2 border-[#61677A]/50">
-                          <img
-                            src={
-                              user.profileImageURL ||
-                              "https://via.placeholder.com/150"
-                            }
-                            alt={`${user.fullName}'s profile`}
-                            className="w-full h-full object-cover transition-transform hover:scale-110 duration-500"
-                          />
-                        </div>
-                        <span
-                          className={`absolute bottom-0 right-0 w-3 h-3 ${
-                            isOnline ? "bg-green-500" : "bg-red-500"
-                          } rounded-full border-2 border-[#61677A] animate-pulse`}
-                        ></span>
-                      </div>
-                      <div className="flex-1 ml-3">
-                        <h3 className="text-lg font-semibold">
-                          {user.fullName}
-                        </h3>
-                        <p className="text-sm text-[#FFF6E0] opacity-75">
-                          {user.email}
-                        </p>
-                      </div>
-                      {unreadCount > 0 && (
-                        <div className="bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-[#272829] rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold animate-bounce">
-                          {unreadCount > 9 ? "9+" : unreadCount}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
           </div>
-        </aside>
+        </div>
+
+        {/* Mobile User List with enhanced styling */}
+        <div className="flex-1 overflow-y-auto h-full custom-scrollbar p-2">
+          {viewMode === "nearby" ? (
+            <>
+              {/* Loading state with improved styling */}
+              {isFetchingNearbyUsers && (
+                <div className="p-6 text-center text-[#FFF6E0] opacity-75">
+                  <div className="inline-block p-3 bg-[#272829]/50 rounded-full">
+                    <RefreshCw size={24} className="animate-spin" />
+                  </div>
+                  <p className="mt-4 font-medium">Discovering nearby connections...</p>
+                  </div>
+                )}
+
+              {/* Empty state with improved styling */}
+              {!isFetchingNearbyUsers && arrayOfNearbyUserData.length === 0 && (
+                <div className="p-6 text-center text-[#FFF6E0]">
+                  <div className="bg-[#272829]/40 p-6 rounded-xl border border-[#61677A]/20 shadow-lg">
+                    <div className="inline-block p-4 bg-[#272829]/40 rounded-full mb-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 6L6 18M6 6l12 12"></path>
+                      </svg>
+                    </div>
+                    <p className="mb-4 font-medium">No nearby users found</p>
+                        <button
+                          onClick={handleRefreshNearby}
+                      className="px-4 py-2 bg-[#61677A] text-[#FFF6E0] rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md flex items-center justify-center mx-auto"
+                        >
+                      <RefreshCw size={16} className="inline mr-2" /> Try Again
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+              {/* User list with improved cards */}
+                {arrayOfNearbyUserData.length > 0 && (
+                <div className="space-y-2 px-2">
+                  {/* Section header with refresh button */}
+                  <div className="flex items-center justify-between px-2 py-3 sticky top-0 bg-[#272829]/90">
+                    <h3 className="text-xs uppercase tracking-wider text-[#FFF6E0]/60 font-semibold">
+                      People Nearby ({arrayOfNearbyUserData.length})
+                    </h3>
+                    <button
+                      onClick={handleRefreshNearby}
+                      className="p-2 rounded-full hover:bg-[#31333A] transition-all duration-300 text-[#FFF6E0]/70 hover:text-[#FFF6E0] flex items-center"
+                      title="Refresh nearby users"
+                    >
+                      <MdRefresh size={18} className="mr-1" />
+                      <span className="text-xs">Refresh</span>
+                    </button>
+                  </div>
+                  
+                    {arrayOfNearbyUserData.map((user, index) => {
+                      const unreadCount = unreadMessages[user._id] || 0;
+                      const isOnline = onlineUsers[user._id] || false;
+                      const isFriend = isUserFriend(user._id);
+                      return (
+                        <div
+                          key={user._id}
+                        className={`flex items-center p-3 rounded-xl cursor-pointer transition-all duration-300 ${
+                            activeChatUser?._id === user._id
+                            ? "bg-gradient-to-r from-[#61677A] to-[#505460] shadow-md border-l-4 border-[#FFF6E0]"
+                            : "bg-[#272829]/30 hover:bg-[#61677A]/40 hover:translate-x-1"
+                        }`}
+                        onClick={() => {
+                          handleStartChat(user);
+                          toggleSidebar();
+                        }}
+                        >
+                          <div className="relative">
+                          <div className={`relative overflow-hidden rounded-full w-12 h-12 border-2 ${
+                            activeChatUser?._id === user._id 
+                              ? "border-[#FFF6E0]" 
+                              : "border-[#61677A]/30"
+                          }`}>
+                              <img
+                                src={
+                                  user.profileImageURL ||
+                                  "https://via.placeholder.com/150"
+                                }
+                                alt={`${user.fullName}'s profile`}
+                                className="w-full h-full object-cover transition-transform hover:scale-110 duration-500"
+                              />
+                            </div>
+                            {isFriend && (
+                              <div className="absolute -top-[6px] -left-1 z-10">
+                                <div className="w-6 h-6 rounded-full flex items-center justify-center shadow-lg rotate-[-25deg]">
+                                  <GiBowTie className="text-pink-500 text-3xl" />
+                                </div>
+                              </div>
+                            )}
+                            <span
+                              className={`absolute bottom-0 right-0 w-3 h-3 ${
+                                isOnline ? "bg-green-500" : "bg-red-500"
+                            } rounded-full border-2 border-[#272829]`}
+                            ></span>
+                          </div>
+                          <div className="flex-1 ml-3">
+                          <h3 className="text-base font-semibold text-[#FFF6E0] flex items-center">
+                              {user.fullName}
+                            {isOnline && (
+                              <span className="ml-2 text-xs text-green-400 font-normal">• online</span>
+                            )}
+                            
+                            </h3>
+                          <p className="text-xs text-[#FFF6E0]/70 line-clamp-1">
+                              {user.email}
+                            </p>
+                          </div>
+                          {unreadCount > 0 && (
+                          <div className="bg-[#FFF6E0] text-[#272829] rounded-full min-w-6 h-6 flex items-center justify-center text-xs font-bold px-2">
+                            {unreadCount > 99 ? "99+" : unreadCount}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
+            ) : (
+            <div className="px-2">
+              {/* Friend Requests Section as expandable dropdown */}
+              <div className="mb-6 bg-[#272829]/40 rounded-lg overflow-hidden">
+                <button 
+                  onClick={() => setIsFriendRequestsExpanded(!isFriendRequestsExpanded)}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-[#31333A]/70 hover:bg-[#31333A] transition-colors"
+                >
+                  <div className="flex items-center">
+                    <FaUserPlus className="mr-2" size={16} />
+                    <h3 className="text-xs uppercase tracking-wider text-[#FFF6E0]/90 font-semibold">
+                      Friend Requests
+                    </h3>
+                  </div>
+                  <div className="flex items-center">
+                    {friendRequests.length > 0 && (
+                      <span className="bg-[#FFF6E0] text-[#272829] rounded-full min-w-5 h-5 flex items-center justify-center text-xs font-bold px-1.5 mr-2">
+                        {friendRequests.length}
+                      </span>
+                    )}
+                    {isFriendRequestsExpanded ? (
+                      <FaChevronUp size={16} />
+                    ) : (
+                      <FaChevronDown size={16} />
+                    )}
+                  </div>
+                </button>
+                
+                <div 
+                  className={`transition-all duration-300 overflow-hidden ${
+                    isFriendRequestsExpanded 
+                      ? 'max-h-96 opacity-100' 
+                      : 'max-h-0 opacity-0'
+                  }`}
+                >
+                  <div className="space-y-2 p-3">
+                    {friendRequests.length > 0 ? (
+                      friendRequests.map((request) => (
+                        <div
+                          key={request._id}
+                          className="flex items-center justify-between p-3 bg-[#31333A]/50 rounded-lg border-l-2 border-[#FFF6E0]/50"
+                        >
+                          <div className="flex items-center">
+                            <div className="w-10 h-10 rounded-full overflow-hidden border border-[#61677A]/30 mr-3">
+                              <img 
+                                src={request.userId.profileImageURL || "https://via.placeholder.com/150"} 
+                                alt={request.userId.fullName}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <span className="font-medium text-sm">{request.userId.fullName}</span>
+                          </div>
+                          <div className="flex space-x-1">
+                            <button
+                              onClick={() => acceptFriendRequest(request.userId._id)}
+                              className="p-2 rounded-lg bg-[#272829]/50 hover:bg-green-500/20 transition-colors"
+                            >
+                              <FaUserCheck size={18} className="text-[#FFF6E0] hover:text-green-400" />
+                            </button>
+                            <button
+                              onClick={() => rejectFriendRequest(request.userId._id)}
+                              className="p-2 rounded-lg bg-[#272829]/50 hover:bg-red-500/20 transition-colors"
+                            >
+                              <FaUserMinus size={18} className="text-[#FFF6E0] hover:text-red-400" />
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-sm text-[#FFF6E0]/70 bg-[#272829]/20 rounded-lg p-4 text-center">
+                        No pending friend requests
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Friends list with improved styling */}
+              <h3 className="text-xs uppercase tracking-wider text-[#FFF6E0]/60 font-semibold px-2 py-3 sticky top-0 bg-[#272829]/90 flex items-center justify-between">
+                Friends
+                {friends.length > 0 && (
+                  <span className="bg-[#FFF6E0] text-[#272829] rounded-full min-w-5 h-5 flex items-center justify-center text-xs font-bold px-1.5">
+                    {friends.length}
+                  </span>
+                )}
+              </h3>
+              
+                  <div className="space-y-2 relative">
+                {filteredFriends.length > 0 ? (
+                  filteredFriends.map((friend) => (
+                        <div
+                          key={friend.friendId._id}
+                          ref={(el) => (mobileFriendRefs.current[friend.friendId._id] = el)}
+                          className="relative"
+                        >
+                          <div 
+                        className={`flex items-center p-3 rounded-xl cursor-pointer transition-all duration-300 ${
+                          activeChatUser?._id === friend.friendId._id
+                            ? "bg-gradient-to-r from-[#61677A] to-[#505460] shadow-md border-l-4 border-[#FFF6E0]"
+                            : "bg-[#272829]/30 hover:bg-[#61677A]/40 hover:translate-x-1"
+                        }`}
+                        onClick={() => {
+                          handleStartChat(friend.friendId);
+                          toggleSidebar();
+                        }}
+                      >
+                          <div className="relative">
+                          <div className={`relative overflow-hidden rounded-full w-12 h-12 border-2 ${
+                            activeChatUser?._id === friend.friendId._id 
+                              ? "border-[#FFF6E0]" 
+                              : "border-[#61677A]/30"
+                          }`}>
+                            <img
+                              src={friend.friendId.profileImageURL || "https://via.placeholder.com/150"}
+                              alt={`${friend.friendId.fullName}'s profile`}
+                              className="w-full h-full object-cover transition-transform hover:scale-110 duration-500"
+                            />
+                          </div>
+                          <span
+                            className={`absolute bottom-0 right-0 w-3 h-3 ${
+                              onlineUsers[friend.friendId._id] ? "bg-green-500" : "bg-red-500"
+                            } rounded-full border-2 border-[#272829]`}
+                          ></span>
+                        </div>
+                        <div className="flex-1 ml-3">
+                          <h3 className="text-base font-semibold text-[#FFF6E0] flex items-center">
+                            {friend.friendId.fullName}
+                            {onlineUsers[friend.friendId._id] && (
+                              <span className="ml-2 text-xs text-green-400 font-normal">• online</span>
+                            )}
+                            {/* {isUserFriend(friend.friendId._id) && (
+                              <span className="ml-2 text-xs text-pink-400 font-normal flex items-center">
+                                <FaUserFriends className="mr-1" /> Friend
+                              </span>
+                            )} */}
+                          </h3>
+                          <p className="text-xs text-[#FFF6E0]/70 line-clamp-1">
+                            {friend.friendId.email}
+                          </p>
+                        </div>
+                            {(unreadMessages[friend.friendId._id] || 0) > 0 && (
+                          <div className="bg-[#FFF6E0] text-[#272829] rounded-full min-w-6 h-6 flex items-center justify-center text-xs font-bold px-2 mr-2">
+                            {unreadMessages[friend.friendId._id] > 99 ? "99+" : unreadMessages[friend.friendId._id]}
+                          </div>
+                        )}
+                        <div className="relative">
+                          <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                              setOpenMenuFriendId(
+                                    openMenuFriendId === friend.friendId._id ? null : friend.friendId._id
+                              )
+                                }}
+                            className="text-[#FFF6E0]/70 hover:text-[#FFF6E0] p-2 hover:bg-[#272829]/30 rounded-full transition-colors"
+                          >
+                            <FaEllipsisV size={16} />
+                          </button>
+                          {openMenuFriendId === friend.friendId._id && (
+                            <div className="absolute right-0 mt-2 w-48 bg-[#272829] text-[#FFF6E0] rounded-lg shadow-lg z-50 border border-[#61677A]/20">
+                              <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                  setFriendToRemove(friend.friendId);
+                                  setOpenMenuFriendId(null);
+                                }}
+                                className="w-full text-left px-4 py-3 hover:bg-[#31333A] transition-colors flex items-center"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                  <circle cx="8.5" cy="7" r="4"></circle>
+                                  <line x1="18" y1="8" x2="23" y2="13"></line>
+                                  <line x1="23" y1="8" x2="18" y2="13"></line>
+                                </svg>
+                                Remove Friend
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      {friendToRemove &&
+                        friendToRemove._id === friend.friendId._id && (
+                          <div className="absolute top-full left-0 right-0 mt-1 p-4 bg-[#FFF6E0] rounded-lg shadow-lg z-50">
+                            <p className="text-[#272829] mb-4">
+                              Do you really want to remove{" "}
+                              {friendToRemove.fullName} from your friends?
+                            </p>
+                            <div className="flex justify-end space-x-4">
+                              <button
+                                onClick={() => {
+                                  removeFriend(friendToRemove._id);
+                                  setFriendToRemove(null);
+                                }}
+                                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                              >
+                                Yes
+                              </button>
+                              <button
+                                onClick={() => setFriendToRemove(null)}
+                                className="px-4 py-2 bg-gray-300 text-[#272829] rounded hover:bg-gray-400 transition-colors"
+                              >
+                                No
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-sm text-[#FFF6E0]/70 bg-[#272829]/20 rounded-lg p-4 text-center">
+                    {friendSearchTerm.trim() !== "" ? (
+                      <p>No friends match your search</p>
+                    ) : (
+                      <>
+                        <p>No friends yet</p>
+                        <p className="text-xs mt-2">Add friends to chat with them anytime</p>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+                </div>
+              )}
+          </div>
       </div>
 
       {sidebarOpen && (
@@ -843,96 +1248,394 @@ useEffect(() => {
       border-r border-[#61677A]/20
     `}
       >
-        {/* Desktop Sidebar Header - removed backdrop blur */}
-        <div className="sticky top-0 z-10 p-6 bg-[#272829]/70 border-b border-[#3a3b3c] shadow-sm">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold flex items-center">
-              <MessageCircle className="mr-2" />
-              <span className="bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-transparent bg-clip-text">
-                Nearby Users
-              </span>
-            </h2>
-            <button
-              onClick={handleRefreshNearby}
-              className="p-2 rounded-full hover:bg-[#3a3b3c] transition-all duration-300 hover:rotate-180"
-              title="Refresh nearby users"
-            >
-              <RefreshCw size={20} />
-            </button>
+        {/* Desktop Sidebar Header - improved design */}
+        <div className="sticky top-0 z-10 p-3 bg-gradient-to-r from-[#272829] to-[#31333A] border-b border-[#3a3b3c] shadow-md">
+          <div className="flex flex-col space-y-3">
+            <h2 className="font-semibold text-[#FFF6E0] text-lg px-3 pt-2">ChatApp</h2>
+            
+            {/* Improved tab navigation with better contrast and visual cues */}
+            <div className="flex bg-[#1e1f20]/40 p-1 rounded-lg">
+              <button
+                className={`flex-1 px-4 py-2.5 rounded-lg transition-all duration-300 flex items-center justify-center ${
+                  viewMode === "nearby"
+                    ? "bg-[#61677A] text-[#FFF6E0] shadow-md"
+                    : "text-[#FFF6E0]/70 hover:text-[#FFF6E0] hover:bg-[#31333A]/50"
+                }`}
+                onClick={() => setViewMode("nearby")}
+              >
+                <FaUser className="mr-2" size={18} />
+                Nearby
+              </button>
+              <button
+                className={`flex-1 px-4 py-2.5 rounded-lg transition-all duration-300 flex items-center justify-center ${
+                  viewMode === "friends"
+                    ? "bg-[#61677A] text-[#FFF6E0] shadow-md"
+                    : "text-[#FFF6E0]/70 hover:text-[#FFF6E0] hover:bg-[#31333A]/50"
+                }`}
+                onClick={() => setViewMode("friends")}
+              >
+                <FaUserFriends className="mr-2" size={18} />
+                Friends
+              </button>
+            </div>
+            
+            {/* Search bar only in friends view */}
+            {viewMode === "friends" && (
+              <div className="relative px-3 pb-1">
+                <div className="relative flex items-center">
+                  <input
+                    type="text"
+                    placeholder="Search friends..."
+                    value={friendSearchTerm}
+                    onChange={(e) => setFriendSearchTerm(e.target.value)}
+                    className="w-full bg-[#1e1f20]/40 rounded-lg px-3 py-2 pl-10 text-sm text-[#FFF6E0] placeholder-[#FFF6E0]/40 focus:outline-none focus:ring-1 focus:ring-[#61677A]/50"
+                  />
+                  <FaSearch className="absolute left-3 text-[#FFF6E0]/40" size={16} />
+                  {friendSearchTerm && (
+                    <button
+                      onClick={() => setFriendSearchTerm("")}
+                      className="absolute right-3 p-1 rounded-full hover:bg-[#3a3b3c] text-[#FFF6E0]/70 hover:text-[#FFF6E0]"
+                    >
+                      <FaTimes size={14} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Desktop User List with enhanced styling */}
-        <div className="flex-1 overflow-y-auto p-4">
-          {isFetchingNearbyUsers && (
-            <div className="p-4 text-center text-[#FFF6E0] opacity-75">
-              <RefreshCw size={24} className="animate-spin mx-auto mb-2" />
-              <p>Discovering nearby connections...</p>
-            </div>
-          )}
+        <div className="flex-1 overflow-y-auto h-auto p-2 custom-scrollbar">
+          {viewMode === "nearby" ? (
+            <>
+              {/* Loading state with improved styling */}
+              {isFetchingNearbyUsers && (
+                <div className="p-6 text-center text-[#FFF6E0] opacity-75">
+                  <div className="inline-block p-3 bg-[#272829]/50 rounded-full">
+                    <RefreshCw size={24} className="animate-spin" />
+                  </div>
+                  <p className="mt-4 font-medium">Discovering nearby connections...</p>
+                </div>
+              )}
 
-          {!isFetchingNearbyUsers && arrayOfNearbyUserData.length === 0 && (
-            <div className="p-8 text-center text-[#FFF6E0] opacity-75">
-              <div className="bg-[#272829]/30 p-6 rounded-xl border border-[#61677A]/30 shadow-lg">
-                <p className="mb-4">No nearby users found.</p>
-                <button
-                  onClick={handleRefreshNearby}
-                  className="px-4 py-2 bg-gradient-to-r from-[#FFF6E0]/20 to-[#D8D9DA]/20 hover:from-[#FFF6E0]/30 hover:to-[#D8D9DA]/30 rounded-lg transition-all duration-300 text-[#FFF6E0] transform hover:scale-105"
-                >
-                  <RefreshCw size={16} className="inline mr-2" /> Try Again
-                </button>
-              </div>
-            </div>
-          )}
+              {/* Empty state with improved styling */}
+              {!isFetchingNearbyUsers && arrayOfNearbyUserData.length === 0 && (
+                <div className="p-6 text-center text-[#FFF6E0]">
+                  <div className="bg-[#272829]/40 p-6 rounded-xl border border-[#61677A]/20 shadow-lg">
+                    <div className="inline-block p-4 bg-[#272829]/40 rounded-full mb-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 6L6 18M6 6l12 12"></path>
+                      </svg>
+                    </div>
+                    <p className="mb-4 font-medium">No nearby users found</p>
+                    <button
+                      onClick={handleRefreshNearby}
+                      className="px-4 py-2 bg-[#61677A] text-[#FFF6E0] rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md flex items-center justify-center mx-auto"
+                    >
+                      <MdRefresh className="inline mr-2" size={16} /> Try Again
+                    </button>
+                  </div>
+                </div>
+              )}
 
-          {arrayOfNearbyUserData.length > 0 && (
-            <div className="space-y-3">
-              {arrayOfNearbyUserData.map((user, index) => {
-                const unreadCount = unreadMessages[user._id] || 0;
-                return (
-                  <div
-                    key={user._id}
-                    className={`flex items-center p-4 rounded-xl cursor-pointer transition-all duration-300 transform ${
-                      activeChatUser?._id === user._id
-                        ? "bg-gradient-to-r from-[#61677A] to-[#505460] shadow-lg scale-102"
-                        : "bg-[#272829]/40 hover:bg-[#61677A]/60 hover:scale-105"
-                    }`}
-                    style={{ animationDelay: `${index * 0.05}s` }}
-                    onClick={() => handleStartChat(user)}
-                  >
-                    <div className="relative">
-                      <div className="relative overflow-hidden rounded-full w-14 h-14 border-2 border-[#61677A]/50">
-                        <img
-                          src={
-                            user.profileImageURL ||
-                            "https://via.placeholder.com/150"
-                          }
-                          alt={`${user.fullName}'s profile`}
-                          className="w-full h-full object-cover transition-transform hover:scale-110 duration-500"
-                        />
+              {/* User list with improved cards */}
+              {arrayOfNearbyUserData.length > 0 && (
+                <div className="space-y-2 px-2">
+                  {/* Section header with refresh button */}
+                  <div className="flex items-center justify-between px-2 py-3 sticky top-0 bg-[#272829]/90">
+                    <h3 className="text-xs uppercase tracking-wider text-[#FFF6E0]/60 font-semibold">
+                      People Nearby ({arrayOfNearbyUserData.length})
+                    </h3>
+                    <button
+                      onClick={handleRefreshNearby}
+                      className="p-2 rounded-full hover:bg-[#31333A] transition-all duration-300 text-[#FFF6E0]/70 hover:text-[#FFF6E0] hover:rotate-180"
+                      title="Refresh nearby users"
+                    >
+                      <MdRefresh size={18} />
+                    </button>
+                  </div>
+                  
+                  {arrayOfNearbyUserData.map((user, index) => {
+                    const unreadCount = unreadMessages[user._id] || 0;
+                    const isFriend = isUserFriend(user._id);
+                    
+                    return (
+                      <div
+                        key={user._id}
+                        className={`flex items-center p-3 rounded-xl cursor-pointer transition-all duration-300 ${
+                          activeChatUser?._id === user._id
+                            ? "bg-gradient-to-r from-[#61677A] to-[#505460] shadow-md scale-102 border-l-4 border-[#FFF6E0]"
+                            : "bg-[#272829]/30 hover:bg-[#61677A]/40 hover:translate-x-1"
+                        }`}
+                        onClick={() => handleStartChat(user)}
+                      >
+                        <div className="relative">
+                          <div className={`relative overflow-hidden rounded-full w-12 h-12 border-2 ${
+                            activeChatUser?._id === user._id 
+                              ? "border-[#FFF6E0]" 
+                              : "border-[#61677A]/30"
+                          }`}>
+                            <img
+                              src={user.profileImageURL || "https://via.placeholder.com/150"}
+                              alt={`${user.fullName}'s profile`}
+                              className="w-full h-full object-cover transition-transform hover:scale-110 duration-500"
+                            />
+                            
+                            {/* Bow Tie indicator for friends - diagonally opposite to status dot */}
+                            
+                          </div>
+                          {isFriend && (
+                              <div className="absolute -top-[6px] -left-1 z-10">
+                                <div className="w-6 h-6 rounded-full flex items-center justify-center shadow-lg rotate-[-25deg]">
+                                  <GiBowTie className="text-pink-500 text-3xl" />
+                                </div>
+                              </div>
+                            )}
+                          <span
+                            className={`absolute bottom-0 right-0 w-3 h-3 ${
+                              user.activeStatus?.isActive 
+                                ? "bg-green-500" 
+                                : "bg-red-500"
+                            } rounded-full border-2 border-[#272829]`}
+                          ></span>
+                        </div>
+                        <div className="flex-1 ml-3">
+                          <h3 className="text-base font-semibold text-[#FFF6E0] flex items-center">
+                            {user.fullName}
+                            {user.activeStatus?.isActive && (
+                              <span className="ml-2 text-xs text-green-400 font-normal">• online</span>
+                            )}
+                          </h3>
+                          <p className="text-xs text-[#FFF6E0]/70 line-clamp-1">
+                            {user.email}
+                          </p>
+                        </div>
+                        {unreadCount > 0 && (
+                          <div className="bg-[#FFF6E0] text-[#272829] rounded-full min-w-6 h-6 flex items-center justify-center text-xs font-bold px-2">
+                            {unreadCount > 99 ? "99+" : unreadCount}
+                          </div>
+                        )}
                       </div>
-                      <span
-                        className={`absolute bottom-0 right-0 w-3 h-3 ${
-                          user.activeStatus.isActive
-                            ? "bg-green-500"
-                            : "bg-red-500"
-                        } rounded-full border-2 border-[#61677A] animate-pulse`}
-                      ></span>
-                    </div>
-                    <div className="flex-1 ml-3">
-                      <h3 className="text-lg font-semibold">{user.fullName}</h3>
-                      <p className="text-sm text-[#FFF6E0] opacity-75">
-                        {user.email}
-                      </p>
-                    </div>
-                    {unreadCount > 0 && (
-                      <div className="bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-[#272829] rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold animate-bounce">
-                        {unreadCount > 9 ? "9+" : unreadCount}
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="px-2">
+              {/* Friend Requests Section as expandable dropdown */}
+              <div className="mb-6 bg-[#272829]/40 rounded-lg overflow-hidden">
+                        <button
+                  onClick={() => setIsFriendRequestsExpanded(!isFriendRequestsExpanded)}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-[#31333A]/70 hover:bg-[#31333A] transition-colors"
+                >
+                  <div className="flex items-center">
+                    <FaUserPlus className="mr-2" size={16} />
+                    <h3 className="text-xs uppercase tracking-wider text-[#FFF6E0]/90 font-semibold">
+                      Friend Requests
+                    </h3>
+                  </div>
+                  <div className="flex items-center">
+                    {friendRequests.length > 0 && (
+                      <span className="bg-[#FFF6E0] text-[#272829] rounded-full min-w-5 h-5 flex items-center justify-center text-xs font-bold px-1.5 mr-2">
+                        {friendRequests.length}
+                      </span>
+                    )}
+                    {isFriendRequestsExpanded ? (
+                      <FaChevronUp size={16} />
+                    ) : (
+                      <FaChevronDown size={16} />
+                    )}
+                  </div>
+                </button>
+                
+                <div 
+                  className={`transition-all duration-300 overflow-hidden ${
+                    isFriendRequestsExpanded 
+                      ? 'max-h-96 opacity-100' 
+                      : 'max-h-0 opacity-0'
+                  }`}
+                >
+                  <div className="space-y-2 p-3">
+                    {friendRequests.length > 0 ? (
+                      friendRequests.map((request) => (
+                        <div
+                          key={request._id}
+                          className="flex items-center justify-between p-3 bg-[#31333A]/50 rounded-lg border-l-2 border-[#FFF6E0]/50"
+                        >
+                          <div className="flex items-center">
+                            <div className="w-10 h-10 rounded-full overflow-hidden border border-[#61677A]/30 mr-3">
+                              <img 
+                                src={request.userId.profileImageURL || "https://via.placeholder.com/150"} 
+                                alt={request.userId.fullName}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <span className="font-medium text-sm">{request.userId.fullName}</span>
+                          </div>
+                          <div className="flex space-x-1">
+                            <button
+                              onClick={() => acceptFriendRequest(request.userId._id)}
+                              className="p-2 rounded-lg bg-[#272829]/50 hover:bg-green-500/20 transition-colors"
+                            >
+                              <FaUserCheck size={18} className="text-[#FFF6E0] hover:text-green-400" />
+                            </button>
+                            <button
+                              onClick={() => rejectFriendRequest(request.userId._id)}
+                              className="p-2 rounded-lg bg-[#272829]/50 hover:bg-red-500/20 transition-colors"
+                            >
+                              <FaUserMinus size={18} className="text-[#FFF6E0] hover:text-red-400" />
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-sm text-[#FFF6E0]/70 bg-[#272829]/20 rounded-lg p-4 text-center">
+                        No pending friend requests
                       </div>
                     )}
                   </div>
-                );
-              })}
+                </div>
+              </div>
+
+              {/* Friends list with improved styling */}
+              <h3 className="text-xs uppercase tracking-wider text-[#FFF6E0]/60 font-semibold px-2 py-3 sticky top-0 bg-[#272829]/90 flex items-center justify-between">
+                Friends
+                {friends.length > 0 && (
+                  <span className="bg-[#FFF6E0] text-[#272829] rounded-full min-w-5 h-5 flex items-center justify-center text-xs font-bold px-1.5">
+                    {friends.length}
+                  </span>
+                )}
+              </h3>
+              
+              <div className="space-y-2 relative">
+                {filteredFriends.length > 0 ? (
+                  filteredFriends.map((friend) => (
+                    <div
+                      key={friend.friendId._id}
+                      ref={(el) => (desktopFriendRefs.current[friend.friendId._id] = el)}
+                      className="relative"
+                    >
+                      <div 
+                        className={`flex items-center p-3 rounded-xl cursor-pointer transition-all duration-300 ${
+                          activeChatUser?._id === friend.friendId._id
+                            ? "bg-gradient-to-r from-[#61677A] to-[#505460] shadow-md border-l-4 border-[#FFF6E0]"
+                            : "bg-[#272829]/30 hover:bg-[#61677A]/40 hover:translate-x-1"
+                        }`}
+                        onClick={() => handleStartChat(friend.friendId)}
+                      >
+                        <div className="relative">
+                          <div className={`relative overflow-hidden rounded-full w-12 h-12 border-2 ${
+                            activeChatUser?._id === friend.friendId._id 
+                              ? "border-[#FFF6E0]" 
+                              : "border-[#61677A]/30"
+                          }`}>
+                            <img
+                              src={friend.friendId.profileImageURL || "https://via.placeholder.com/150"}
+                              alt={`${friend.friendId.fullName}'s profile`}
+                              className="w-full h-full object-cover transition-transform hover:scale-110 duration-500"
+                            />
+                          </div>
+                          
+                          <span
+                            className={`absolute bottom-0 right-0 w-3 h-3 ${
+                              onlineUsers[friend.friendId._id] ? "bg-green-500" : "bg-red-500"
+                            } rounded-full border-2 border-[#272829]`}
+                          ></span>
+                        </div>
+                        <div className="flex-1 ml-3">
+                          <h3 className="text-base font-semibold text-[#FFF6E0] flex items-center">
+                            {friend.friendId.fullName}
+                            {onlineUsers[friend.friendId._id] && (
+                              <span className="ml-2 text-xs text-green-400 font-normal">• online</span>
+                            )}
+                            
+                          </h3>
+                          <p className="text-xs text-[#FFF6E0]/70 line-clamp-1">
+                            {friend.friendId.email}
+                          </p>
+                        </div>
+                        {(unreadMessages[friend.friendId._id] || 0) > 0 && (
+                          <div className="bg-[#FFF6E0] text-[#272829] rounded-full min-w-6 h-6 flex items-center justify-center text-xs font-bold px-2 mr-2">
+                            {unreadMessages[friend.friendId._id] > 99 ? "99+" : unreadMessages[friend.friendId._id]}
+                          </div>
+                        )}
+                        <div className="relative">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenMenuFriendId(
+                                openMenuFriendId === friend.friendId._id ? null : friend.friendId._id
+                              )
+                            }}
+                            className="text-[#FFF6E0]/70 hover:text-[#FFF6E0] p-2 hover:bg-[#272829]/30 rounded-full transition-colors"
+                          >
+                            <FaEllipsisV size={16} />
+                          </button>
+                          {openMenuFriendId === friend.friendId._id && (
+                            <div className="absolute right-0 mt-2 w-48 bg-[#272829] text-[#FFF6E0] rounded-lg shadow-lg z-50 border border-[#61677A]/20">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setFriendToRemove(friend.friendId);
+                                  setOpenMenuFriendId(null);
+                                }}
+                                className="w-full text-left px-4 py-3 hover:bg-[#31333A] transition-colors flex items-center"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                  <circle cx="8.5" cy="7" r="4"></circle>
+                                  <line x1="18" y1="8" x2="23" y2="13"></line>
+                                  <line x1="23" y1="8" x2="18" y2="13"></line>
+                                </svg>
+                                Remove Friend
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      {friendToRemove &&
+                        friendToRemove._id === friend.friendId._id && (
+                          <div className="absolute top-full left-0 right-0 mt-1 p-4 bg-[#FFF6E0] rounded-lg shadow-lg z-50">
+                            <p className="text-[#272829] mb-4">
+                              Do you really want to remove{" "}
+                              {friendToRemove.fullName} from your friends?
+                            </p>
+                            <div className="flex justify-end space-x-4">
+                              <button
+                                onClick={() => {
+                                  removeFriend(friendToRemove._id);
+                                  setFriendToRemove(null);
+                                }}
+                                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                              >
+                                Yes
+                              </button>
+                              <button
+                                onClick={() => setFriendToRemove(null)}
+                                className="px-4 py-2 bg-gray-300 text-[#272829] rounded hover:bg-gray-400 transition-colors"
+                              >
+                                No
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-sm text-[#FFF6E0]/70 bg-[#272829]/20 rounded-lg p-4 text-center">
+                    {friendSearchTerm.trim() !== "" ? (
+                      <p>No friends match your search</p>
+                    ) : (
+                      <>
+                        <p>No friends yet</p>
+                        <p className="text-xs mt-2">Add friends to chat with them anytime</p>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -945,7 +1648,10 @@ useEffect(() => {
             {/* Chat Header - removed backdrop blur */}
             <div className="p-4 border-b border-gray-200 bg-[#FFF6E0] shadow-sm sticky top-0 z-10 bg-opacity-80">
               <div className="flex items-center">
-                <div className="relative overflow-hidden rounded-full w-10 h-10 border-2 border-[#61677A]/30 cursor-pointer" onClick={() => setShowUserInfoPopup(true)}>
+                <div
+                  className="relative overflow-hidden rounded-full w-10 h-10 border-2 border-[#61677A]/30 cursor-pointer"
+                  onClick={() => setShowUserInfoPopup(true)}
+                >
                   <img
                     src={
                       activeChatUser.profileImageURL ||
@@ -976,6 +1682,18 @@ useEffect(() => {
                     {onlineUsers[activeChatUser._id] ? "online" : "offline"}
                   </div>
                 </div>
+                <div className="ml-3 flex items-center">
+                  {/* Friend Request Icon */}
+                  {!isFriend && (
+                    <button
+                      onClick={() => setShowFriendRequestPopup(true)}
+                      className="ml-2 text-[#61677A] hover:text-[#272829] transition-colors"
+                      title="Send friend request"
+                    >
+                      <UserPlus size={20} />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -984,111 +1702,186 @@ useEffect(() => {
               {activeChatRoom ? (
                 <div className="space-y-4 relative z-10">
                   {currentMessages.length > 0 ? (
-                    Object.entries(groupMessagesByDate(currentMessages)).map(([dateString, messages]) => (
-                      <div key={dateString} className="mb-6">
-                        {/* Date Header */}
-                        <div className="flex justify-center mb-4">
-                          <div className="bg-[#D8D9DA] text-[#272829] text-xs font-medium px-3 py-1.5 rounded-full shadow-sm">
-                            {dateString}
+                    Object.entries(groupMessagesByDate(currentMessages)).map(
+                      ([dateString, messages]) => (
+                        <div key={dateString} className="mb-6">
+                          {/* Date Header */}
+                          <div className="flex justify-center mb-4">
+                            <div className="bg-[#D8D9DA] text-[#272829] text-xs font-medium px-3 py-1.5 rounded-full shadow-sm">
+                              {dateString}
+                            </div>
                           </div>
-                        </div>
-                        
-                        {/* Messages for this date */}
-                        <div className="space-y-1">
-                          {messages.map((msg, idx) => {
-                            const isMe = msg.sender === authUser.data.user._id;
-                            const isExpanded = expandedMessages[msg._id] || false;
-                            const isLongMessage = msg.message.length > 150;
-                            const prevMsg = idx > 0 ? messages[idx - 1] : null;
-                            const nextMsg = idx < messages.length - 1 ? messages[idx + 1] : null;
-                            
-                            // Check if messages are from the same sender
-                            const isFirstInGroup = !prevMsg || prevMsg.sender !== msg.sender;
-                            const isLastInGroup = !nextMsg || nextMsg.sender !== msg.sender;
-                            
-                            return (
-                              <div key={msg._id || idx} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
-                                {/* Show avatar only for first message in group from others */}
-                                {!isMe && isFirstInGroup && (
-                                  <div className="self-end mb-2 mr-2">
-                                    <div className="w-8 h-8 rounded-full overflow-hidden border border-[#61677A]/30">
-                                      <img
-                                        src={activeChatUser.profileImageURL || "https://via.placeholder.com/150"}
-                                        alt={`${activeChatUser.fullName}`}
-                                        className="w-full h-full object-cover"
-                                      />
+
+                          {/* Messages for this date */}
+                          <div className="space-y-1">
+                            {messages.map((msg, idx) => {
+                              const isMe =
+                                msg.sender === authUser.data.user._id;
+                              const isExpanded =
+                                expandedMessages[msg._id] || false;
+                              const isLongMessage = msg.message.length > 150;
+                              const prevMsg =
+                                idx > 0 ? messages[idx - 1] : null;
+                              const nextMsg =
+                                idx < messages.length - 1
+                                  ? messages[idx + 1]
+                                  : null;
+
+                              // Check if messages are from the same sender
+                              const isFirstInGroup =
+                                !prevMsg || prevMsg.sender !== msg.sender;
+                              const isLastInGroup =
+                                !nextMsg || nextMsg.sender !== msg.sender;
+
+                              return (
+                                <div
+                                  key={msg._id || idx}
+                                  className={`flex ${
+                                    isMe ? "justify-end" : "justify-start"
+                                  }`}
+                                >
+                                  {/* Show avatar only for first message in group from others */}
+                                  {!isMe && isFirstInGroup && (
+                                    <div className="self-end mb-2 mr-2">
+                                      <div className="w-8 h-8 rounded-full overflow-hidden border border-[#61677A]/30">
+                                        <img
+                                          src={
+                                            activeChatUser.profileImageURL ||
+                                            "https://via.placeholder.com/150"
+                                          }
+                                          alt={`${activeChatUser.fullName}`}
+                                          className="w-full h-full object-cover"
+                                        />
+                                      </div>
                                     </div>
-                                  </div>
-                                )}
-                                
-                                <div className={`group relative max-w-[75%] ${!isFirstInGroup && !isMe ? 'ml-10' : ''}`}>
+                                  )}
+
                                   <div
-                                    className={`
+                                    className={`group relative max-w-[75%] ${
+                                      !isFirstInGroup && !isMe ? "ml-10" : ""
+                                    }`}
+                                  >
+                                    <div
+                                      className={`
                                       p-3 
                                       shadow-sm 
                                       hover:shadow-md 
                                       transition-shadow 
                                       cursor-pointer
-                                      ${isMe 
-                                        ? "bg-[#272829] text-[#FFF6E0]" 
-                                        : "bg-[#61677A] text-[#FFF6E0]"}
-                                      ${isFirstInGroup && isMe ? 'rounded-tl-xl rounded-tr-xl rounded-bl-xl rounded-br-sm' : ''}
-                                      ${isFirstInGroup && !isMe ? 'rounded-tr-xl rounded-tl-sm rounded-bl-xl rounded-br-xl' : ''}
-                                      ${isLastInGroup && isMe ? 'rounded-tl-xl rounded-tr-sm rounded-bl-xl rounded-br-xl' : ''}
-                                      ${isLastInGroup && !isMe ? 'rounded-tr-xl rounded-tl-xl rounded-bl-sm rounded-br-xl' : ''}
-                                      ${!isFirstInGroup && !isLastInGroup && isMe ? 'rounded-tl-xl rounded-tr-sm rounded-bl-xl rounded-br-sm' : ''}
-                                      ${!isFirstInGroup && !isLastInGroup && !isMe ? 'rounded-tr-xl rounded-tl-sm rounded-bl-sm rounded-br-xl' : ''}
-                                      ${isFirstInGroup && isLastInGroup && isMe ? 'rounded-tl-xl rounded-tr-xl rounded-bl-xl rounded-br-xl' : ''}
-                                      ${isFirstInGroup && isLastInGroup && !isMe ? 'rounded-tr-xl rounded-tl-xl rounded-bl-xl rounded-br-xl' : ''}
+                                      ${
+                                        isMe
+                                          ? "bg-[#272829] text-[#FFF6E0]"
+                                          : "bg-[#61677A] text-[#FFF6E0]"
+                                      }
+                                      ${
+                                        isFirstInGroup && isMe
+                                          ? "rounded-tl-xl rounded-tr-xl rounded-bl-xl rounded-br-sm"
+                                          : ""
+                                      }
+                                      ${
+                                        isFirstInGroup && !isMe
+                                          ? "rounded-tr-xl rounded-tl-sm rounded-bl-xl rounded-br-xl"
+                                          : ""
+                                      }
+                                      ${
+                                        isLastInGroup && isMe
+                                          ? "rounded-tl-xl rounded-tr-sm rounded-bl-xl rounded-br-xl"
+                                          : ""
+                                      }
+                                      ${
+                                        isLastInGroup && !isMe
+                                          ? "rounded-tr-xl rounded-tl-xl rounded-bl-sm rounded-br-xl"
+                                          : ""
+                                      }
+                                      ${
+                                        !isFirstInGroup &&
+                                        !isLastInGroup &&
+                                        isMe
+                                          ? "rounded-tl-xl rounded-tr-sm rounded-bl-xl rounded-br-sm"
+                                          : ""
+                                      }
+                                      ${
+                                        !isFirstInGroup &&
+                                        !isLastInGroup &&
+                                        !isMe
+                                          ? "rounded-tr-xl rounded-tl-sm rounded-bl-sm rounded-br-xl"
+                                          : ""
+                                      }
+                                      ${
+                                        isFirstInGroup && isLastInGroup && isMe
+                                          ? "rounded-tl-xl rounded-tr-xl rounded-bl-xl rounded-br-xl"
+                                          : ""
+                                      }
+                                      ${
+                                        isFirstInGroup && isLastInGroup && !isMe
+                                          ? "rounded-tr-xl rounded-tl-xl rounded-bl-xl rounded-br-xl"
+                                          : ""
+                                      }
                                     `}
-                                    onClick={(e) => handleMessageClick(e, msg)}
-                                  >
-                                    <p className="leading-relaxed text-sm md:text-base">
-                                      {isLongMessage && !isExpanded 
-                                        ? truncateMessage(msg.message) 
-                                        : msg.message}
-                                    </p>
-                                    
-                                    {isLongMessage && (
-                                      <button 
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          toggleMessageExpansion(msg._id);
-                                        }}
-                                        className="text-xs mt-1 text-[#FFF6E0]/70 hover:text-[#FFF6E0] transition-colors duration-300 underline focus:outline-none"
-                                      >
-                                        {isExpanded ? "Read less" : "Read more"}
-                                      </button>
-                                    )}
-                                    
-                                    <div className="text-[10px] mt-1 text-right flex justify-end items-center opacity-70">
-                                      <span>{formatTime(msg.timestamp)}</span>
-                                      {isMe && (
-                                        <span className="ml-1">
-                                          {msg.status === "sent" && <Check size={12} />}
-                                          {msg.status === "delivered" && <CheckCheck size={12} />}
-                                          {msg.status === "read" && (
-                                            <span className="text-blue-400">
-                                              <CheckCheck size={12} />
-                                            </span>
-                                          )}
-                                        </span>
+                                      onClick={(e) =>
+                                        handleMessageClick(e, msg)
+                                      }
+                                    >
+                                      <p className="leading-relaxed text-sm md:text-base">
+                                        {isLongMessage && !isExpanded
+                                          ? truncateMessage(msg.message)
+                                          : msg.message}
+                                      </p>
+
+                                      {isLongMessage && (
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            toggleMessageExpansion(msg._id);
+                                          }}
+                                          className="text-xs mt-1 text-[#FFF6E0]/70 hover:text-[#FFF6E0] transition-colors duration-300 underline focus:outline-none"
+                                        >
+                                          {isExpanded
+                                            ? "Read less"
+                                            : "Read more"}
+                                        </button>
                                       )}
+
+                                      <div className="text-[10px] mt-1 text-right flex justify-end items-center opacity-70">
+                                        <span>{formatTime(msg.timestamp)}</span>
+                                        {isMe && (
+                                          <span className="ml-1">
+                                            {msg.status === "sent" && (
+                                              <IoCheckmark size={12} />
+                                            )}
+                                            {msg.status === "delivered" && (
+                                              <IoCheckmarkDone size={12} />
+                                            )}
+                                            {msg.status === "read" && (
+                                              <span className="text-blue-400">
+                                                <IoCheckmarkDone size={12} />
+                                              </span>
+                                            )}
+                                          </span>
+                                        )}
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
-                              </div>
-                            );
-                          })}
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      )
+                    )
                   ) : (
                     <div className="flex items-center justify-center h-full py-20 text-[#61677A]">
                       <div className="text-center p-6 bg-[#FFF6E0]/30 rounded-2xl">
-                        <MessageCircle size={40} className="mx-auto mb-4 text-[#61677A]/50" />
-                        <p>Start a conversation with {activeChatUser.fullName}</p>
-                        <p className="text-xs mt-2 text-[#61677A]/70">Messages are end-to-end encrypted</p>
+                        <MdMessage
+                          size={40}
+                          className="mx-auto mb-4 text-[#61677A]/50"
+                        />
+                        <p>
+                          Start a conversation with {activeChatUser.fullName}
+                        </p>
+                        <p className="text-xs mt-2 text-[#61677A]/70">
+                          Messages are end-to-end encrypted
+                        </p>
                       </div>
                     </div>
                   )}
@@ -1097,7 +1890,10 @@ useEffect(() => {
               ) : (
                 <div className="flex items-center justify-center h-full text-[#61677A]">
                   <div className="text-center">
-                    <RefreshCw size={30} className="mx-auto mb-2 animate-spin" />
+                    <RefreshCw
+                      size={30}
+                      className="mx-auto mb-2 animate-spin"
+                    />
                     <p>Establishing secure connection...</p>
                   </div>
                 </div>
@@ -1109,23 +1905,20 @@ useEffect(() => {
               <div className="flex gap-2 items-end">
                 {/* Emoji button with position relative for proper positioning */}
                 <div className="relative z-[9000]">
-                  <button 
+                  <button
                     onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                     className="p-2 rounded-full hover:bg-[#D8D9DA] transition-colors text-[#272829]"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
-                      <line x1="9" y1="9" x2="9.01" y2="9"></line>
-                      <line x1="15" y1="9" x2="15.01" y2="9"></line>
-                    </svg>
+                    <FaSmile size={24} />
                   </button>
-                  
+
                   <EmojiPicker
                     visible={showEmojiPicker}
                     onEmojiSelect={(emoji) => {
                       if (emoji) {
-                        setChatMessage(prevMessage => prevMessage + emoji.native);
+                        setChatMessage(
+                          (prevMessage) => prevMessage + emoji.native
+                        );
                       } else {
                         setShowEmojiPicker(false);
                       }
@@ -1133,7 +1926,7 @@ useEffect(() => {
                     position="top"
                   />
                 </div>
-                
+
                 <input
                   type="text"
                   value={chatMessage}
@@ -1142,25 +1935,63 @@ useEffect(() => {
                   className="flex-1 bg-[#272829] text-[#FFF6E0] border-none rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#61677A] transition-all duration-300 shadow-inner placeholder-[#FFF6E0]/50 min-h-[44px]"
                   placeholder="Type a message..."
                 />
-                
+
                 <button
                   onClick={handleSendMessage}
                   className="p-3 rounded-full bg-[#272829] text-[#FFF6E0] hover:bg-[#31333A] transition-colors duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={!activeChatRoom || !chatMessage.trim()}
                 >
-                  <Send size={20} />
+                  <FaPaperPlane size={20} />
                 </button>
               </div>
             </div>
 
+            {showFriendRequestPopup && (
+              <div
+                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 animate-fadeIn"
+                onClick={() => setShowFriendRequestPopup(false)}
+              >
+                <div
+                  className="p-8 bg-gradient-to-b from-[#FFF6E0] to-[#D8D9DA] rounded-xl shadow-2xl max-w-md m-4 border border-[#61677A]/20 transform transition-all duration-500 animate-scaleIn"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <h3 className="text-2xl font-bold mb-4 text-[#272829]">
+                    Send Friend Request
+                  </h3>
+                  <p className="mb-6 text-[#61677A] leading-relaxed">
+                    By sending a friend request to {activeChatUser.fullName},
+                    they will be able to see your name and the number of friends
+                    you have. Do you want to proceed?
+                  </p>
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => {
+                        sendFriendRequest(activeChatUser._id);
+                        setShowFriendRequestPopup(false);
+                      }}
+                      className="flex-1 bg-gradient-to-r from-[#272829] to-[#31333A] text-[#FFF6E0] px-4 py-3 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center transform hover:scale-105"
+                    >
+                      Send Request
+                    </button>
+                    <button
+                      onClick={() => setShowFriendRequestPopup(false)}
+                      className="flex-1 border border-[#272829]/50 text-[#272829] px-4 py-3 rounded-xl hover:bg-[#272829]/5 transition-all duration-300 transform hover:scale-105"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {showUserInfoPopup && (
-      <UserInfoPopup
-          className="z-100"
-        user={activeChatUser}
-        isOnline={onlineUsers[activeChatUser._id] || false}
-        onClose={() => setShowUserInfoPopup(false)}
-      />
-    )}
+              <UserInfoPopup
+                className="z-100"
+                user={activeChatUser}
+                isOnline={onlineUsers[activeChatUser._id] || false}
+                onClose={() => setShowUserInfoPopup(false)}
+              />
+            )}
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-[#272829] p-8 relative">
@@ -1191,10 +2022,7 @@ useEffect(() => {
                   onClick={handleRefreshNearby}
                   className="group bg-gradient-to-r from-[#272829] to-[#31333A] text-[#FFF6E0] px-6 py-3 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center transform hover:scale-105"
                 >
-                  <RefreshCw
-                    size={18}
-                    className="mr-2 group-hover:rotate-90 transition-transform duration-500"
-                  />
+                  <MdRefresh className="mr-2 group-hover:rotate-90 transition-transform duration-500" size={18} />
                   <span>Find Nearby Users</span>
                 </button>
               </div>
@@ -1238,7 +2066,7 @@ useEffect(() => {
                 }}
                 className="flex-1 bg-gradient-to-r from-[#272829] to-[#31333A] text-[#FFF6E0] px-4 py-3 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center transform hover:scale-105"
               >
-                <RefreshCw size={16} className="mr-2" /> Try Again
+                <MdRefresh className="mr-2" size={16} /> Try Again
               </button>
               <button
                 onClick={() => setLocationPermissionDenied(false)}
@@ -1265,43 +2093,14 @@ useEffect(() => {
             className="w-full text-left px-4 py-2 hover:bg-[#31333A] transition-colors duration-200 flex items-center"
             onClick={copyMessageText}
           >
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              width="16" 
-              height="16" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              className="mr-2"
-            >
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-            </svg>
+            <FaRegCopy className="mr-2" size={16} />
             Copy
           </button>
           <button
             className="w-full text-left px-4 py-2 hover:bg-[#31333A] transition-colors duration-200 flex items-center"
             onClick={showMessageInfo}
           >
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              width="16" 
-              height="16" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              className="mr-2"
-            >
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="16" x2="12" y2="12"></line>
-              <line x1="12" y1="8" x2="12.01" y2="8"></line>
-            </svg>
+            <FaInfoCircle className="mr-2" size={16} />
             Info
           </button>
         </div>
@@ -1336,7 +2135,41 @@ useEffect(() => {
         .scale-102 {
           transform: scale(1.02);
         }
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 5px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(30, 31, 32, 0.1);
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(97, 103, 122, 0.4);
+          border-radius: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(97, 103, 122, 0.7);
+        }
+        
+        .line-clamp-1 {
+          display: -webkit-box;
+          -webkit-line-clamp: 1;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
       `}</style>
+
+      {/* Add a floating action button for mobile view when scrolled down */}
+      {viewMode === "nearby" && !activeChatUser && (
+        <button
+          onClick={handleRefreshNearby}
+          className="md:hidden fixed bottom-6 right-6 z-20 p-3 rounded-full bg-[#61677A] text-[#FFF6E0] shadow-lg hover:bg-[#505460] transition-all duration-300 flex items-center justify-center"
+          aria-label="Refresh nearby users"
+        >
+          <MdRefresh size={24} />
+        </button>
+      )}
     </div>
   );
 };
