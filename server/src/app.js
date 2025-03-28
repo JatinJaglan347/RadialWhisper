@@ -30,6 +30,7 @@ import manageUserRouter from './routes/manageUser.route.js';
 import suggestionRouter from './routes/suggestion.route.js';
 import contact from './routes/contact.routes.js'
 import activityStatus from './routes/activityStatus.routes.js'
+import friend from './routes/friend.router.js'
 
 // Routes declaration
 app.use("/api/v1/user", userRouter);
@@ -40,6 +41,7 @@ app.use("/api/v1/op", opRouter);
 app.use("/api/v1/op", manageUserRouter );
 app.use("/api/v1/suggestions", suggestionRouter);
 app.use("/api/v1/contact", contact);
+app.use("/api/v1/friend", friend)
 
 // Error handling middleware (place it here)
 app.use((err, req, res, next) => {

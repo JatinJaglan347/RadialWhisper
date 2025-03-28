@@ -101,7 +101,7 @@ const userSchema = new Schema({
         {
           friendId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'User', // Reference to the User collection
+            ref: 'User',
           },
           since: {
             type: Date,
@@ -109,11 +109,31 @@ const userSchema = new Schema({
           },
         },
       ],
+      // Incoming friend requests – requests that this user received
       friendRequests: [
         {
           userId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'User', // User that has sent the request
+            ref: 'User',
+            required: true,
+          },
+          status: {
+            type: String,
+            enum: ['pending', 'accepted', 'rejected'],
+            default: 'pending',
+          },
+          createdAt: {
+            type: Date,
+            default: Date.now,
+          },
+        },
+      ],
+      // Outgoing friend requests – requests that this user has sent
+      friendRequestsSent: [
+        {
+          receiverId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
             required: true,
           },
           status: {
