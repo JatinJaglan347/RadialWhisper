@@ -159,7 +159,7 @@ function App() {
               : '0',
             width: isMobile ? '100vw' : 'auto',
             padding: '0', // Remove any padding
-            overflow: isChatRoute ? 'hidden' : 'auto' // Prevent scrolling for chat routes
+           // overflow: isChatRoute ? 'hidden' : 'auto' // Prevent scrolling for chat routes
           }}
         >
           <Routes>
