@@ -47,10 +47,17 @@ const LandingNavbar = () => {
     logout();
     toast.success("Logged out successfully");
     navigate("/login");
+    setIsMenuOpen(false); // Close menu after logout
   };
   
   const goToBannedPage = () => {
     navigate("/banned");
+    setIsMenuOpen(false); // Close menu after navigation
+  };
+
+  // Add this new function to handle menu item clicks
+  const handleMenuItemClick = () => {
+    setIsMenuOpen(false);
   };
 
   return (
@@ -165,11 +172,11 @@ const LandingNavbar = () => {
       {isMenuOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <Link to="/" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Home</Link>
-            <Link to="/chat" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Chat</Link>
-            <Link to="/about" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">About</Link>
-            <Link to="/suggestion" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Suggestion</Link>
-            <Link to="/contact" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Contact</Link>
+            <Link to="/" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Home</Link>
+            <Link to="/chat" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Chat</Link>
+            <Link to="/about" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">About</Link>
+            <Link to="/suggestion" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Suggestion</Link>
+            <Link to="/contact" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Contact</Link>
             
             {/* Conditional rendering for mobile menu */}
             {authUser ? (
@@ -185,16 +192,16 @@ const LandingNavbar = () => {
                 ) : (
                   <>
                     {kingOptin && (
-                      <Link to="/op/dashboard" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">King Panel</Link>
+                      <Link to="/op/dashboard" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">King Panel</Link>
                     )}
                     {adminOptin && (
-                      <Link to="/op/dashboard" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Admin Panel</Link>
+                      <Link to="/op/dashboard" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Admin Panel</Link>
                     )}
                     {moderatorOptin && (
-                      <Link to="/op/dashboard" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Moderate</Link>
+                      <Link to="/op/dashboard" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Moderate</Link>
                     )}
-                    <Link to="/chat/profile" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Profile</Link>
-                    <Link to="/chat/settings" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Settings</Link>
+                    <Link to="/chat/profile" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Profile</Link>
+                    <Link to="/chat/settings" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Settings</Link>
                   </>
                 )}
                 <button 
@@ -206,8 +213,8 @@ const LandingNavbar = () => {
               </>
             ) : (
               <>
-                <Link to="/login" className="block px-3 py-2 rounded-md bg-[#61677A] text-center hover:bg-[#D8D9DA] hover:text-[#272829] font-medium">Login</Link>
-                <Link to="/signup" className="block px-3 py-2 rounded-md bg-[#FFF6E0] text-center text-[#272829] hover:bg-[#D8D9DA] font-medium mt-2">Sign Up</Link>
+                <Link to="/login" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md bg-[#61677A] text-center hover:bg-[#D8D9DA] hover:text-[#272829] font-medium">Login</Link>
+                <Link to="/signup" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md bg-[#FFF6E0] text-center text-[#272829] hover:bg-[#D8D9DA] font-medium mt-2">Sign Up</Link>
               </>
             )}
           </div>
