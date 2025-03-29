@@ -2,46 +2,55 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore.js'; // Zustand store
 import { axiosInstance } from '../../lib/axios.js'; // axios instance for API calls
-import { User, Settings, LogOut, Skull, Scale, Crown } from 'lucide-react'; // Lucide icons
+import { User, Settings, LogOut, Skull, Scale, Crown, AlertTriangle } from 'lucide-react'; // Added AlertTriangle icon
 import toast from 'react-hot-toast';
 
 const LandingNavbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { authUser, getUserDetails,logout } = useAuthStore();
+  const { authUser, getUserDetails, logout } = useAuthStore();
   const navigate = useNavigate();
   const [adminOptin, setAdminOptin] = useState(false);
   const [moderatorOptin, setModeratorOptin] = useState(false);
   const [kingOptin, setKingOptin] = useState(false);
   
+  // Check if user is banned
+  const isUserBanned = authUser?.data?.user?.banned?.current?.status === true;
+  
   useEffect(() => {
     // Fetch user details on component mount
     getUserDetails();
     
-    // Set user role options based on the user role
-    if (authUser?.data?.user?.userRole === 'king') {
-      setKingOptin(true);
-      
-    }
-    else if (authUser?.data?.user?.userRole === 'admin') {
-
-      setAdminOptin(true);
-      
-    }
-    else if (authUser?.data?.user?.userRole === 'moderator') {
-
-      setModeratorOptin(true);
-     
+    // Only set role options if user is not banned
+    if (!isUserBanned) {
+      if (authUser?.data?.user?.userRole === 'king') {
+        setKingOptin(true);
+      }
+      else if (authUser?.data?.user?.userRole === 'admin') {
+        setAdminOptin(true);
+      }
+      else if (authUser?.data?.user?.userRole === 'moderator') {
+        setModeratorOptin(true);
+      } else {
+        setKingOptin(false);
+        setAdminOptin(false);
+        setModeratorOptin(false);
+      }
     } else {
+      // Reset all roles if user is banned
       setKingOptin(false);
       setAdminOptin(false);
       setModeratorOptin(false);
     }
-  }, [getUserDetails, authUser?.data?.user?.userRole]);
+  }, [getUserDetails, authUser?.data?.user?.userRole, isUserBanned]);
 
   const handleLogout = () => {
     logout();
     toast.success("Logged out successfully");
     navigate("/login");
+  };
+  
+  const goToBannedPage = () => {
+    navigate("/banned");
   };
 
   return (
@@ -80,37 +89,47 @@ const LandingNavbar = () => {
                   tabIndex={0}
                   className="menu menu-compact dropdown-content mt-3 p-2 z-50 shadow bg-base-100 rounded-box w-52 text-[#FFF6E0]"
                 >
-                  {kingOptin && (
+                  {isUserBanned ? (
                     <li>
-                      <Link to="/op/dashboard">
-                        <Crown className="w-5 h-5" />KingPanal
-                      </Link>
+                      <button onClick={goToBannedPage} className="text-red-400 font-medium">
+                        <AlertTriangle className="w-5 h-5 text-red-400" />Account Suspended
+                      </button>
                     </li>
+                  ) : (
+                    <>
+                      {kingOptin && (
+                        <li>
+                          <Link to="/op/dashboard">
+                            <Crown className="w-5 h-5" />KingPanal
+                          </Link>
+                        </li>
+                      )}
+                      {adminOptin && (
+                        <li>
+                          <Link to="/op/dashboard">
+                            <Skull className="w-5 h-5" />AdminPanal
+                          </Link>
+                        </li>
+                      )}
+                      {moderatorOptin && (
+                        <li>
+                          <Link to="/op/dashboard">
+                            <Scale className="w-5 h-5"/>Moderate
+                          </Link>
+                        </li>
+                      )}
+                      <li>
+                        <Link to="/chat/profile">
+                          <User className="w-5 h-5" /> Profile
+                        </Link>
+                      </li>
+                      <li>
+                        <Link to="/chat/settings">
+                          <Settings className="w-5 h-5" /> Settings
+                        </Link>
+                      </li>
+                    </>
                   )}
-                  {adminOptin && (
-                    <li>
-                      <Link to="/op/dashboard">
-                        <Skull className="w-5 h-5" />AdminPanal
-                      </Link>
-                    </li>
-                  )}
-                  {moderatorOptin && (
-                    <li>
-                      <Link to="/op/dashboard">
-                        <Scale className="w-5 h-5"/>Moderate
-                      </Link>
-                    </li>
-                  )}
-                  <li>
-                    <Link to="/chat/profile">
-                      <User className="w-5 h-5" /> Profile
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/chat/settings">
-                      <Settings className="w-5 h-5" /> Settings
-                    </Link>
-                  </li>
                   <li>
                     <button onClick={handleLogout}>
                       <LogOut className="w-5 h-5" /> Logout
@@ -155,17 +174,29 @@ const LandingNavbar = () => {
             {/* Conditional rendering for mobile menu */}
             {authUser ? (
               <>
-                {kingOptin && (
-                  <Link to="/op/dashboard" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">King Panel</Link>
+                {isUserBanned ? (
+                  <button 
+                    onClick={goToBannedPage} 
+                    className=" w-full text-left px-3 py-2 rounded-md bg-red-500/20 text-red-400 hover:bg-red-500/30 font-medium flex items-center"
+                  >
+                    <AlertTriangle className="h-5 w-5 mr-2" />
+                    Account Suspended
+                  </button>
+                ) : (
+                  <>
+                    {kingOptin && (
+                      <Link to="/op/dashboard" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">King Panel</Link>
+                    )}
+                    {adminOptin && (
+                      <Link to="/op/dashboard" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Admin Panel</Link>
+                    )}
+                    {moderatorOptin && (
+                      <Link to="/op/dashboard" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Moderate</Link>
+                    )}
+                    <Link to="/chat/profile" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Profile</Link>
+                    <Link to="/chat/settings" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Settings</Link>
+                  </>
                 )}
-                {adminOptin && (
-                  <Link to="/op/dashboard" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Admin Panel</Link>
-                )}
-                {moderatorOptin && (
-                  <Link to="/op/dashboard" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Moderate</Link>
-                )}
-                <Link to="/chat/profile" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Profile</Link>
-                <Link to="/chat/settings" className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Settings</Link>
                 <button 
                   onClick={handleLogout}
                   className="block w-full text-left px-3 py-2 rounded-md hover:bg-[#61677A] font-medium"
