@@ -77,6 +77,8 @@ const HomePage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState({});
   const [showFriendRequestPopup, setShowFriendRequestPopup] = useState(false);
+  const [interestFilter, setInterestFilter] = useState("");
+  const [showInterestFilters, setShowInterestFilters] = useState(false);
   const messagesEndRef = useRef(null);
   const isInitialFetchDone = useRef(false);
   const activeChatUserRef = useRef(activeChatUser);
@@ -121,6 +123,36 @@ const HomePage = () => {
   // Add this state to manage the friend requests dropdown
   const [isFriendRequestsExpanded, setIsFriendRequestsExpanded] = useState(false);
 
+  // First, let the arrayOfNearbyUserData be defined 
+  const arrayOfNearbyUserData = Array.isArray(
+    nearbyUsersData?.data?.nearbyUsers
+  )
+    ? nearbyUsersData?.data?.nearbyUsers
+    : [];
+
+  // THEN define functions that use it
+  const getAllUniqueInterests = () => {
+    const interestsSet = new Set();
+    
+    arrayOfNearbyUserData.forEach(user => {
+      if (user.bio && Array.isArray(user.bio)) {
+        user.bio.forEach(interest => {
+          interestsSet.add(interest);
+        });
+      }
+    });
+    
+    return Array.from(interestsSet).sort();
+  };
+
+  // Add this function to filter nearby users by interest
+  const filteredNearbyUsers = interestFilter 
+    ? arrayOfNearbyUserData.filter(user => 
+        user.bio && Array.isArray(user.bio) && 
+        user.bio.some(interest => interest.toLowerCase().includes(interestFilter.toLowerCase()))
+      )
+    : arrayOfNearbyUserData;
+
   const formatTime = (timestamp) => {
     if (!timestamp) return "";
 
@@ -139,7 +171,16 @@ const HomePage = () => {
       fetchFriends();
       fetchFriendRequests();
     }
-  }, [authUser, fetchFriends, fetchFriendRequests]);
+  }, [authUser, fetchFriends, fetchFriendRequests , ]);
+
+  // Replace this useEffect with the correct implementation
+  useEffect(() => {
+    // This will run whenever selectedSection changes
+    if (viewMode === "friends" && authUser) {
+      fetchFriends();
+      fetchFriendRequests();
+    }
+  }, [viewMode, authUser, fetchFriends, fetchFriendRequests]);
 
   const isFriend = friends.some((friend) => friend.friendId._id === activeChatUser?._id);
 
@@ -171,12 +212,6 @@ const HomePage = () => {
   useEffect(() => {
     activeChatUserRef.current = activeChatUser;
   }, [activeChatUser]);
-
-  const arrayOfNearbyUserData = Array.isArray(
-    nearbyUsersData?.data?.nearbyUsers
-  )
-    ? nearbyUsersData?.data?.nearbyUsers
-    : [];
 
   // Scroll to bottom of messages
   const scrollToBottom = () => {
@@ -916,90 +951,170 @@ const HomePage = () => {
               {/* User list with improved cards */}
                 {arrayOfNearbyUserData.length > 0 && (
                 <div className="space-y-2 px-2">
-                  {/* Section header with refresh button */}
-                  <div className="flex items-center justify-between px-2 py-3 sticky top-0 bg-[#272829]/90">
+                  {/* Section header with refresh button and filter */}
+                  <div className="sticky top-0 bg-[#272829]/90 py-3 z-20">
+                    <div className="flex items-center justify-between px-2 mb-2">
                     <h3 className="text-xs uppercase tracking-wider text-[#FFF6E0]/60 font-semibold">
-                      People Nearby ({arrayOfNearbyUserData.length})
+                        People Nearby ({filteredNearbyUsers.length})
                     </h3>
+                  <div className="flex items-center">
+                            <button
+                          onClick={() => setShowInterestFilters(!showInterestFilters)}
+                          className="p-2 rounded-full hover:bg-[#31333A] transition-all duration-300 text-[#FFF6E0]/70 hover:text-[#FFF6E0] flex items-center mr-1"
+                          title="Filter by interest"
+                            >
+                          <FaSearch size={16} />
+                            </button>
                     <button
                       onClick={handleRefreshNearby}
-                      className="p-2 rounded-full hover:bg-[#31333A] transition-all duration-300 text-[#FFF6E0]/70 hover:text-[#FFF6E0] flex items-center"
+                          className="p-2 rounded-full hover:bg-[#31333A] transition-all duration-300 text-[#FFF6E0]/70 hover:text-[#FFF6E0] flex items-center"
                       title="Refresh nearby users"
                     >
-                      <MdRefresh size={18} className="mr-1" />
-                      <span className="text-xs">Refresh</span>
+                          <MdRefresh size={18} className="mr-1" />
+                          <span className="text-xs">Refresh</span>
                     </button>
                   </div>
+                                </div>
+                    
+                    {/* Interest filter dropdown */}
+                    {showInterestFilters && (
+                      <div className="px-2 mb-2 animate-fadeIn">
+                        <div className="relative flex items-center">
+                          <input
+                            type="text"
+                            placeholder="Filter by interest..."
+                            value={interestFilter}
+                            onChange={(e) => setInterestFilter(e.target.value)}
+                            className="w-full bg-[#1e1f20]/40 rounded-lg px-3 py-2 pl-10 text-sm text-[#FFF6E0] placeholder-[#FFF6E0]/40 focus:outline-none focus:ring-1 focus:ring-[#61677A]/50"
+                          />
+                          <FaSearch className="absolute left-3 text-[#FFF6E0]/40" size={16} />
+                          {interestFilter && (
+                            <button
+                              onClick={() => setInterestFilter("")}
+                              className="absolute right-3 p-1 rounded-full hover:bg-[#3a3b3c] text-[#FFF6E0]/70 hover:text-[#FFF6E0]"
+                            >
+                              <FaTimes size={14} />
+                            </button>
+                          )}
+                        </div>
+                        
+                        {/* Quick interest tags */}
+                        {getAllUniqueInterests().length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {getAllUniqueInterests().slice(0, 10).map(interest => (
+                              <button 
+                                key={interest}
+                                onClick={() => setInterestFilter(interest)}
+                                className={`text-xs px-2 py-1 rounded-full transition-colors ${
+                                  interestFilter === interest 
+                                    ? "bg-[#61677A] text-[#FFF6E0]" 
+                                    : "bg-[#272829]/40 text-[#FFF6E0]/70 hover:bg-[#272829]/60"
+                                }`}
+                              >
+                                {interest}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                   
-                    {arrayOfNearbyUserData.map((user, index) => {
-                      const unreadCount = unreadMessages[user._id] || 0;
-                      const isOnline = onlineUsers[user._id] || false;
-                      const isFriend = isUserFriend(user._id);
-                      return (
-                        <div
-                          key={user._id}
+                  {/* Updated user cards with more visible interests */}
+                  {filteredNearbyUsers.map((user, index) => {
+                    const unreadCount = unreadMessages[user._id] || 0;
+                    const isOnline = onlineUsers[user._id] || false;
+                    const isFriend = isUserFriend(user._id);
+                    return (
+                      <div
+                        key={user._id}
                         className={`flex items-center p-3 rounded-xl cursor-pointer transition-all duration-300 ${
-                            activeChatUser?._id === user._id
-                            ? "bg-gradient-to-r from-[#61677A] to-[#505460] shadow-md border-l-4 border-[#FFF6E0]"
-                            : "bg-[#272829]/30 hover:bg-[#61677A]/40 hover:translate-x-1"
+                          activeChatUser?._id === user._id
+                          ? "bg-gradient-to-r from-[#61677A] to-[#505460] shadow-md border-l-4 border-[#FFF6E0]"
+                          : "bg-[#272829]/30 hover:bg-[#61677A]/40 hover:translate-x-1"
                         }`}
                         onClick={() => {
                           handleStartChat(user);
                           toggleSidebar();
                         }}
-                        >
-                          <div className="relative">
+                      >
+                        <div className="relative">
                           <div className={`relative overflow-hidden rounded-full w-12 h-12 border-2 ${
                             activeChatUser?._id === user._id 
                               ? "border-[#FFF6E0]" 
                               : "border-[#61677A]/30"
                           }`}>
-                              <img
-                                src={
-                                  user.profileImageURL ||
-                                  "https://via.placeholder.com/150"
-                                }
-                                alt={`${user.fullName}'s profile`}
-                                className="w-full h-full object-cover transition-transform hover:scale-110 duration-500"
-                              />
-                            </div>
-                            {isFriend && (
-                              <div className="absolute -top-[6px] -left-1 z-10">
-                                <div className="w-6 h-6 rounded-full flex items-center justify-center shadow-lg rotate-[-25deg]">
-                                  <GiBowTie className="text-pink-500 text-3xl" />
-                                </div>
+                            <img
+                              src={
+                                user.profileImageURL ||
+                                "https://via.placeholder.com/150"
+                              }
+                              alt={`${isFriend ? user.fullName : user.uniqueTag}'s profile`}
+                              className="w-full h-full object-cover transition-transform hover:scale-110 duration-500"
+                            />
+                          </div>
+                          {isFriend && (
+                            <div className="absolute -top-[6px] -left-1 z-10">
+                              <div className="w-6 h-6 rounded-full flex items-center justify-center shadow-lg rotate-[-25deg]">
+                                <GiBowTie className="text-pink-500 text-3xl" />
                               </div>
-                            )}
-                            <span
-                              className={`absolute bottom-0 right-0 w-3 h-3 ${
-                                isOnline ? "bg-green-500" : "bg-red-500"
-                            } rounded-full border-2 border-[#272829]`}
-                            ></span>
-                          </div>
-                          <div className="flex-1 ml-3">
-                          <h3 className="text-base font-semibold text-[#FFF6E0] flex items-center">
-                              {user.fullName}
-                            {isOnline && (
-                              <span className="ml-2 text-xs text-green-400 font-normal">• online</span>
-                            )}
-                            
-                            </h3>
-                          <p className="text-xs text-[#FFF6E0]/70 line-clamp-1">
-                              {user.email}
-                            </p>
-                          </div>
-                          {unreadCount > 0 && (
-                          <div className="bg-[#FFF6E0] text-[#272829] rounded-full min-w-6 h-6 flex items-center justify-center text-xs font-bold px-2">
-                            {unreadCount > 99 ? "99+" : unreadCount}
                             </div>
                           )}
+                          <span
+                            className={`absolute bottom-0 right-0 w-3 h-3 ${
+                              isOnline ? "bg-green-500" : "bg-red-500"
+                            } rounded-full border-2 border-[#272829]`}
+                          ></span>
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </>
-            ) : (
+                        <div className="flex-1 ml-3">
+                          <h3 className="text-base font-semibold text-[#FFF6E0] flex items-center">
+                            {isFriend ? (
+                              <>
+                                {user.fullName}
+                                {isOnline && (
+                                  <span className="ml-2 text-xs text-green-400 font-normal">• online</span>
+                                )}
+                              </>
+                            ) : (
+                              <>
+                                @{user.uniqueTag}
+                                {isOnline && (
+                                  <span className="ml-2 text-xs text-green-400 font-normal">• online</span>
+                                )}
+                              </>
+                            )}
+                          </h3>
+                          {/* Enhance interest display here */}
+                          {!isFriend && user.bio && user.bio.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1.5">
+                              {user.bio.map((interest, idx) => (
+                                <span 
+                                  key={idx} 
+                                  className="inline-block px-2 py-0.5 bg-[#272829]/50 text-[#FFF6E0] text-[10px] rounded-full border border-[#FFF6E0]/10"
+                                >
+                                  {interest}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          {isFriend && (
+                            <p className="text-xs text-[#FFF6E0]/70 line-clamp-1 mt-1">
+                              Friend
+                            </p>
+                          )}
+                        </div>
+                        {unreadCount > 0 && (
+                          <div className="bg-[#FFF6E0] text-[#272829] rounded-full min-w-6 h-6 flex items-center justify-center text-xs font-bold px-2">
+                            {unreadCount > 99 ? "99+" : unreadCount}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          ) : (
             <div className="px-2">
               {/* Friend Requests Section as expandable dropdown */}
               <div className="mb-6 bg-[#272829]/40 rounded-lg overflow-hidden">
@@ -1129,14 +1244,9 @@ const HomePage = () => {
                             {onlineUsers[friend.friendId._id] && (
                               <span className="ml-2 text-xs text-green-400 font-normal">• online</span>
                             )}
-                            {/* {isUserFriend(friend.friendId._id) && (
-                              <span className="ml-2 text-xs text-pink-400 font-normal flex items-center">
-                                <FaUserFriends className="mr-1" /> Friend
-                              </span>
-                            )} */}
                           </h3>
                           <p className="text-xs text-[#FFF6E0]/70 line-clamp-1">
-                            {friend.friendId.email}
+                            Friend
                           </p>
                         </div>
                             {(unreadMessages[friend.friendId._id] || 0) > 0 && (
@@ -1342,21 +1452,76 @@ const HomePage = () => {
               {/* User list with improved cards */}
               {arrayOfNearbyUserData.length > 0 && (
                 <div className="space-y-2 px-2">
-                  {/* Section header with refresh button */}
-                  <div className="flex items-center justify-between px-2 py-3 sticky top-0 bg-[#272829]/90">
-                    <h3 className="text-xs uppercase tracking-wider text-[#FFF6E0]/60 font-semibold">
-                      People Nearby ({arrayOfNearbyUserData.length})
-                    </h3>
-                    <button
-                      onClick={handleRefreshNearby}
-                      className="p-2 rounded-full hover:bg-[#31333A] transition-all duration-300 text-[#FFF6E0]/70 hover:text-[#FFF6E0] hover:rotate-180"
-                      title="Refresh nearby users"
-                    >
-                      <MdRefresh size={18} />
-                    </button>
+                  {/* Section header with refresh button and filter */}
+                  <div className="sticky top-0 bg-[#272829]/90 py-3 z-20">
+                    <div className="flex items-center justify-between px-2 mb-2">
+                      <h3 className="text-xs uppercase tracking-wider text-[#FFF6E0]/60 font-semibold">
+                        People Nearby ({filteredNearbyUsers.length})
+                      </h3>
+                      <div className="flex items-center">
+                        <button
+                          onClick={() => setShowInterestFilters(!showInterestFilters)}
+                          className="p-2 rounded-full hover:bg-[#31333A] transition-all duration-300 text-[#FFF6E0]/70 hover:text-[#FFF6E0] mr-1"
+                          title="Filter by interest"
+                        >
+                          <FaSearch size={16} />
+                        </button>
+                        <button
+                          onClick={handleRefreshNearby}
+                          className="p-2 rounded-full hover:bg-[#31333A] transition-all duration-300 text-[#FFF6E0]/70 hover:text-[#FFF6E0] hover:rotate-180"
+                          title="Refresh nearby users"
+                        >
+                          <MdRefresh size={18} />
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Interest filter dropdown */}
+                    {showInterestFilters && (
+                      <div className="px-2 mb-2 animate-fadeIn">
+                        <div className="relative flex items-center">
+                          <input
+                            type="text"
+                            placeholder="Filter by interest..."
+                            value={interestFilter}
+                            onChange={(e) => setInterestFilter(e.target.value)}
+                            className="w-full bg-[#1e1f20]/40 rounded-lg px-3 py-2 pl-10 text-sm text-[#FFF6E0] placeholder-[#FFF6E0]/40 focus:outline-none focus:ring-1 focus:ring-[#61677A]/50"
+                          />
+                          <FaSearch className="absolute left-3 text-[#FFF6E0]/40" size={16} />
+                          {interestFilter && (
+                            <button
+                              onClick={() => setInterestFilter("")}
+                              className="absolute right-3 p-1 rounded-full hover:bg-[#3a3b3c] text-[#FFF6E0]/70 hover:text-[#FFF6E0]"
+                            >
+                              <FaTimes size={14} />
+                            </button>
+                          )}
+                        </div>
+                        
+                        {/* Quick interest tags */}
+                        {getAllUniqueInterests().length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {getAllUniqueInterests().slice(0, 10).map(interest => (
+                              <button 
+                                key={interest}
+                                onClick={() => setInterestFilter(interest)}
+                                className={`text-xs px-2 py-1 rounded-full transition-colors ${
+                                  interestFilter === interest 
+                                    ? "bg-[#61677A] text-[#FFF6E0]" 
+                                    : "bg-[#272829]/40 text-[#FFF6E0]/70 hover:bg-[#272829]/60"
+                                }`}
+                              >
+                                {interest}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                   
-                  {arrayOfNearbyUserData.map((user, index) => {
+                  {/* Updated desktop nearby user cards with more visible interests */}
+                  {filteredNearbyUsers.map((user, index) => {
                     const unreadCount = unreadMessages[user._id] || 0;
                     const isFriend = isUserFriend(user._id);
                     
@@ -1378,11 +1543,10 @@ const HomePage = () => {
                           }`}>
                             <img
                               src={user.profileImageURL || "https://via.placeholder.com/150"}
-                              alt={`${user.fullName}'s profile`}
+                              alt={`${isFriend ? user.fullName : user.uniqueTag}'s profile`}
                               className="w-full h-full object-cover transition-transform hover:scale-110 duration-500"
                             />
                             
-                            {/* Bow Tie indicator for friends - diagonally opposite to status dot */}
                             
                           </div>
                           {isFriend && (
@@ -1402,14 +1566,40 @@ const HomePage = () => {
                         </div>
                         <div className="flex-1 ml-3">
                           <h3 className="text-base font-semibold text-[#FFF6E0] flex items-center">
-                            {user.fullName}
-                            {user.activeStatus?.isActive && (
-                              <span className="ml-2 text-xs text-green-400 font-normal">• online</span>
+                            {isFriend ? (
+                              <>
+                                {user.fullName}
+                                {user.activeStatus?.isActive && (
+                                  <span className="ml-2 text-xs text-green-400 font-normal">• online</span>
+                                )}
+                              </>
+                            ) : (
+                              <>
+                                @{user.uniqueTag}
+                                {user.activeStatus?.isActive && (
+                                  <span className="ml-2 text-xs text-green-400 font-normal">• online</span>
+                                )}
+                              </>
                             )}
                           </h3>
-                          <p className="text-xs text-[#FFF6E0]/70 line-clamp-1">
-                            {user.email}
-                          </p>
+                          {/* Enhance interest display here */}
+                          {!isFriend && user.bio && user.bio.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1.5">
+                              {user.bio.map((interest, idx) => (
+                                <span 
+                                  key={idx} 
+                                  className="inline-block px-2 py-0.5 bg-[#272829]/50 text-[#FFF6E0] text-[10px] rounded-full border border-[#FFF6E0]/10"
+                                >
+                                  {interest}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          {isFriend && (
+                            <p className="text-xs text-[#FFF6E0]/70 line-clamp-1 mt-1">
+                              Friend
+                            </p>
+                          )}
                         </div>
                         {unreadCount > 0 && (
                           <div className="bg-[#FFF6E0] text-[#272829] rounded-full min-w-6 h-6 flex items-center justify-center text-xs font-bold px-2">
@@ -1553,7 +1743,7 @@ const HomePage = () => {
                             
                           </h3>
                           <p className="text-xs text-[#FFF6E0]/70 line-clamp-1">
-                            {friend.friendId.email}
+                            Friend
                           </p>
                         </div>
                         {(unreadMessages[friend.friendId._id] || 0) > 0 && (
@@ -1657,32 +1847,46 @@ const HomePage = () => {
                       activeChatUser.profileImageURL ||
                       "https://via.placeholder.com/150"
                     }
-                    alt={`${activeChatUser.fullName}'s profile`}
+                    alt={`${isFriend ? activeChatUser.fullName : activeChatUser.uniqueTag}'s profile`}
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <div className="ml-3">
                   <h2 className="text-lg font-bold">
-                    {activeChatUser.fullName}
+                    {isFriend ? activeChatUser.fullName : `@${activeChatUser.uniqueTag}`}
                   </h2>
-                  <div
-                    className={`flex items-center text-xs ${
-                      onlineUsers[activeChatUser._id]
-                        ? "text-green-600"
-                        : "text-red-600"
-                    }`}
-                  >
-                    <span
-                      className={`w-2 h-2 ${
+                  <div className="flex flex-col">
+                    <div
+                      className={`flex items-center text-xs ${
                         onlineUsers[activeChatUser._id]
-                          ? "bg-green-500"
-                          : "bg-red-500"
-                      } rounded-full mr-1 animate-pulse`}
-                    ></span>
-                    {onlineUsers[activeChatUser._id] ? "online" : "offline"}
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }`}
+                    >
+                      <span
+                        className={`w-2 h-2 ${
+                          onlineUsers[activeChatUser._id]
+                            ? "bg-green-500"
+                            : "bg-red-500"
+                        } rounded-full mr-1 animate-pulse`}
+                      ></span>
+                      {onlineUsers[activeChatUser._id] ? "online" : "offline"}
+                    </div>
+                    {/* {!isFriend && activeChatUser.bio && activeChatUser.bio.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1 max-w-[260px]">
+                        {activeChatUser.bio.map((interest, idx) => (
+                          <span 
+                            key={idx} 
+                            className="inline-block px-2 py-0.5 bg-[#272829]/10 text-[#61677A] text-[10px] rounded-full"
+                          >
+                            {interest}
+                          </span>
+                        ))}
+                      </div>
+                    )} */}
                   </div>
                 </div>
-                <div className="ml-3 flex items-center">
+                <div className="ml-5 flex items-center">
                   {/* Friend Request Icon */}
                   {!isFriend && (
                     <button
@@ -1738,11 +1942,11 @@ const HomePage = () => {
                                   key={msg._id || idx}
                                   className={`flex ${
                                     isMe ? "justify-end" : "justify-start"
-                                  }`}
+                                  } mb-2`}
                                 >
                                   {/* Show avatar only for first message in group from others */}
                                   {!isMe && isFirstInGroup && (
-                                    <div className="self-end mb-2 mr-2">
+                                    <div className="self-end mb-1 mr-2">
                                       <div className="w-8 h-8 rounded-full overflow-hidden border border-[#61677A]/30">
                                         <img
                                           src={
@@ -1761,73 +1965,24 @@ const HomePage = () => {
                                       !isFirstInGroup && !isMe ? "ml-10" : ""
                                     }`}
                                   >
+                                    {/* Message Bubble */}
                                     <div
                                       className={`
-                                      p-3 
-                                      shadow-sm 
-                                      hover:shadow-md 
-                                      transition-shadow 
-                                      cursor-pointer
-                                      ${
-                                        isMe
-                                          ? "bg-[#272829] text-[#FFF6E0]"
-                                          : "bg-[#61677A] text-[#FFF6E0]"
-                                      }
-                                      ${
-                                        isFirstInGroup && isMe
-                                          ? "rounded-tl-xl rounded-tr-xl rounded-bl-xl rounded-br-sm"
-                                          : ""
-                                      }
-                                      ${
-                                        isFirstInGroup && !isMe
-                                          ? "rounded-tr-xl rounded-tl-sm rounded-bl-xl rounded-br-xl"
-                                          : ""
-                                      }
-                                      ${
-                                        isLastInGroup && isMe
-                                          ? "rounded-tl-xl rounded-tr-sm rounded-bl-xl rounded-br-xl"
-                                          : ""
-                                      }
-                                      ${
-                                        isLastInGroup && !isMe
-                                          ? "rounded-tr-xl rounded-tl-xl rounded-bl-sm rounded-br-xl"
-                                          : ""
-                                      }
-                                      ${
-                                        !isFirstInGroup &&
-                                        !isLastInGroup &&
-                                        isMe
-                                          ? "rounded-tl-xl rounded-tr-sm rounded-bl-xl rounded-br-sm"
-                                          : ""
-                                      }
-                                      ${
-                                        !isFirstInGroup &&
-                                        !isLastInGroup &&
-                                        !isMe
-                                          ? "rounded-tr-xl rounded-tl-sm rounded-bl-sm rounded-br-xl"
-                                          : ""
-                                      }
-                                      ${
-                                        isFirstInGroup && isLastInGroup && isMe
-                                          ? "rounded-tl-xl rounded-tr-xl rounded-bl-xl rounded-br-xl"
-                                          : ""
-                                      }
-                                      ${
-                                        isFirstInGroup && isLastInGroup && !isMe
-                                          ? "rounded-tr-xl rounded-tl-xl rounded-bl-xl rounded-br-xl"
-                                          : ""
-                                      }
-                                    `}
-                                      onClick={(e) =>
-                                        handleMessageClick(e, msg)
-                                      }
+                                        relative p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer
+                                        ${isMe 
+                                          ? "bg-[#272829] text-[#FFF6E0] rounded-2xl rounded-br-sm" 
+                                          : "bg-[#61677A] text-[#FFF6E0] rounded-2xl rounded-bl-sm"}
+                                      `}
+                                      onClick={(e) => handleMessageClick(e, msg)}
                                     >
+                                      {/* Message Content */}
                                       <p className="leading-relaxed text-sm md:text-base">
                                         {isLongMessage && !isExpanded
                                           ? truncateMessage(msg.message)
                                           : msg.message}
                                       </p>
 
+                                      {/* Read More/Less Button */}
                                       {isLongMessage && (
                                         <button
                                           onClick={(e) => {
@@ -1842,6 +1997,7 @@ const HomePage = () => {
                                         </button>
                                       )}
 
+                                      {/* Timestamp and Message Status */}
                                       <div className="text-[10px] mt-1 text-right flex justify-end items-center opacity-70">
                                         <span>{formatTime(msg.timestamp)}</span>
                                         {isMe && (
@@ -1860,6 +2016,20 @@ const HomePage = () => {
                                           </span>
                                         )}
                                       </div>
+                                      
+                                      {/* Message Tail */}
+                                      <div 
+                                        className={`absolute w-4 h-4 ${
+                                          isMe 
+                                            ? "right-0 bottom-0 bg-[#272829]" 
+                                            : "left-0 bottom-0 bg-[#61677A]"
+                                        }`}
+                                        style={{
+                                          clipPath: isMe 
+                                            ? 'polygon(100% 0, 0 100%, 100% 100%)' 
+                                            : 'polygon(0 0, 0 100%, 100% 100%)'
+                                        }}
+                                      />
                                     </div>
                                   </div>
                                 </div>
@@ -1959,7 +2129,7 @@ const HomePage = () => {
                     Send Friend Request
                   </h3>
                   <p className="mb-6 text-[#61677A] leading-relaxed">
-                    By sending a friend request to {activeChatUser.fullName},
+                    By sending a friend request to @{activeChatUser.uniqueTag},
                     they will be able to see your name and the number of friends
                     you have. Do you want to proceed?
                   </p>
