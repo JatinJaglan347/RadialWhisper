@@ -9,9 +9,9 @@ const LandingNavbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { authUser, getUserDetails, logout } = useAuthStore();
   const navigate = useNavigate();
-  const [adminOptin, setAdminOptin] = useState(false);
-  const [moderatorOptin, setModeratorOptin] = useState(false);
-  const [kingOptin, setKingOptin] = useState(false);
+  const [adminOption, setAdminOption] = useState(false);
+  const [moderatorOption, setModeratorOption] = useState(false);
+  const [kingOption, setKingOption] = useState(false);
   
   // Check if user is banned
   const isUserBanned = authUser?.data?.user?.banned?.current?.status === true;
@@ -23,23 +23,23 @@ const LandingNavbar = () => {
     // Only set role options if user is not banned
     if (!isUserBanned) {
       if (authUser?.data?.user?.userRole === 'king') {
-        setKingOptin(true);
+        setKingOption(true);
       }
       else if (authUser?.data?.user?.userRole === 'admin') {
-        setAdminOptin(true);
+        setAdminOption(true);
       }
       else if (authUser?.data?.user?.userRole === 'moderator') {
-        setModeratorOptin(true);
+        setModeratorOption(true);
       } else {
-        setKingOptin(false);
-        setAdminOptin(false);
-        setModeratorOptin(false);
+        setKingOption(false);
+        setAdminOption(false);
+        setModeratorOption(false);
       }
     } else {
       // Reset all roles if user is banned
-      setKingOptin(false);
-      setAdminOptin(false);
-      setModeratorOptin(false);
+      setKingOption(false);
+      setAdminOption(false);
+      setModeratorOption(false);
     }
   }, [getUserDetails, authUser?.data?.user?.userRole, isUserBanned]);
 
@@ -104,21 +104,21 @@ const LandingNavbar = () => {
                     </li>
                   ) : (
                     <>
-                      {kingOptin && (
+                      {kingOption && (
                         <li>
                           <Link to="/op/dashboard">
                             <Crown className="w-5 h-5" />KingPanal
                           </Link>
                         </li>
                       )}
-                      {adminOptin && (
+                      {adminOption && (
                         <li>
                           <Link to="/op/dashboard">
                             <Skull className="w-5 h-5" />AdminPanal
                           </Link>
                         </li>
                       )}
-                      {moderatorOptin && (
+                      {moderatorOption && (
                         <li>
                           <Link to="/op/dashboard">
                             <Scale className="w-5 h-5"/>Moderate
@@ -191,13 +191,13 @@ const LandingNavbar = () => {
                   </button>
                 ) : (
                   <>
-                    {kingOptin && (
+                    {kingOption && (
                       <Link to="/op/dashboard" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">King Panel</Link>
                     )}
-                    {adminOptin && (
+                    {adminOption && (
                       <Link to="/op/dashboard" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Admin Panel</Link>
                     )}
-                    {moderatorOptin && (
+                    {moderatorOption && (
                       <Link to="/op/dashboard" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Moderate</Link>
                     )}
                     <Link to="/chat/profile" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Profile</Link>
