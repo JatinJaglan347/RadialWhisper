@@ -102,7 +102,7 @@ const getAdminStats = asyncHandler(async (req, res) => {
     const totalUsers = await User.countDocuments();
     const totalModerators = await User.countDocuments({ userRole: "moderator" });
     const totalAdmins = await User.countDocuments({ userRole: "admin" });
-    const totalBannedUsers = await User.countDocuments({ "banned.history.status": true });
+    const totalBannedUsers = await User.countDocuments({ "banned.current.status": true });
   
     // Signup trend aggregation
     const signups = await User.aggregate([

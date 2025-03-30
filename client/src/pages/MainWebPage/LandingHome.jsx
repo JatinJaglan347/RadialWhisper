@@ -1132,8 +1132,10 @@ function LandingHome() {
                 to="/anonymous"
                 className="inline-flex items-center px-5 py-3 bg-[#61677A] hover:bg-[#555c6d] text-[#FFF6E0] rounded-lg shadow-md transition-all duration-200 group"
               >
-                <span className="font-medium">Know more about the Creator</span>
-                <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-200 group-hover:translate-x-1" />
+                <div className="flex items-center w-auto h-auto group ">
+                  <span className="font-medium">Know more about the Creator</span>
+                  <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-200 group-hover:translate-x-1" />
+                </div>
               </Link>
             </div>
 

@@ -198,7 +198,7 @@ const ManageSuggestionsPage = () => {
             </p>
           </div>
           
-          <Link to="/create-suggestion" className="btn bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] hover:from-[#FFE6C0] hover:to-[#FFF6E0] text-[#1A1B1F] px-7 py-3.5 rounded-full font-semibold transition-all duration-300 flex items-center shadow-lg hover:shadow-xl transform hover:translate-y-[-2px]">
+          <Link to="/suggestion" className="btn bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] hover:from-[#FFE6C0] hover:to-[#FFF6E0] text-[#1A1B1F] px-7 py-3.5 rounded-full font-semibold transition-all duration-300 flex items-center shadow-lg hover:shadow-xl transform hover:translate-y-[-2px]">
             <Plus size={18} className="mr-2" />
             New Suggestion
           </Link>
@@ -285,7 +285,7 @@ const ManageSuggestionsPage = () => {
             <Bookmark size={60} className="mx-auto text-[#D8D9DA] mb-6 opacity-70" />
             <h3 className="text-2xl font-semibold mb-3">No suggestions found</h3>
             <p className="text-[#D8D9DA] mb-8 text-lg max-w-xl mx-auto">Try adjusting your search or filters, or create a new suggestion to be the first one!</p>
-            <Link to="/create-suggestion" className="btn bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] hover:from-[#FFE6C0] hover:to-[#FFF6E0] text-[#1A1B1F] px-7 py-3.5 rounded-full font-semibold transition-all duration-300 inline-flex items-center shadow-lg hover:shadow-xl transform hover:translate-y-[-2px]">
+            <Link to="/suggestion" className="btn bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] hover:from-[#FFE6C0] hover:to-[#FFF6E0] text-[#1A1B1F] px-7 py-3.5 rounded-full font-semibold transition-all duration-300 inline-flex items-center shadow-lg hover:shadow-xl transform hover:translate-y-[-2px]">
               <Plus size={18} className="mr-2" />
               New Suggestion
             </Link>

@@ -25,6 +25,8 @@ const DashboardPage = () => {
     { name: 'Moderators', value: opStats?.totalModerators || 0, color: '#D8D9DA' }
   ];
 
+  console.log("sfsdfs",opStats);
+
   return (
     <div className="min-h-screen bg-[#272829] text-[#FFF6E0] p-6 relative overflow-hidden">
       {/* Background elements */}
