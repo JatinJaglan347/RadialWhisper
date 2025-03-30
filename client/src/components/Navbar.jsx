@@ -17,9 +17,9 @@ const Navbar = () => {
   const { authUser, getUserDetails,logout } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
-  const [adminOptin, setAdminOptin] = useState(false);
-  const [moderatorOptin, setModeratorOptin] = useState(false);
-  const [kingOptin, setKingOptin] = useState(false);
+  const [adminOption, setAdminOption] = useState(false);
+  const [moderatorOption, setModeratorOption] = useState(false);
+  const [kingOption, setKingOption] = useState(false);
   const [showChatOption, setShowChatOption] = useState(false);
 
   useEffect(() => {
@@ -31,20 +31,20 @@ const Navbar = () => {
     // Fetch user details on component mount
     getUserDetails();
     if (authUser?.data?.user?.userRole === "king") {
-      setKingOptin(true);
+      setKingOption(true);
       
     } else if (authUser?.data?.user?.userRole === "admin") {
       
-      setAdminOptin(true);
+      setAdminOption(true);
       
     } else if (authUser?.data?.user?.userRole === "moderator") {
       
-      setModeratorOptin(true);
+      setModeratorOption(true);
       
     } else {
-      setKingOptin(false);
-      setAdminOptin(false);
-      setModeratorOptin(false);
+      setKingOption(false);
+      setAdminOption(false);
+      setModeratorOption(false);
     }
   }, [getUserDetails, authUser?.data?.user?.userRole]);
 
@@ -120,7 +120,7 @@ const Navbar = () => {
                   </Link>
                 </li>
               )}
-              {kingOptin && (
+              {kingOption && (
                 <li>
                   <Link
                     to="/op/dashboard"
@@ -131,7 +131,7 @@ const Navbar = () => {
                   </Link>
                 </li>
               )}
-              {adminOptin && (
+              {adminOption && (
                 <li>
                   <Link
                     to="/op/dashboard"
@@ -142,7 +142,7 @@ const Navbar = () => {
                   </Link>
                 </li>
               )}
-              {moderatorOptin && (
+              {moderatorOption && (
                 <li>
                   <Link
                     to="/op/dashboard"
@@ -241,7 +241,7 @@ const Navbar = () => {
                   <div className="h-px w-full bg-gradient-to-r from-transparent via-[#61677A]/30 to-transparent my-1"></div>
                 </>
               )}
-              {kingOptin && (
+              {kingOption && (
                 <Link
                   to="/op/dashboard"
                   className="flex items-center px-4 py-2 text-[#FFF6E0] hover:bg-[#FFF6E0]/10 transition-colors"
@@ -250,7 +250,7 @@ const Navbar = () => {
                   <span>King Panel</span>
                 </Link>
               )}
-              {adminOptin && (
+              {adminOption && (
                 <Link
                   to="/op/dashboard"
                   className="flex items-center px-4 py-2 text-[#FFF6E0] hover:bg-[#FFF6E0]/10 transition-colors"
@@ -259,7 +259,7 @@ const Navbar = () => {
                   <span>Admin Panel</span>
                 </Link>
               )}
-              {moderatorOptin && (
+              {moderatorOption && (
                 <Link
                   to="/op/dashboard"
                   className="flex items-center px-4 py-2 text-[#FFF6E0] hover:bg-[#FFF6E0]/10 transition-colors"

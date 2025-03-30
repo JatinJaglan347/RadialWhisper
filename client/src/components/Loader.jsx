@@ -37,7 +37,7 @@ const Loader = () => {
 
       {/* Branding with an intriguing animated title */}
       <h1 className="mt-6 text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 animate-whisper">
-        Radialwisper
+        Radialwhisper
       </h1>
 
       {/* Engaging tagline */}
