@@ -1192,13 +1192,13 @@ const HomePage = () => {
               </div>
 
               {/* Friends list with improved styling */}
-              <h3 className="text-xs uppercase tracking-wider text-[#FFF6E0]/60 font-semibold px-2 py-3 sticky top-0 bg-[#272829]/90 flex items-center justify-between">
+              <h3 className="text-xs uppercase tracking-wider text-[#FFF6E0]/60 font-semibold px-2 py-3 sticky top-0 bg-[#272829]/90 flex items-center ">
                 Friends
-                {friends.length > 0 && (
-                  <span className="bg-[#FFF6E0] text-[#272829] rounded-full min-w-5 h-5 flex items-center justify-center text-xs font-bold px-1.5">
+                ({friends.length > 0 && (
+                  <span className="text-[#FFF6E0]/60 flex items-center justify-center text-xs font-bold ">
                     {friends.length}
                   </span>
-                )}
+                )})
               </h3>
               
                   <div className="space-y-2 relative">
