@@ -1077,7 +1077,7 @@ const HomePage = () => {
                               </>
                             ) : (
                               <>
-                                @{user.uniqueTag}
+                                #{user.uniqueTag}
                                 {isOnline && (
                                   <span className="ml-2 text-xs text-green-400 font-normal">• online</span>
                                 )}
@@ -1575,7 +1575,7 @@ const HomePage = () => {
                               </>
                             ) : (
                               <>
-                                @{user.uniqueTag}
+                                #{user.uniqueTag}
                                 {user.activeStatus?.isActive && (
                                   <span className="ml-2 text-xs text-green-400 font-normal">• online</span>
                                 )}
@@ -1853,7 +1853,7 @@ const HomePage = () => {
                 </div>
                 <div className="ml-3">
                   <h2 className="text-lg font-bold">
-                    {isFriend ? activeChatUser.fullName : `@${activeChatUser.uniqueTag}`}
+                    {isFriend ? activeChatUser.fullName : `#${activeChatUser.uniqueTag}`}
                   </h2>
                   <div className="flex flex-col">
                     <div
@@ -2040,6 +2040,7 @@ const HomePage = () => {
                       )
                     )
                   ) : (
+                    
                     <div className="flex items-center justify-center h-full py-20 text-[#61677A]">
                       <div className="text-center p-6 bg-[#FFF6E0]/30 rounded-2xl">
                         <MdMessage
@@ -2047,11 +2048,11 @@ const HomePage = () => {
                           className="mx-auto mb-4 text-[#61677A]/50"
                         />
                         <p>
-                          Start a conversation with {activeChatUser.fullName}
+                          Start a conversation with {isFriend ? activeChatUser.fullName : `#${activeChatUser.uniqueTag}`}
                         </p>
-                        <p className="text-xs mt-2 text-[#61677A]/70">
+                        {/* <p className="text-xs mt-2 text-[#61677A]/70">
                           Messages are end-to-end encrypted
-                        </p>
+                        </p> */}
                       </div>
                     </div>
                   )}
@@ -2129,7 +2130,7 @@ const HomePage = () => {
                     Send Friend Request
                   </h3>
                   <p className="mb-6 text-[#61677A] leading-relaxed">
-                    By sending a friend request to @{activeChatUser.uniqueTag},
+                    By sending a friend request to #{activeChatUser.uniqueTag},
                     they will be able to see your name and the number of friends
                     you have. Do you want to proceed?
                   </p>
