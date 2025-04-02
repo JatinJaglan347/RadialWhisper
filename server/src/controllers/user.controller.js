@@ -283,4 +283,66 @@ const checkAuth = asyncHandler(async (req, res) => {
     );
 });
 
-export {registerUser , loginUser , logoutUser , refreshAccessToken ,checkAuth } 
+const startFriendChat = asyncHandler(async (req, res) => {
+    const { userId, friendId } = req.body;
+
+    if (!userId || !friendId) {
+        throw new ApiError(400, "Both userId and friendId are required");
+    }
+
+    // Get user from database
+    const user = await User.findById(userId);
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    // Get friend from database
+    const friend = await User.findById(friendId);
+    if (!friend) {
+        throw new ApiError(404, "Friend not found");
+    }
+
+    // Check if they are actually friends
+    const isFriend = user.friendList.some(f => f.friendId.toString() === friendId);
+    if (!isFriend) {
+        throw new ApiError(403, "You can only start chats with your friends");
+    }
+
+    // Create a unique room ID for one-to-one chat (same logic as in socket.controller.js)
+    const roomId = [userId, friendId].sort().join("_");
+
+    // Get chat history
+    const history = await ChatMessage.find({ roomId })
+        .sort({ createdAt: 1 })
+        .lean()
+        .exec();
+
+    const formattedHistory = history.map(msg => ({
+        _id: msg._id,
+        sender: msg.sender,
+        message: msg.message,
+        room: msg.roomId,
+        status: msg.status,
+        timestamp: msg.createdAt
+    }));
+
+    return res.status(200).json(
+        new ApiResponse(
+            200, 
+            { 
+                roomId, 
+                friend: {
+                    _id: friend._id,
+                    fullName: friend.fullName,
+                    profileImageURL: friend.profileImageURL,
+                    isActive: friend.activeStatus.isActive,
+                    lastActive: friend.activeStatus.lastActive
+                },
+                history: formattedHistory 
+            }, 
+            "Chat room ready"
+        )
+    );
+});
+
+export {registerUser , loginUser , logoutUser , refreshAccessToken ,checkAuth, startFriendChat } 

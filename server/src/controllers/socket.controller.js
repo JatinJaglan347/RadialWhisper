@@ -40,6 +40,68 @@ export async function registerUser(socket, data) {
 
     logEvent("User Registered", { userId: data.userId, fullName, socketId: socket.id });
     
+    // Mark pending messages as delivered
+    try {
+      // Find all messages sent to this user that are still in 'sent' status
+      const pendingMessages = await ChatMessage.find({
+        recipient: data.userId,
+        status: 'sent'
+      }).exec();
+      
+      // Update all pending messages to 'delivered' status
+      if (pendingMessages.length > 0) {
+        await ChatMessage.updateMany(
+          { recipient: data.userId, status: 'sent' },
+          { $set: { status: 'delivered' } }
+        );
+        
+        // Group messages by sender to emit correct counts
+        const messagesBySender = {};
+        pendingMessages.forEach(msg => {
+          const senderId = msg.sender.toString();
+          if (!messagesBySender[senderId]) {
+            messagesBySender[senderId] = [];
+          }
+          messagesBySender[senderId].push(msg);
+        });
+        
+        // Emit messageDelivered events for each message
+        for (const msg of pendingMessages) {
+          const roomId = msg.roomId;
+          socket.to(roomId).emit("messageDelivered", {
+            messageId: msg._id,
+            room: roomId,
+            status: 'delivered'
+          });
+        }
+        
+        // Emit unread count updates for each sender
+        for (const [senderId, messages] of Object.entries(messagesBySender)) {
+          const roomId = messages[0].roomId;
+          const unreadCount = await ChatMessage.countDocuments({
+            roomId,
+            recipient: data.userId,
+            status: 'delivered'
+          });
+          
+          socket.emit("updateUnreadCount", {
+            sender: senderId,
+            count: unreadCount
+          });
+        }
+        
+        logEvent("Pending Messages Delivered", { 
+          userId: data.userId, 
+          count: pendingMessages.length 
+        });
+      }
+    } catch (deliveryError) {
+      logEvent("Error Delivering Pending Messages", { 
+        error: deliveryError.toString(), 
+        userId: data.userId 
+      });
+    }
+    
     // Re-join any existing rooms this user might be part of
     for (const [roomId, chat] of activeChats.entries()) {
       if (chat.user1 === data.userId || chat.user2 === data.userId) {
@@ -66,13 +128,6 @@ export async function joinChat(socket, data, io) {
     return;
   }
 
-  const targetUser = connectedUsers.get(data.targetUserId);
-  if (!targetUser) {
-    socket.emit("error", { message: "Target user not available." });
-    logEvent("Join Chat Error", { error: "Target user not available", targetUserId: data.targetUserId });
-    return;
-  }
-
   // Leave all previous rooms except the socket's own room
   for (const room of socket.rooms) {
     if (room !== socket.id) {
@@ -86,26 +141,36 @@ export async function joinChat(socket, data, io) {
   socket.join(roomId);
   logEvent("Joined Room", { userId: socket.userId, fullName: socket.fullName, roomId });
 
-  // Add the target user to the same room
-  const targetSocket = io.sockets.sockets.get(targetUser.socketId);
-  if (targetSocket) {
-    // Ensure targetSocket leaves its previous rooms too
-    for (const room of targetSocket.rooms) {
-      if (room !== targetSocket.id) {
-        targetSocket.leave(room);
-        logEvent("Target Left Room", { userId: data.targetUserId, fullName: targetUser.fullName, room });
+  // Get the target user from connected users if they're online
+  const targetUser = connectedUsers.get(data.targetUserId);
+  
+  // If target user is online, add them to the room too
+  if (targetUser) {
+    const targetSocket = io.sockets.sockets.get(targetUser.socketId);
+    if (targetSocket) {
+      // Ensure targetSocket leaves its previous rooms too
+      for (const room of targetSocket.rooms) {
+        if (room !== targetSocket.id) {
+          targetSocket.leave(room);
+          logEvent("Target Left Room", { userId: data.targetUserId, fullName: targetUser.fullName, room });
+        }
       }
+      targetSocket.join(roomId);
+      logEvent("Target User Joined Room", { userId: data.targetUserId, fullName: targetUser.fullName, roomId });
+      
+      // Update active chat room for target user
+      targetUser.activeChatRoom = roomId;
     }
-    targetSocket.join(roomId);
-    logEvent("Target User Joined Room", { userId: data.targetUserId, fullName: targetUser.fullName, roomId });
+  } else {
+    logEvent("Target User Offline", { targetUserId: data.targetUserId });
+    // We'll continue anyway, allowing messages to be sent to offline users
   }
 
-  // Update active chat room for both users
+  // Update active chat room for current user
   currentUser.activeChatRoom = roomId;
-  targetUser.activeChatRoom = roomId;
   activeChats.set(roomId, { user1: socket.userId, user2: data.targetUserId });
 
-  // Fetch and send chat history (unchanged)
+  // Fetch and send chat history
   try {
     const history = await ChatMessage.find({ roomId })
       .sort({ createdAt: 1 })
@@ -129,6 +194,7 @@ export async function joinChat(socket, data, io) {
   io.to(roomId).emit("chatStarted", { roomId });
   logEvent("Chat Started", { roomId, user1: socket.userId, user1FullName: socket.fullName, user2: data.targetUserId });
 }
+
 // -------------------- HANDLE MESSAGE --------------------
 export async function handleMessage(socket, data, io) {
   if (!data.roomId || !data.message) {
@@ -153,6 +219,7 @@ export async function handleMessage(socket, data, io) {
   
   const recipient = socket.userId === chat.user1 ? chat.user2 : chat.user1;
   try {
+    // Create and save message regardless of recipient's online status
     const newMessage = new ChatMessage({
       roomId,
       sender: socket.userId,
@@ -172,31 +239,37 @@ export async function handleMessage(socket, data, io) {
       timestamp: newMessage.createdAt
     };
     
-    // Calculate unread message count for the recipient
-    const unreadCount = await ChatMessage.countDocuments({
-      roomId,
-      recipient,
-      status: 'delivered'
-    });
-    
+    // Emit the message to the room (will reach sender and recipient if online)
     io.to(roomId).emit("newMessage", messageObj);
     logEvent("Message Sent", {
       roomId,
       sender: socket.userId,
       senderFullName: socket.fullName,
       recipient,
-      recipientFullName: connectedUsers.get(recipient).fullName,
       message: data.message,
       messageId: newMessage._id
     });
     
+    // Check if recipient is online
     const recipientUser = connectedUsers.get(recipient);
     if (recipientUser && recipientUser.socketId) {
+      // Recipient is online, mark message as delivered
       await ChatMessage.findByIdAndUpdate(newMessage._id, { status: 'delivered' });
+      
+      // Calculate unread message count for the recipient
+      const unreadCount = await ChatMessage.countDocuments({
+        roomId,
+        recipient,
+        status: 'delivered'
+      });
+      
+      // Notify recipient about unread count
       io.to(recipientUser.socketId).emit("updateUnreadCount", {
         sender: socket.userId,
         count: unreadCount
       });
+      
+      // Notify room that message was delivered
       const deliveredMessage = {
         messageId: newMessage._id,
         room: roomId,
@@ -209,6 +282,14 @@ export async function handleMessage(socket, data, io) {
         recipient,
         recipientFullName: recipientUser.fullName,
         unreadCount
+      });
+    } else {
+      // If recipient is offline, message status stays at 'sent'
+      // It will be marked as 'delivered' when they come online
+      logEvent("Message Saved for Offline User", {
+        roomId,
+        messageId: newMessage._id,
+        recipient
       });
     }
   } catch (error) {
