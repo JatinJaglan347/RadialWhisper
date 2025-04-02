@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Edit3, MapPin, Cake, Hash, User, Globe, Clock, Radio, Shield, Settings } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import UpdateField from "../components/UpdateField";
 
 const ProfilePage = () => {
-  const { authUser, isGettingUserInfoRules, userInfoRulesData } = useAuthStore();
+  const { authUser, isGettingUserInfoRules, userInfoRulesData ,  fetchPublicUserInfoRules} = useAuthStore();
   const userData = authUser?.data?.user;
 
   const [showUpdateBox, setShowUpdateBox] = useState(false);
@@ -28,6 +28,9 @@ const handleEditClick = (field, value, type) => {
     console.log(`Updated ${editField}:`, newValue);
     // You can update the user data here (e.g., by calling an API).
   };
+  useEffect(() => {
+    fetchPublicUserInfoRules();
+  },[]);
 
   if (!userData) {
     return (
