@@ -1877,19 +1877,19 @@ const HomePage = () => {
                   <div className="flex flex-col">
                     <div
                       className={`flex items-center text-xs ${
-                        onlineUsers[activeChatUser._id]
+                        activeChatUser.activeStatus?.isActive
                           ? "text-green-600"
                           : "text-red-600"
                       }`}
                     >
                       <span
                         className={`w-2 h-2 ${
-                          onlineUsers[activeChatUser._id]
+                          activeChatUser.activeStatus?.isActive
                             ? "bg-green-500"
                             : "bg-red-500"
                         } rounded-full mr-1 animate-pulse`}
                       ></span>
-                      {onlineUsers[activeChatUser._id] ? "online" : "offline"}
+                      {activeChatUser.activeStatus?.isActive ? "online" : "offline"}
                     </div>
                     
                   </div>
