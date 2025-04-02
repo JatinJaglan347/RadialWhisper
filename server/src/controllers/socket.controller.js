@@ -225,6 +225,7 @@ export async function handleMessage(socket, data, io) {
       sender: socket.userId,
       recipient,
       message: data.message,
+      replyTo: data.replyTo || null,
       status: 'sent'
     });
     
@@ -236,7 +237,8 @@ export async function handleMessage(socket, data, io) {
       message: data.message, 
       room: roomId, 
       status: 'sent',
-      timestamp: newMessage.createdAt
+      timestamp: newMessage.createdAt,
+      replyTo: data.replyTo || null
     };
     
     // Emit the message to the room (will reach sender and recipient if online)
@@ -247,7 +249,8 @@ export async function handleMessage(socket, data, io) {
       senderFullName: socket.fullName,
       recipient,
       message: data.message,
-      messageId: newMessage._id
+      messageId: newMessage._id,
+      replyTo: data.replyTo || null
     });
     
     // Check if recipient is online

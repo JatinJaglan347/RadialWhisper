@@ -12,6 +12,9 @@ import {
   UserX,
   Clock,
   Info,
+  X,
+  Reply,
+  Copy,
 } from "lucide-react";
 import { useUserActivity } from "../hooks/useUserActivity";
 import EmojiPicker from "../components/EmojiPicker";
@@ -32,7 +35,9 @@ import {
   FaEllipsisV,
   FaRegCopy,
   FaInfoCircle,
-  FaClock
+  FaClock,
+  FaReply,
+  FaCopy
 } from 'react-icons/fa';
 import { 
   MdRefresh, 
@@ -534,8 +539,10 @@ const HomePage = () => {
         return;
       }
 
-      sendMessage(chatMessage, activeChatRoom);
+      // Send message with replyTo if replying
+      sendMessage(chatMessage, activeChatRoom, replyingTo?._id || null);
       setChatMessage("");
+      setReplyingTo(null); // Clear the replyingTo state after sending
     } else {
       toast.error("No active chat room. Please start a chat first.");
     }
@@ -817,6 +824,81 @@ const HomePage = () => {
       return total;
     }, 0);
   };
+
+  const [replyingTo, setReplyingTo] = useState(null); // Add this state for tracking which message we're replying to
+
+  // Add a reply function to the context menu options
+  const replyToMessage = () => {
+    if (!selectedMessage) return;
+    
+    setReplyingTo(selectedMessage);
+    setShowContextMenu(false);
+    
+    // Focus the chat input after selecting to reply
+    const chatInput = document.getElementById('chatInput');
+    if (chatInput) chatInput.focus();
+  };
+
+  // Add this function to render a reply preview
+  const renderReplyPreview = () => {
+    if (!replyingTo) return null;
+    
+    const isReplyFromMe = replyingTo.sender === authUser.data.user._id;
+    const replySender = isReplyFromMe ? 'You' : activeChatUser?.fullName || 'User';
+    
+    return (
+      <div className="bg-[#31333A] text-[#FFF6E0] p-2 rounded-t-lg flex justify-between items-start">
+        <div>
+          <div className="text-xs font-semibold mb-1">
+            Replying to {replySender}
+          </div>
+          <div className="text-sm text-[#FFF6E0]/80 truncate max-w-[220px]">
+            {replyingTo.message}
+          </div>
+        </div>
+        <button 
+          onClick={() => setReplyingTo(null)} 
+          className="text-[#FFF6E0]/60 hover:text-[#FFF6E0] transition-colors"
+        >
+          <X size={16} />
+        </button>
+      </div>
+    );
+  };
+
+  // Add a function to render replied message content
+  const renderRepliedMessage = (message) => {
+    if (!message.replyTo) return null;
+    
+    // Find the original message being replied to
+    const repliedMessage = messagesByRoom[activeChatRoom]?.find(
+      msg => msg._id === message.replyTo
+    );
+    
+    if (!repliedMessage) return null;
+    
+    const isReplyFromMe = repliedMessage.sender === authUser.data.user._id;
+    const replySender = isReplyFromMe ? 'You' : activeChatUser?.fullName || 'User';
+    
+    return (
+      <div className="mb-1 text-xs bg-[#494D5A] p-1.5 rounded-lg text-[#FFF6E0]/80">
+        <div className="font-semibold text-[#FFF6E0]/90 mb-0.5">
+          {replySender}
+        </div>
+        <div className="truncate max-w-full">
+          {repliedMessage.message}
+        </div>
+      </div>
+    );
+  };
+
+  // Update the context menu to include a reply option
+  // Add the reply option to the context menu
+  const contextMenuItems = [
+    { label: "Copy", icon: <FaCopy />, action: copyMessageText },
+    { label: "Reply", icon: <FaReply />, action: replyToMessage },
+    { label: "Info", icon: <FaInfoCircle />, action: showMessageInfo },
+  ];
 
   return (
     <div
@@ -2043,13 +2125,16 @@ const HomePage = () => {
                                       `}
                                       onClick={(e) => handleMessageClick(e, msg)}
                                     >
+                                      {/* Render replied message if this message is a reply */}
+                                      {renderRepliedMessage(msg)}
+                                      
                                       {/* Message Content */}
                                       <p className="leading-relaxed text-sm md:text-base">
                                         {isLongMessage && !isExpanded
                                           ? truncateMessage(msg.message)
                                           : msg.message}
                                       </p>
-
+                                      
                                       {/* Read More/Less Button */}
                                       {isLongMessage && (
                                         <button
@@ -2141,6 +2226,9 @@ const HomePage = () => {
 
             {/* Message Input with modern styling and animation - simplified version */}
             <div className="p-3 border-t border-gray-200 bg-[#FFF6E0] sticky bottom-0 left-0 right-0 bg-opacity-90 shadow-md z-40">
+              {/* Reply Preview */}
+              {renderReplyPreview()}
+              
               <div className="flex gap-2 items-end">
                 {/* Emoji button with position relative for proper positioning */}
                 <div className="relative z-[9000]">
@@ -2167,12 +2255,13 @@ const HomePage = () => {
                 </div>
 
                 <input
+                  id="chatInput" // Add an ID to the input for focusing
                   type="text"
                   value={chatMessage}
                   onChange={(e) => setChatMessage(e.target.value)}
                   onKeyDown={handleKeyPress}
                   className="flex-1 bg-[#272829] text-[#FFF6E0] border-none rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#61677A] transition-all duration-300 shadow-inner placeholder-[#FFF6E0]/50 min-h-[44px]"
-                  placeholder="Type a message..."
+                  placeholder={replyingTo ? "Type your reply..." : "Type a message..."}
                 />
 
                 <button
@@ -2332,20 +2421,16 @@ const HomePage = () => {
             left: `${contextMenuPosition.x}px`,
           }}
         >
-          <button
-            className="w-full text-left px-4 py-2 hover:bg-[#31333A] transition-colors duration-200 flex items-center"
-            onClick={copyMessageText}
-          >
-            <FaRegCopy className="mr-2" size={16} />
-            Copy
-          </button>
-          <button
-            className="w-full text-left px-4 py-2 hover:bg-[#31333A] transition-colors duration-200 flex items-center"
-            onClick={showMessageInfo}
-          >
-            <FaInfoCircle className="mr-2" size={16} />
-            Info
-          </button>
+          {contextMenuItems.map((item, index) => (
+            <button
+              key={index}
+              className="w-full text-left px-4 py-2 hover:bg-[#31333A] transition-colors duration-200 flex items-center"
+              onClick={item.action}
+            >
+              {item.icon}
+              {item.label}
+            </button>
+          ))}
         </div>
       )}
 

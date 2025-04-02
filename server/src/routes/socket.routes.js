@@ -46,7 +46,8 @@ export function initializeSocket(server) {
       console.log("✉️ message event triggered");
       handleMessage(socket, data, io);
     });
-// Client wants to mark messages as read
+
+    // Client wants to mark messages as read
     socket.on("markMessagesAsRead", (data) => {
       console.log("📖 markMessagesAsRead event triggered");
       markMessagesAsRead(socket, data, io);
@@ -56,7 +57,7 @@ export function initializeSocket(server) {
     socket.on("leaveAllRooms", (callback) => {
       const rooms = Array.from(socket.rooms);
       rooms.forEach((room) => {
-        if (room !== socket.id) { // Don’t leave the socket’s own ID room
+        if (room !== socket.id) { // Don't leave the socket's own ID room
           socket.leave(room);
           console.log(`Socket ${socket.id} left room ${room}`);
         }

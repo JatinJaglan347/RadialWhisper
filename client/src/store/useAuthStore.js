@@ -978,11 +978,16 @@ fetchPublicUserInfoRules: async () => {
   },
   
   
-  sendMessage: (message, roomId) => {
+  sendMessage: (message, roomId, replyTo = null) => {
     const { socket, activeChatRoom, currentUserId } = get();
     const targetRoom = roomId || activeChatRoom;
     if (socket && targetRoom && currentUserId) {
-      socket.emit("message", { roomId: targetRoom, message, sender: currentUserId });
+      socket.emit("message", { 
+        roomId: targetRoom, 
+        message, 
+        sender: currentUserId,
+        replyTo 
+      });
     } else {
       toast.error("Cannot send message: Chat not properly initialized");
     }
