@@ -801,6 +801,23 @@ const HomePage = () => {
   // Add state for the retention policy popup
   const [showRetentionPolicyPopup, setShowRetentionPolicyPopup] = useState(false);
 
+  // Add these functions to calculate unread messages by type
+  const calculateUnreadFromFriends = () => {
+    return friends.reduce((total, friend) => {
+      return total + (unreadMessages[friend.friendId._id] || 0);
+    }, 0);
+  };
+
+  const calculateUnreadFromNearby = () => {
+    // Only count nearby users who are not friends
+    return arrayOfNearbyUserData.reduce((total, user) => {
+      if (!isUserFriend(user._id)) {
+        return total + (unreadMessages[user._id] || 0);
+      }
+      return total;
+    }, 0);
+  };
+
   return (
     <div
       className="h-full flex flex-col md:flex-row overflow-hidden relative"
@@ -839,11 +856,17 @@ const HomePage = () => {
       {/* Mobile Burger Menu */}
       {!sidebarOpen && !showUserInfoPopup && (
         <button
-          className="md:hidden absolute top-4 right-4 z-30 bg-[#272829] text-[#FFF6E0] p-3 rounded-full shadow-md hover:bg-[#31333A] transition-all duration-300"
+          className="md:hidden absolute top-4 right-4 z-30 bg-[#272829] text-[#FFF6E0] p-3 rounded-full shadow-md hover:bg-[#31333A] transition-all duration-300 "
           onClick={toggleSidebar}
           aria-label="Open menu"
         >
           <MdMenu size={20} />
+          {/* Add unread count badge */}
+          {(calculateUnreadFromFriends() + calculateUnreadFromNearby()) > 0 && (
+            <div className="absolute -top-2 -right-2 bg-[#B8B7B5] text-[#272829] rounded-full min-w-5 h-5 flex items-center justify-center text-xs font-bold px-1.5">
+              {(calculateUnreadFromFriends() + calculateUnreadFromNearby()) > 99 ? "99+" : (calculateUnreadFromFriends() + calculateUnreadFromNearby())}
+            </div>
+          )}
         </button>
       )}
 
@@ -893,6 +916,11 @@ const HomePage = () => {
                 >
                 <FaUser className="mr-2" size={18} />
                 Nearby
+                {calculateUnreadFromNearby() > 0 && (
+                  <div className="bg-[#FFF6E0] text-[#272829] rounded-full min-w-5 h-5 flex items-center justify-center text-xs font-bold px-1.5 ml-2">
+                    {calculateUnreadFromNearby() > 99 ? "99+" : calculateUnreadFromNearby()}
+                  </div>
+                )}
               </button>
               <button
                 className={`flex-1 px-4 py-2.5 rounded-lg transition-all duration-300 flex items-center justify-center ${
@@ -904,6 +932,11 @@ const HomePage = () => {
               >
                 <FaUserFriends className="mr-2" size={18} />
                 Friends
+                {calculateUnreadFromFriends() > 0 && (
+                  <div className="bg-[#FFF6E0] text-[#272829] rounded-full min-w-5 h-5 flex items-center justify-center text-xs font-bold px-1.5 ml-2">
+                    {calculateUnreadFromFriends() > 99 ? "99+" : calculateUnreadFromFriends()}
+                  </div>
+                )}
               </button>
             </div>
             
@@ -1394,6 +1427,11 @@ const HomePage = () => {
               >
                 <FaUser className="mr-2" size={18} />
                 Nearby
+                {calculateUnreadFromNearby() > 0 && (
+                  <div className="bg-[#FFF6E0] text-[#272829] rounded-full min-w-5 h-5 flex items-center justify-center text-xs font-bold px-1.5 ml-2">
+                    {calculateUnreadFromNearby() > 99 ? "99+" : calculateUnreadFromNearby()}
+                  </div>
+                )}
               </button>
               <button
                 className={`flex-1 px-4 py-2.5 rounded-lg transition-all duration-300 flex items-center justify-center ${
@@ -1405,6 +1443,11 @@ const HomePage = () => {
               >
                 <FaUserFriends className="mr-2" size={18} />
                 Friends
+                {calculateUnreadFromFriends() > 0 && (
+                  <div className="bg-[#FFF6E0] text-[#272829] rounded-full min-w-5 h-5 flex items-center justify-center text-xs font-bold px-1.5 ml-2">
+                    {calculateUnreadFromFriends() > 99 ? "99+" : calculateUnreadFromFriends()}
+                  </div>
+                )}
               </button>
             </div>
             
@@ -1709,11 +1752,11 @@ const HomePage = () => {
               </div>
 
               {/* Friends list with improved styling */}
-              <h3 className="text-xs uppercase tracking-wider text-[#FFF6E0]/60 font-semibold px-2 py-3 sticky top-0 bg-[#272829]/90 flex items-center justify-between">
+              <h3 className="text-xs uppercase tracking-wider text-[#FFF6E0]/60 font-semibold px-2 py-3 sticky top-0 bg-[#272829]/90 flex items-center ">
                 Friends
                 {friends.length > 0 && (
-                  <span className="bg-[#FFF6E0] text-[#272829] rounded-full min-w-5 h-5 flex items-center justify-center text-xs font-bold px-1.5">
-                    {friends.length}
+                  <span className="bg-[#272829]/90  text-[#FFF6E0]/60 rounded-full min-w-5 h-5 flex items-center justify-center text-xs font-bold px-1.5">
+                    ({friends.length})
                   </span>
                 )}
               </h3>
