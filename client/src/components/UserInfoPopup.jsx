@@ -14,10 +14,13 @@ import {
   X,
   AlertTriangle,
   Cake,
-  Copy 
+  Copy,
+  UserPlus,
+  UserMinus,
+  Users
 } from 'lucide-react';
 
-const UserInfoPopup = ({ user, onClose }) => {
+const UserInfoPopup = ({ user, onClose, isUserFriend, friendCount, onAddFriend, onRemoveFriend }) => {
   const [activeSection, setActiveSection] = useState('profile');
   const [isNotificationsMuted, setIsNotificationsMuted] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
@@ -101,7 +104,12 @@ const UserInfoPopup = ({ user, onClose }) => {
                 alt={`${user.uniqueTag}'s profile`}
                 className="w-28 h-28 rounded-full object-cover border-4 border-[#61677A]/30"
               />
-              <div className="flex items-center mt-4">
+              
+              {isUserFriend && (
+                <h2 className="text-xl font-bold text-[#FFF6E0] mt-3">{user.name}</h2>
+              )}
+              
+              <div className="flex items-center mt-2">
                 <h2 className="text-xl font-bold text-[#FFF6E0] mr-2 italic">#{user.uniqueTag}</h2>
                 <button 
                   onClick={copyUniqueTag}
@@ -110,12 +118,19 @@ const UserInfoPopup = ({ user, onClose }) => {
                   <Copy size={16} />
                 </button>
               </div>
+
+              {isUserFriend && (
+                <div className="flex items-center mt-2 text-[#D8D9DA]">
+                  <Users size={16} className="mr-1" />
+                  <span>{friendCount || 0} Friends</span>
+                </div>
+              )}
             </div>
             
             <div className="space-y-2">
               <div className="flex items-center justify-between flex-wrap">
                 <div className="flex items-center space-x-1">
-                  <Cake  className="text-[#F6B0BA]" size={20} />
+                  <Cake className="text-[#F6B0BA]" size={20} />
                   <span className="text-[#FFF6E0]">{formatDate(user.dateOfBirth)}</span>
                 </div>
 
@@ -277,14 +292,32 @@ const UserInfoPopup = ({ user, onClose }) => {
 
           {/* Action Buttons */}
           {activeSection === 'profile' && (
-            <div className="p-4 bg-[#272829] border-t border-[#61677A]/10">
+            <div className="p-4 bg-[#272829] border-t border-[#61677A]/10 flex gap-2">
               <button 
-               onClick={onClose} 
-                className="w-full bg-[#61677A] text-[#FFF6E0] rounded-full py-3 flex items-center justify-center hover:bg-[#61677A]/80 transition-all duration-300"
+                onClick={onClose} 
+                className="flex-1 bg-[#61677A] text-[#FFF6E0] rounded-full py-3 flex items-center justify-center hover:bg-[#61677A]/80 transition-all duration-300"
               >
                 <MessageCircle size={20} className="mr-2" />
                 Message
               </button>
+              
+              {isUserFriend ? (
+                <button 
+                  onClick={onRemoveFriend}
+                  className="flex-1 bg-red-500/10 text-red-500 rounded-full py-3 flex items-center justify-center hover:bg-red-500/20 transition-all duration-300"
+                >
+                  <UserMinus size={20} className="mr-2" />
+                  Remove Friend
+                </button>
+              ) : (
+                <button 
+                  onClick={onAddFriend}
+                  className="flex-1 bg-green-500/10 text-green-500 rounded-full py-3 flex items-center justify-center hover:bg-green-500/20 transition-all duration-300"
+                >
+                  <UserPlus size={20} className="mr-2" />
+                  Add Friend
+                </button>
+              )}
             </div>
           )}
         </div>

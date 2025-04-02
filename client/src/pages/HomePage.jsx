@@ -1891,18 +1891,7 @@ const HomePage = () => {
                       ></span>
                       {onlineUsers[activeChatUser._id] ? "online" : "offline"}
                     </div>
-                    {/* {!isFriend && activeChatUser.bio && activeChatUser.bio.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-1 max-w-[260px]">
-                        {activeChatUser.bio.map((interest, idx) => (
-                          <span 
-                            key={idx} 
-                            className="inline-block px-2 py-0.5 bg-[#272829]/10 text-[#61677A] text-[10px] rounded-full"
-                          >
-                            {interest}
-                          </span>
-                        ))}
-                      </div>
-                    )} */}
+                    
                   </div>
                 </div>
                 <div className="ml-5 flex items-center space-x-3">
@@ -1913,9 +1902,9 @@ const HomePage = () => {
                     title="Message Retention Policy"
                   >
                     <FaClock size={18} />
-                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full opacity-70 animate-pulse"></span>
-                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 bg-[#272829] text-[#FFF6E0] text-xs p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
-                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-[#272829]"></div>
+                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full opacity-70 animate-pulse "></span>
+                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 bg-[#272829] text-[#FFF6E0] text-xs  p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-[#272829] "></div>
                       Messages expire after a period of time. Click for details.
                     </div>
                   </button>
@@ -2197,6 +2186,10 @@ const HomePage = () => {
                 user={activeChatUser}
                 isOnline={onlineUsers[activeChatUser._id] || false}
                 onClose={() => setShowUserInfoPopup(false)}
+                isUserFriend={isUserFriend(activeChatUser._id)}
+                friendCount={friends.length}
+                onAddFriend={() => sendFriendRequest(activeChatUser._id)}
+                onRemoveFriend={() => removeFriend(activeChatUser._id)}
               />
             )}
           </>
