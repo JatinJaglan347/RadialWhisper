@@ -13,13 +13,23 @@ export const verifyJWT = asyncHandler( async (req , res ,next)=>{
     
         const decodedToken = jwt.verify(token , process.env.ACCESS_TOKEN_SECRET)
     
-       const user = await User.findById(decodedToken?._id).select ("-password -refrenceToken")
-       if (!user){
-        throw new ApiError(401 , "Invalid access token")
-       }
+        const user = await User.findById(decodedToken?._id).select ("-password -refrenceToken")
+        
+        if (!user){
+            throw new ApiError(401 , "Invalid access token")
+        }
+        
+        // Check if the token version in the JWT matches the user's current token version
+        // This ensures that if a user logs in on a new device and forces logout on others,
+        // the old tokens are invalidated even if they haven't expired yet
+        if (decodedToken.tokenVersion !== undefined && 
+            user.tokenVersion !== undefined && 
+            decodedToken.tokenVersion !== user.tokenVersion) {
+            throw new ApiError(401, "Session expired. Please login again.")
+        }
     
-       req.user = user;
-       next()
+        req.user = user;
+        next()
     } catch (error) {
         throw new ApiError(401 , error?.message || "Invalid Access Token")
     }

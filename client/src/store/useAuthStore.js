@@ -38,6 +38,9 @@ export const useAuthStore = create((set, get) => ({
   isUpdating: false,
   userInfoRules: null,
   isLoading: false,
+  showSingleDevicePrompt: false, // New state for showing the single device prompt
+  pendingAuthUserData: null, // Store pending auth data when device prompt is shown
+  pendingCredentials: null, // Store credentials when device prompt is shown
   
 
   user: null,
@@ -136,24 +139,102 @@ export const useAuthStore = create((set, get) => ({
   },
 
   // Function to handle user login
-  login: async (data) => {
+  login: async (data, forceLogoutOthers = false) => {
+    console.log("LOGIN FUNCTION CALLED with:", {
+      forceLogoutOthers,
+      email: data?.email,
+      hasPassword: !!data?.password
+    });
+    
     set({ isLoggingIn: true });
     try {
-      const res = await axiosInstance.post('/api/v1/user/login', data);
-      console.log("Login API");
-      set({ authUser: res.data });
+      // Construct request data with explicit properties
+      const requestData = {};
+      
+      if (data?.email) requestData.email = data.email;
+      if (data?.password) requestData.password = data.password;
+      if (forceLogoutOthers === true) requestData.forceLogoutOthers = true;
+      
+      console.log("LOGIN REQUEST DATA:", JSON.stringify(requestData));
+      
+      const res = await axiosInstance.post('/api/v1/user/login', requestData);
+      console.log("LOGIN API RESPONSE:", JSON.stringify(res.data));
+      
+      // Check if there's another active session
+      if (res.data?.data?.hasOtherSessions === true && !forceLogoutOthers) {
+        console.log("OTHER SESSIONS DETECTED, showing prompt without setting auth state");
+        
+        // Store the credentials and auth data for later use, but DON'T set authUser yet
+        set({ 
+          showSingleDevicePrompt: true,
+          pendingAuthUserData: res.data, // Store auth data for later use
+          pendingCredentials: { 
+            email: data.email, 
+            password: data.password 
+          },
+          isLoggingIn: false 
+        });
+        return { needsConfirmation: true, message: res.data?.data?.message };
+      }
+      
+      // Normal login flow - no other sessions or user confirmed logout
+      console.log("COMPLETE LOGIN FLOW, setting full auth state");
+      set({ 
+        authUser: res.data,
+        showSingleDevicePrompt: false,
+        pendingAuthUserData: null,
+        pendingCredentials: null
+      });
+      
       // Immediately update role flags by calling checkAuth:
       await get().checkAuth();
-      toast.success("Logged in successfully");
+      toast.success(forceLogoutOthers 
+        ? "Logged in successfully and logged out from other devices" 
+        : "Logged in successfully");
+      return { success: true };
     } catch (error) {
-      console.error(error);
+      console.error("LOGIN ERROR:", error);
       const errorMessage = error.response?.data?.message || "Failed to log in";
       toast.error(errorMessage);
+      return { error: errorMessage };
     } finally {
       set({ isLoggingIn: false });
     }
   },
-
+  
+  // Function to confirm single device login
+  confirmSingleDeviceLogin: async () => {
+    console.log("CONFIRM SINGLE DEVICE LOGIN CALLED");
+    const { pendingCredentials } = get();
+    
+    console.log("Using stored credentials:", {
+      hasPendingCreds: !!pendingCredentials,
+      email: pendingCredentials?.email,
+    });
+    
+    if (!pendingCredentials || !pendingCredentials.email || !pendingCredentials.password) {
+      console.error("MISSING CREDENTIALS for confirmSingleDeviceLogin");
+      toast.error("Session expired. Please try logging in again.");
+      set({ 
+        showSingleDevicePrompt: false,
+        pendingAuthUserData: null,
+        pendingCredentials: null
+      });
+      return { error: "Missing credentials" };
+    }
+    
+    console.log("CALLING LOGIN with forceLogoutOthers=true");
+    return await get().login(pendingCredentials, true);
+  },
+  
+  // Function to cancel single device login
+  cancelSingleDeviceLogin: () => {
+    set({ 
+      showSingleDevicePrompt: false,
+      pendingAuthUserData: null,
+      pendingCredentials: null
+    });
+  },
 
   logout: async () => {
     try {
@@ -269,6 +350,7 @@ updateActivityStatus: async (isActive, lastActive) => {
   set({ isActive, lastActive });
   
   const { authUser } = get();
+  // Only update if fully logged in (not during pending auth state)
   if (authUser?.data?.user?._id) {
     try {
       console.log(`Sending activity update to server: ${isActive}`);
@@ -281,6 +363,8 @@ updateActivityStatus: async (isActive, lastActive) => {
     } catch (error) {
       console.error('Failed to update activity status:', error);
     }
+  } else {
+    console.log('Activity status update skipped - user not fully logged in');
   }
 },
 
@@ -809,16 +893,16 @@ fetchPublicUserInfoRules: async () => {
   
 
   connectSocket: () => {
-    const { socket } = get();
-    if (socket) return;
-
+    const { socket, authUser } = get();
+    
+    // Don't connect socket if not fully logged in or socket already exists
+    if (!authUser || socket) return;
+    
+    console.log("Connecting socket for fully authenticated user");
+    
     const newSocket = io(import.meta.env.VITE_API_BASE_URL, {
       transports: ["websocket"],
       withCredentials: true,
-    });
-
-    newSocket.on("connect", () => {
-      console.log("🟢 Connected to Socket.io server:", newSocket.id);
     });
 
     // Load stored unread messages - first from unreadMessagesBySender, then fallback to localStorage

@@ -175,20 +175,108 @@ const HomePage = () => {
   window.scrollTo(0, 0);
 
   useEffect(() => {
-    if (authUser ) {
-      fetchFriends();
-      fetchFriendRequests();
+    // Check if user is fully logged in and not in pending state
+    const { showSingleDevicePrompt } = useAuthStore.getState();
+    
+    // Skip if user is in pending login state (waiting for device confirmation)
+    if (showSingleDevicePrompt) {
+      console.log("Skipping socket connection - user in pending login state");
+      return;
     }
-  }, [authUser, fetchFriends, fetchFriendRequests , ]);
+    
+    if (authUser) {
+      console.log("Connecting socket for fully authenticated user");
+      connectSocket();
+      const timer = setTimeout(() => {
+        const currentSocket = useAuthStore.getState().socket;
+        if (currentSocket && authUser?.data?.user?._id) {
+          currentSocket.emit("registerUser", {
+            userId: authUser.data.user._id,
+          });
+          console.log("User registered via socket:", authUser.data.user._id);
 
-  // Replace this useEffect with the correct implementation
-  useEffect(() => {
-    // This will run whenever selectedSection changes
-    if (viewMode === "friends" && authUser) {
-      fetchFriends();
-      fetchFriendRequests();
+          useAuthStore.getState().setCurrentUserId(authUser.data.user._id);
+          // Add socket event listeners for debugging
+          currentSocket.on("connect", () => {
+            console.log("Socket connected");
+          });
+
+          currentSocket.on("disconnect", () => {
+            console.log("Socket disconnected");
+          });
+
+          currentSocket.on("error", (error) => {
+            console.error("Socket error:", error);
+            toast.error(error.message || "Socket error occurred");
+          });
+        }
+      }, 500);
+      return () => clearTimeout(timer);
     }
-  }, [viewMode, authUser, fetchFriends, fetchFriendRequests]);
+  }, [authUser, connectSocket]);
+
+  // Fetch location when authenticated
+  useEffect(() => {
+    // Skip if user is in pending login state
+    const { showSingleDevicePrompt } = useAuthStore.getState();
+    if (showSingleDevicePrompt) {
+      console.log("Skipping location fetch - user in pending login state");
+      return;
+    }
+    
+    if (authUser && !locationPermissionDenied) {
+      console.log("Fetching location for fully authenticated user");
+      fetchLocation();
+    }
+  }, [authUser, locationPermissionDenied]);
+
+  // Fetch nearby users periodically based on location
+  useEffect(() => {
+    // Skip if user is in pending login state
+    const { showSingleDevicePrompt } = useAuthStore.getState();
+    if (showSingleDevicePrompt) {
+      console.log("Skipping nearby users fetch - user in pending login state");
+      return () => {}; // Return empty cleanup function
+    }
+    
+    if (
+      location.latitude &&
+      location.longitude &&
+      !isInitialFetchDone.current
+    ) {
+      console.log("Fetching nearby users for fully authenticated user");
+      fetchNearbyUsers(location);
+      isInitialFetchDone.current = true;
+    }
+    
+    const fetchInterval = setInterval(() => {
+      // Check if user is still fully logged in before fetching
+      const { showSingleDevicePrompt } = useAuthStore.getState();
+      if (showSingleDevicePrompt) {
+        console.log("Skipping interval fetch - user in pending login state");
+        return;
+      }
+      
+      if (location.latitude && location.longitude) {
+        fetchNearbyUsers(location);
+      }
+    }, refreshTime);
+    
+    return () => clearInterval(fetchInterval);
+  }, [location, fetchNearbyUsers]);
+
+  useEffect(() => {
+    // Skip if user is in pending login state
+    const { showSingleDevicePrompt } = useAuthStore.getState(); 
+    if (showSingleDevicePrompt || !authUser) {
+      console.log("Skipping friends fetch - user in pending login state");
+      return;
+    }
+    
+    console.log("Fetching friends for fully authenticated user");
+    fetchFriends();
+    fetchFriendRequests();
+  }, [authUser, fetchFriends, fetchFriendRequests]);
 
   // Add this useEffect to load unread messages from localStorage on mount
   useEffect(() => {
@@ -242,88 +330,6 @@ const HomePage = () => {
   useEffect(() => {
     scrollToBottom();
   }, [currentMessages]);
-  // Connect socket when user is authenticated
-  useEffect(() => {
-    if (authUser) {
-      connectSocket();
-      const timer = setTimeout(() => {
-        const currentSocket = useAuthStore.getState().socket;
-        if (currentSocket && authUser?.data?.user?._id) {
-          currentSocket.emit("registerUser", {
-            userId: authUser.data.user._id,
-          });
-          console.log("User registered via socket:", authUser.data.user._id);
-
-          useAuthStore.getState().setCurrentUserId(authUser.data.user._id);
-          // Add socket event listeners for debugging
-          currentSocket.on("connect", () => {
-            console.log("Socket connected");
-          });
-
-          currentSocket.on("disconnect", () => {
-            console.log("Socket disconnected");
-          });
-
-          currentSocket.on("error", (error) => {
-            console.error("Socket error:", error);
-            toast.error(error.message || "Socket error occurred");
-          });
-        }
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [authUser, connectSocket]);
-
-  // Fetch user's current location
-  const fetchLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setLocation({ latitude, longitude });
-        },
-        (error) => {
-          console.error("Geolocation error:", error);
-          if (error.code === error.PERMISSION_DENIED) {
-            setLocationPermissionDenied(true);
-            toast.error(
-              "Location permission denied. Please allow location access."
-            );
-          } else {
-            toast.error("Failed to fetch location. Please try again.");
-          }
-        }
-      );
-    } else {
-      toast.error("Geolocation is not supported by this browser.");
-    }
-  };
-
-  // Fetch nearby users periodically based on location
-  const refreshTime = 100000; // 100 seconds
-  useEffect(() => {
-    if (
-      location.latitude &&
-      location.longitude &&
-      !isInitialFetchDone.current
-    ) {
-      fetchNearbyUsers(location);
-      isInitialFetchDone.current = true;
-    }
-    const fetchInterval = setInterval(() => {
-      if (location.latitude && location.longitude) {
-        fetchNearbyUsers(location);
-      }
-    }, refreshTime);
-    return () => clearInterval(fetchInterval);
-  }, [location, fetchNearbyUsers]);
-
-  // Fetch location when authenticated
-  useEffect(() => {
-    if (authUser && !locationPermissionDenied) {
-      fetchLocation();
-    }
-  }, [authUser, locationPermissionDenied]);
 
   // Listen for chat started event
   useEffect(() => {
@@ -899,6 +905,34 @@ const HomePage = () => {
     { label: "Reply", icon: <FaReply />, action: replyToMessage },
     { label: "Info", icon: <FaInfoCircle />, action: showMessageInfo },
   ];
+
+  // Fetch user's current location
+  const fetchLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setLocation({ latitude, longitude });
+        },
+        (error) => {
+          console.error("Geolocation error:", error);
+          if (error.code === error.PERMISSION_DENIED) {
+            setLocationPermissionDenied(true);
+            toast.error(
+              "Location permission denied. Please allow location access."
+            );
+          } else {
+            toast.error("Failed to fetch location. Please try again.");
+          }
+        }
+      );
+    } else {
+      toast.error("Geolocation is not supported by this browser.");
+    }
+  };
+
+  // Refresh time for fetching nearby users
+  const refreshTime = 100000; // 100 seconds
 
   return (
     <div

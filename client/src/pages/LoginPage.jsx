@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Mail, Lock, Eye, EyeOff, Loader2, Radio, UserCircle2 } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Loader2, Radio, UserCircle2, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import toast from "react-hot-toast";
@@ -11,7 +11,7 @@ function LoginPage() {
     password: "",
   });
 
-  const { login, isLoggingIn } = useAuthStore();
+  const { login, isLoggingIn, showSingleDevicePrompt, confirmSingleDeviceLogin, cancelSingleDeviceLogin } = useAuthStore();
 
   const validateForm = () => {
     if (!formData.email.trim()) {
@@ -32,12 +32,26 @@ function LoginPage() {
     return true;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("FORM SUBMIT with data:", JSON.stringify(formData));
 
     if (validateForm()) {
-      login(formData);
+      console.log("FORM VALIDATED, calling login");
+      const result = await login(formData);
+      console.log("LOGIN RESULT:", result);
+      // If the result indicates already logged in on another device, the showSingleDevicePrompt state will be true
+      // The modal will be shown from the conditional rendering below
     }
+  };
+
+  const handleConfirmSingleDevice = async () => {
+    console.log("CONFIRM BUTTON CLICKED - Using stored credentials from auth store");
+    await confirmSingleDeviceLogin();
+  };
+
+  const handleCancelSingleDevice = () => {
+    cancelSingleDeviceLogin();
   };
 
   const handleChange = (e) => {
@@ -70,6 +84,53 @@ function LoginPage() {
           backgroundSize: '30px 30px'
         }}></div>
       </div>
+      
+      {/* Single Device Login Modal */}
+      {showSingleDevicePrompt && (
+        <div className="fixed inset-0 bg-[#272829]/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-gradient-to-b from-[#31333A] to-[#272829] p-6 sm:p-8 rounded-2xl border border-[#61677A]/30 shadow-2xl w-full max-w-md mx-auto relative animate-fade-in-up">
+            <div className="absolute top-0 left-0 w-full h-full bg-[#61677A]/5 rounded-2xl"></div>
+            
+            <div className="relative z-10">
+              <div className="flex items-center mb-4">
+                <div className="h-10 w-10 bg-[#FFF6E0]/10 rounded-full flex items-center justify-center mr-3">
+                  <AlertCircle className="h-6 w-6 text-[#FFF6E0]" />
+                </div>
+                <h3 className="text-xl font-semibold text-[#FFF6E0]">
+                  Already Logged In
+                </h3>
+              </div>
+              
+              <p className="mb-6 text-[#D8D9DA] leading-relaxed">
+                You are already logged in on another device. For security reasons, you can only be logged in on one device at a time. Would you like to log out from all other devices and continue with this login?
+              </p>
+              
+              <div className="flex flex-col space-y-3">
+                <button
+                  className="bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-[#272829] px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:from-[#D8D9DA] hover:to-[#FFF6E0]"
+                  onClick={handleConfirmSingleDevice}
+                >
+                  {isLoggingIn ? (
+                    <span className="flex items-center justify-center">
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Processing...
+                    </span>
+                  ) : (
+                    "Yes, log me in here only"
+                  )}
+                </button>
+                <button
+                  className="bg-transparent border border-[#61677A]/50 hover:bg-[#31333A] text-[#FFF6E0] px-6 py-3 rounded-xl font-medium transition-all duration-300"
+                  onClick={handleCancelSingleDevice}
+                  disabled={isLoggingIn}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Content */}
       <div className="max-w-md w-full mx-auto px-6 py-16 relative z-10">

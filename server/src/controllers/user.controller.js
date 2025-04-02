@@ -5,87 +5,91 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { uniqueTagGen } from "../utils/uniqueTagGen.js";
 import jwt from "jsonwebtoken";
 
-const generateAccesAndRefreshToken = async(userId)=>{
+const generateAccesAndRefreshToken = async(userId, deviceInfo = null, ip = null, forceLogoutOthers = false)=>{
+    console.log("\n==== GENERATING TOKENS ====");
+    console.log("Params:", {
+        userId,
+        hasDeviceInfo: !!deviceInfo,
+        hasIp: !!ip,
+        forceLogoutOthers,
+        forceType: typeof forceLogoutOthers
+    });
+    
     try{
         const user = await User.findById(userId);
+        if (!user) {
+            console.error("ERROR: User not found during token generation");
+            throw new ApiError(404, "User not found");
+        }
 
-       const accessToken =  user.generateAccesToken()
-       const refreshToken=  user.generateRefreshToken()
-       user.refreshToken = refreshToken
-       await user.save({validateBeforeSave:false})
+        console.log("User before session update:", {
+            id: user._id.toString(),
+            hasRefreshToken: !!user.refreshToken,
+            sessionsCount: user.activeSessions?.length || 0,
+            tokenVersion: user.tokenVersion || 0
+        });
 
-       return {accessToken,refreshToken}
+        // Handle force logout from other devices by incrementing tokenVersion
+        if (forceLogoutOthers) {
+            console.log("FORCING LOGOUT: Incrementing tokenVersion to invalidate existing tokens");
+            user.tokenVersion = (user.tokenVersion || 0) + 1;
+            console.log("New tokenVersion:", user.tokenVersion);
+        }
+
+        const accessToken = user.generateAccesToken();
+        const refreshToken = user.generateRefreshToken();
+        
+        // Create session info
+        const sessionInfo = {
+            refreshToken,
+            deviceInfo: deviceInfo || "Unknown device",
+            ip: ip || "Unknown IP",
+            lastActive: new Date(),
+            issuedAt: new Date()
+        };
+        
+        console.log("New session info:", {
+            refreshTokenLength: refreshToken?.length || 0,
+            deviceSnippet: deviceInfo ? deviceInfo.substring(0, 20) + "..." : "none"
+        });
+
+        // Initialize activeSessions if it doesn't exist
+        if (!Array.isArray(user.activeSessions)) {
+            console.log("Initializing activeSessions array (was not an array)");
+            user.activeSessions = [];
+        }
+
+        // Handle sessions
+        if (forceLogoutOthers) {
+            console.log("FORCING LOGOUT: Clearing all existing sessions and adding new session");
+            // Clear all existing sessions
+            user.activeSessions = [sessionInfo];
+        } else {
+            console.log("NORMAL LOGIN: Adding session to existing sessions");
+            // Add this session to active sessions
+            user.activeSessions.push(sessionInfo);
+        }
+
+        // Keep the refreshToken field updated for backward compatibility
+        user.refreshToken = refreshToken;
+        
+        console.log("User after session update:", {
+            sessionsCount: user.activeSessions.length,
+            hasRefreshToken: !!user.refreshToken,
+            tokenVersion: user.tokenVersion
+        });
+        
+        await user.save({validateBeforeSave:false});
+        console.log("User saved successfully with updated sessions and tokenVersion");
+
+        return {accessToken, refreshToken};
 
     }catch(error){
-        throw new ApiError(500, "Something went wrong while generating refresh and acces token");
+        console.error("ERROR in generateAccesAndRefreshToken:", error);
+        console.error("Stack trace:", error.stack);
+        throw new ApiError(500, "Something went wrong while generating tokens: " + (error.message || "Unknown error"));
     }
-    
 }
-
-// const registerUser = asyncHandler(async (req ,res)=>{
-
-//     const {fullName , email , password , gender , dateOfBirth ,bio , currentLocation  }= req.body
-
-
-//     if (
-//         [fullName , email , password , gender ].some((field)=>field?.trim() === "")
-//     ){
-//        throw new ApiError(400 , "All fields are required") 
-//     }
-//    const existedUser=await User.findOne({email})
-
-//    if (existedUser){
-//     throw new ApiError(409 , "Email already taken ")
-//    }
-
-//    const uniqueTag = await uniqueTagGen();
- 
-//    const user = await User.create({
-//     fullName ,
-//     email ,
-//     password ,
-//     gender ,
-//     dateOfBirth ,
-//     bio ,
-//     currentLocation ,
-//     uniqueTag,
-//    })
-//    const createdUser = await User.findById(user._id).select(
-//     "-password -refreshToken"
-//    )
-
-//    if (!createdUser){
-//     throw new ApiError(500 , "Something went wrong while registering the user")
-//    }
-//    const {accessToken, refreshToken}= await generateAccesAndRefreshToken(user._id)
-
-   
-//    const loggedInUser = await User.findOne(user._id).
-//    select("-password -refreshToken")
-
-//    const options= {
-//     httpOnly : true ,
-//     secure: true
-//    }
-
-// return res.status(201)
-//     .cookie("accessToken" , accessToken , options)
-//    .cookie("refreshToken" , refreshToken , options)
-//    .json(
-//     new ApiResponse(
-//         201,
-//         {
-//             user: loggedInUser ,accessToken, refreshToken
-//         },
-//         "User created successfully",
-//     )
-
-//     // new ApiResponse (201 ,  createdUser , "User registered successfully")
-// )
-   
-
-
-// })
 
 const registerUser = asyncHandler(async (req, res) => {
     const { fullName, email, password, gender, dateOfBirth, bio, currentLocation } = req.body;
@@ -128,17 +132,23 @@ const registerUser = asyncHandler(async (req, res) => {
     });
 
     // Fetch created user without sensitive fields
-    const createdUser = await User.findById(user._id).select("-password -refreshToken");
+    const createdUser = await User.findById(user._id).select("-password -refreshToken -activeSessions");
 
     if (!createdUser) {
         throw new ApiError(500, "Something went wrong while registering the user");
     }
 
-    // Generate access and refresh tokens
-    const { accessToken, refreshToken } = await generateAccesAndRefreshToken(user._id);
+    // Get device info for session tracking
+    const deviceInfo = req.headers["user-agent"] || "Unknown device";
+    const ip = req.ip || req.connection.remoteAddress || "Unknown IP";
 
-    // Fetch logged-in user without sensitive fields
-    const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
+    // Generate access and refresh tokens with device info
+    const { accessToken, refreshToken } = await generateAccesAndRefreshToken(
+        user._id, 
+        deviceInfo, 
+        ip,
+        false // No need to force logout on registration
+    );
 
     // Set cookie options
     const options = {
@@ -155,7 +165,7 @@ const registerUser = asyncHandler(async (req, res) => {
             new ApiResponse(
                 201,
                 {
-                    user: loggedInUser,
+                    user: createdUser,
                     accessToken,
                     refreshToken,
                 },
@@ -164,112 +174,246 @@ const registerUser = asyncHandler(async (req, res) => {
         );
 });
 
-
-const loginUser = asyncHandler (async (req ,res)=>{
-    const {email , password} = req.body
-    if (!email || !password){
-        throw new ApiError(400 , "Both Email and password are required")
-    }
-    const user = await User.findOne({email});
-
-    if(!user){
-        throw new ApiError(401 , "User does't exist")
-    }
-
-   const isPasswordValid = await user.isPasswordCorrect(password)
-   if (!isPasswordValid){
-    throw new ApiError(401 , "Invalid user credentials")
-    }
-
-   const {accessToken, refreshToken}= await generateAccesAndRefreshToken(user._id)
-
-   const loggedInUser = await User.findOne(user._id).
-   select("-password -refreshToken")
-
-
-   const options= {
-    httpOnly : true ,
-    secure: true
-   }
-
-   return res.status(200)
-   .cookie("accessToken" , accessToken , options)
-   .cookie("refreshToken" , refreshToken , options)
-   .json(
-    new ApiResponse(
-        200 ,
-        {
-            user: loggedInUser ,accessToken, refreshToken
-        },
-        "User logged In Successfully"
-    )
+const loginUser = asyncHandler(async (req, res) => {
+    console.log("\n==== LOGIN REQUEST RECEIVED ====");
+    console.log("REQUEST BODY:", req.body);
+    console.log("forceLogoutOthers value:", req.body.forceLogoutOthers);
+    console.log("forceLogoutOthers type:", typeof req.body.forceLogoutOthers);
     
-   )
-   
+    const { email, password, forceLogoutOthers } = req.body;
+    
+    console.log("Extracted values:", {
+        hasEmail: !!email,
+        hasPassword: !!password,
+        forceLogoutOthers
+    });
+    
+    if (!email || !password) {
+        console.log("ERROR: Missing email or password");
+        throw new ApiError(400, "Both Email and password are required");
+    }
 
+    const user = await User.findOne({ email });
 
-})
+    if (!user) {
+        console.log("ERROR: User not found");
+        throw new ApiError(401, "User does't exist");
+    }
+
+    const isPasswordValid = await user.isPasswordCorrect(password);
+    if (!isPasswordValid) {
+        console.log("ERROR: Invalid password");
+        throw new ApiError(401, "Invalid user credentials");
+    }
+
+    // Get device info and IP for session tracking
+    const deviceInfo = req.headers["user-agent"] || "Unknown device";
+    const ip = req.ip || req.connection.remoteAddress || "Unknown IP";
+    
+    // Debug the user's current sessions
+    console.log("USER SESSIONS:", {
+        activeSessions: user.activeSessions || [],
+        activeSessCount: user.activeSessions?.length || 0,
+        hasRefreshToken: !!user.refreshToken
+    });
+    
+    // Check if user has other active sessions
+    const hasOtherActiveSessions = user.activeSessions && user.activeSessions.length > 0;
+    
+    // Parse the forceLogoutOthers flag
+    let shouldForceLogout = false;
+    if (
+        forceLogoutOthers === true || 
+        forceLogoutOthers === "true" || 
+        forceLogoutOthers === 1 ||
+        forceLogoutOthers === "1"
+    ) {
+        shouldForceLogout = true;
+    }
+    
+    console.log("LOGIN DECISION:", {
+        hasOtherActiveSessions,
+        shouldForceLogout,
+        deviceInfo: deviceInfo.substring(0, 30) + "...", // Truncate long UA string
+        ip
+    });
+
+    try {
+        // Generate tokens, passing session info
+        console.log("Generating tokens with forceLogout:", shouldForceLogout);
+        const { accessToken, refreshToken } = await generateAccesAndRefreshToken(
+            user._id, 
+            deviceInfo, 
+            ip, 
+            shouldForceLogout
+        );
+        console.log("Tokens generated successfully");
+
+        const loggedInUser = await User.findById(user._id).select("-password -refreshToken -activeSessions");
+
+        const options = {
+            httpOnly: true,
+            secure: true
+        };
+
+        // If this is a first-phase login and there are other sessions
+        if (!shouldForceLogout && hasOtherActiveSessions) {
+            console.log("Returning other-sessions-exist response");
+            return res.status(200).json(
+                new ApiResponse(
+                    200,
+                    {
+                        user: loggedInUser,
+                        hasOtherSessions: true,
+                        message: "You are already logged in on another device. Do you want to continue and log out from other devices?"
+                    },
+                    "Active session detected on another device"
+                )
+            );
+        }
+
+        console.log("Returning successful login response");
+        return res.status(200)
+            .cookie("accessToken", accessToken, options)
+            .cookie("refreshToken", refreshToken, options)
+            .json(
+                new ApiResponse(
+                    200,
+                    {
+                        user: loggedInUser,
+                        accessToken, 
+                        refreshToken,
+                        hasOtherSessions: false
+                    },
+                    shouldForceLogout 
+                        ? "Logged in successfully and logged out from other devices" 
+                        : "User logged In Successfully"
+                )
+            );
+    } catch (error) {
+        console.error("ERROR during login process:", error);
+        throw new ApiError(500, "Login process failed: " + (error.message || "Unknown error"));
+    }
+});
 
 const logoutUser = asyncHandler(async(req,res)=>{
-   await  User.findByIdAndUpdate(req.user._id,{
-        $set:{
-            refreshToken:undefined
-        }
-        },
-        {
-            new :true
-        }
-    )
+    // Get the refresh token used for this session
+    const refreshToken = req.cookies?.refreshToken || req.body?.refreshToken
+    
+    if (refreshToken) {
+        // Find the user and remove this specific session
+        await User.findByIdAndUpdate(
+            req.user._id,
+            {
+                $pull: { activeSessions: { refreshToken } },
+                // Also clear the refreshToken if it matches the one being logged out
+                ...(req.user.refreshToken === refreshToken ? { refreshToken: undefined } : {})
+            },
+            { new: true }
+        )
+    } else {
+        // If no token is provided, just clear the main refreshToken
+        await User.findByIdAndUpdate(
+            req.user._id,
+            { $set: { refreshToken: undefined } },
+            { new: true }
+        )
+    }
 
-    const options= {
-        httpOnly : true ,
+    const options = {
+        httpOnly: true,
         secure: true
-       }
+    }
 
     return res 
     .status(200) 
-    .clearCookie("accessToken" , options)
-    .clearCookie("refreshToken" ,options)
-    .json(new ApiResponse(200 , {} , "User logged out Successfully"))
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new ApiResponse(200, {}, "User logged out Successfully"))
 })
 
-const refreshAccessToken = asyncHandler(async(req , res)=>{
-   const incomingRefreshToken = req.cookie.refreshToken || req.body.refreshToken
-   if (!incomingRefreshToken){
-    throw new ApiError(401 , "unauthorized request")
+const refreshAccessToken = asyncHandler(async(req, res) => {
+   const incomingRefreshToken = req.cookies?.refreshToken || req.body?.refreshToken
+   
+   if (!incomingRefreshToken) {
+      throw new ApiError(401, "Unauthorized request: No refresh token provided")
    }
+   
    try {
-    const decodedToken = jwt.verify(
+      const decodedToken = jwt.verify(
          incomingRefreshToken, 
          process.env.REFRESH_TOKEN_SECRET
-    )
-    const user = await User.findById(decodedToken?._id)
- 
-    if (!user){
-     throw new ApiError(401 , "Invalid refresh token")
-    }
-    if (incomingRefreshToken !== user?.refreshToken){
-     throw new ApiError(401 , "Refresh token is expired or used")
-    }
- 
-    const options = {
-     httpOnly :true, 
-     secure : true
-    }
-   const {accessToken , newrefreshToken} =await generateAccesAndRefreshToken(user._id)
-   return res 
-   .status(200)
-   .cookie("accessToken",accessToken, options)
-   .cookie("refreshToken",newrefreshToken , options)
-   .json(
-     new ApiResponse(
-         200 ,
-          {accessToken , refreshToken: newrefreshToken} , 
-          "Access token refreshed"
+      )
+      
+      const user = await User.findById(decodedToken?._id)
+      
+      if (!user) {
+         throw new ApiError(401, "Invalid refresh token: User not found")
+      }
+      
+      // Check token version to prevent using tokens from invalidated sessions
+      if (decodedToken.tokenVersion !== undefined && 
+          user.tokenVersion !== undefined && 
+          decodedToken.tokenVersion !== user.tokenVersion) {
+          throw new ApiError(401, "Session expired. Please login again.")
+      }
+      
+      // Check if this refresh token exists in the user's active sessions
+      const sessionExists = user.activeSessions.find(
+         session => session.refreshToken === incomingRefreshToken
+      )
+      
+      // Also check the legacy field
+      const legacyTokenMatches = user.refreshToken === incomingRefreshToken
+      
+      if (!sessionExists && !legacyTokenMatches) {
+         throw new ApiError(401, "Refresh token is expired or invalid")
+      }
+      
+      // Update device info if available
+      const deviceInfo = req.headers["user-agent"] || "Unknown device"
+      const ip = req.ip || req.connection.remoteAddress || "Unknown IP"
+      
+      // Generate new tokens
+      const {accessToken, refreshToken: newrefreshToken} = await generateAccesAndRefreshToken(
+         user._id,
+         deviceInfo,
+         ip,
+         false // Don't force logout other devices
+      )
+      
+      // If using the legacy token, we need to remove it
+      if (legacyTokenMatches) {
+         user.refreshToken = newrefreshToken
+         await user.save({ validateBeforeSave: false })
+      }
+      
+      // Remove the old session
+      if (sessionExists) {
+         await User.updateOne(
+            { _id: user._id },
+            { $pull: { activeSessions: { refreshToken: incomingRefreshToken } } }
          )
-   )
+      }
+      
+      const options = {
+         httpOnly: true, 
+         secure: true
+      }
+      
+      return res 
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", newrefreshToken, options)
+      .json(
+        new ApiResponse(
+            200,
+            { accessToken, refreshToken: newrefreshToken }, 
+            "Access token refreshed"
+        )
+      )
    } catch (error) {
-    throw new ApiError(401 ,error?.message ||"Invalid refresh token")
+      throw new ApiError(401, error?.message || "Invalid refresh token")
    }
 })
 

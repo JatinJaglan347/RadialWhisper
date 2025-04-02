@@ -2,7 +2,20 @@ import mongoose, {Schema} from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
+// Add schema debugging logs 
+console.log("Initializing User schema with activeSessions support");
 
+// Define activeSessions as a separate schema first for clarity
+const sessionSchema = new Schema({
+  refreshToken: { type: String, required: true },
+  deviceInfo: { type: String, default: "Unknown device" },
+  ip: { type: String, default: "Unknown IP" },
+  lastActive: { type: Date, default: Date.now },
+  issuedAt: { type: Date, default: Date.now }
+});
+
+// Log the created schema
+console.log("Session Schema created:", sessionSchema ? "Success" : "Failed");
 
 const userSchema = new Schema({
 
@@ -187,13 +200,27 @@ const userSchema = new Schema({
           },
         ],
       },
+      activeSessions: {
+        type: [sessionSchema],
+        default: function() {
+          console.log("Creating default empty activeSessions array");
+          return [];
+        }
+      },
+      // Old refresh token field is kept for backward compatibility
       refreshToken: {
         type: String,
       },  
       
 });
 
-
+// Add tokenVersion field to the user schema - it will be incremented when forcing logout from other devices
+userSchema.add({
+  tokenVersion: {
+    type: Number,
+    default: 0
+  }
+});
 
 userSchema.pre("save" , async function(next){
     if(!this.isModified("password")) return next();
@@ -308,6 +335,7 @@ userSchema.methods.generateAccesToken = function(){
             firendList:this.friendList,
             locationRadiusPreference:this.locationRadiusPreference,
             banned:this.banned.current.status,
+            tokenVersion: this.tokenVersion // Include token version in the payload
         },
         process.env.ACCESS_TOKEN_SECRET,
         {
@@ -319,7 +347,7 @@ userSchema.methods.generateRefreshToken = function(){
     return jwt.sign(
         {
             _id:this._id,
-            
+            tokenVersion: this.tokenVersion // Include token version in the payload
         },
         process.env.REFRESH_TOKEN_SECRET,
         {
