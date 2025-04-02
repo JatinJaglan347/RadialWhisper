@@ -821,12 +821,48 @@ fetchPublicUserInfoRules: async () => {
       console.log("🟢 Connected to Socket.io server:", newSocket.id);
     });
 
-    // Load stored unread messages
+    // Load stored unread messages - first from unreadMessagesBySender, then fallback to localStorage
     try {
-      const storedUnread = JSON.parse(localStorage.getItem("unreadMessagesBySender") || "{}");
-      set({ unreadMessagesBySender: storedUnread });
+      // Check if localStorage has unread messages
+      const storedLocalUnread = localStorage.getItem("unreadMessages");
+      const storedStoreUnread = localStorage.getItem("unreadMessagesBySender");
+      
+      let mergedUnread = {};
+      
+      // Parse both sources if they exist
+      if (storedLocalUnread) {
+        try {
+          const localUnread = JSON.parse(storedLocalUnread);
+          // Merge the unreadMessages from localStorage into our merged object
+          mergedUnread = {...mergedUnread, ...localUnread};
+        } catch (error) {
+          console.error("Error parsing localStorage unreadMessages:", error);
+        }
+      }
+      
+      if (storedStoreUnread) {
+        try {
+          const storeUnread = JSON.parse(storedStoreUnread);
+          // For each sender in storeUnread, take the maximum count between the two sources
+          Object.keys(storeUnread).forEach(senderId => {
+            mergedUnread[senderId] = Math.max(
+              mergedUnread[senderId] || 0,
+              storeUnread[senderId] || 0
+            );
+          });
+        } catch (error) {
+          console.error("Error parsing localStorage unreadMessagesBySender:", error);
+        }
+      }
+      
+      // Save the merged unread counts to both storage locations
+      localStorage.setItem("unreadMessages", JSON.stringify(mergedUnread));
+      localStorage.setItem("unreadMessagesBySender", JSON.stringify(mergedUnread));
+      
+      // Update the state
+      set({ unreadMessagesBySender: mergedUnread });
     } catch (error) {
-      console.error("Error loading stored unread messages:", error);
+      console.error("Error loading and merging stored unread messages:", error);
     }
 
     // Handle chat history
@@ -894,7 +930,9 @@ fetchPublicUserInfoRules: async () => {
           ...state.unreadMessagesBySender,
           [data.sender]: (state.unreadMessagesBySender[data.sender] || 0) + 1,
         };
+        // Update both localStorage keys to ensure consistency
         localStorage.setItem("unreadMessagesBySender", JSON.stringify(newUnreadMessagesBySender));
+        localStorage.setItem("unreadMessages", JSON.stringify(newUnreadMessagesBySender));
         return { unreadMessagesBySender: newUnreadMessagesBySender };
       });
     } else {
@@ -960,7 +998,9 @@ fetchPublicUserInfoRules: async () => {
         ...state.unreadMessagesBySender,
         [senderId]: 0,
       };
+      // Update both localStorage keys to ensure consistency
       localStorage.setItem("unreadMessagesBySender", JSON.stringify(newUnreadMessagesBySender));
+      localStorage.setItem("unreadMessages", JSON.stringify(newUnreadMessagesBySender));
       return { unreadMessagesBySender: newUnreadMessagesBySender };
     });
   },

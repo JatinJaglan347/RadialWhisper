@@ -4,6 +4,7 @@ import cookieparser from 'cookie-parser';
 import dotenv from 'dotenv';
 import { ApiError } from './utils/ApiError.js';
 import './scheduler/activeUserSnapshot.scheduler.js';
+import './scheduler/messageRetention.scheduler.js';
 
 // Load environment variables
 dotenv.config();

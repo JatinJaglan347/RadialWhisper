@@ -182,6 +182,19 @@ const HomePage = () => {
     }
   }, [viewMode, authUser, fetchFriends, fetchFriendRequests]);
 
+  // Add this useEffect to load unread messages from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedUnreadMessages = localStorage.getItem("unreadMessages");
+      if (savedUnreadMessages) {
+        const parsedUnreadMessages = JSON.parse(savedUnreadMessages);
+        setUnreadMessages(parsedUnreadMessages);
+      }
+    } catch (error) {
+      console.error("Error loading unread messages from localStorage:", error);
+    }
+  }, []);
+
   const isFriend = friends.some((friend) => friend.friendId._id === activeChatUser?._id);
 
   useEffect(() => {
@@ -1336,7 +1349,7 @@ const HomePage = () => {
 
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-20 bg-black bg-opacity-50 transition-opacity duration-300"
+          className="fixed inset-0 z-20 bg-black bg-opacity-50 transition-opacity duration-300 block md:hidden"
           onClick={toggleSidebar}
         />
       )}
