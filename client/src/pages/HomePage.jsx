@@ -10,6 +10,8 @@ import {
   UserPlus,
   UserCheck,
   UserX,
+  Clock,
+  Info,
 } from "lucide-react";
 import { useUserActivity } from "../hooks/useUserActivity";
 import EmojiPicker from "../components/EmojiPicker";
@@ -29,7 +31,8 @@ import {
   FaPaperPlane,
   FaEllipsisV,
   FaRegCopy,
-  FaInfoCircle
+  FaInfoCircle,
+  FaClock
 } from 'react-icons/fa';
 import { 
   MdRefresh, 
@@ -794,6 +797,9 @@ const HomePage = () => {
   const isUserFriend = (userId) => {
     return friends.some(friend => friend.friendId._id === userId);
   };
+
+  // Add state for the retention policy popup
+  const [showRetentionPolicyPopup, setShowRetentionPolicyPopup] = useState(false);
 
   return (
     <div
@@ -1899,15 +1905,32 @@ const HomePage = () => {
                     )} */}
                   </div>
                 </div>
-                <div className="ml-5 flex items-center">
-                  {/* Friend Request Icon */}
+                <div className="ml-5 flex items-center space-x-3">
+                  {/* Message retention policy button */}
+                  <button
+                    onClick={() => setShowRetentionPolicyPopup(true)}
+                    className="p-1.5 text-[#61677A] hover:text-[#272829] bg-[#F0F0F0]/70 hover:bg-[#F0F0F0] rounded-md transition-all duration-200 relative group shadow-sm"
+                    title="Message Retention Policy"
+                  >
+                    <FaClock size={18} />
+                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full opacity-70 animate-pulse"></span>
+                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 bg-[#272829] text-[#FFF6E0] text-xs p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-[#272829]"></div>
+                      Messages expire after a period of time. Click for details.
+                    </div>
+                  </button>
+                  {/* Friend Request Button */}
                   {!isFriend && (
                     <button
                       onClick={() => setShowFriendRequestPopup(true)}
-                      className="ml-2 text-[#61677A] hover:text-[#272829] transition-colors"
+                      className="p-1.5 text-[#61677A] hover:text-[#272829] bg-[#F0F0F0]/70 hover:bg-[#F0F0F0] rounded-md transition-all duration-200 relative group shadow-sm"
                       title="Send friend request"
                     >
-                      <UserPlus size={20} />
+                      <UserPlus size={18} />
+                      <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-36 bg-[#272829] text-[#FFF6E0] text-xs p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-[#272829]"></div>
+                        Send friend request
+                      </div>
                     </button>
                   )}
                 </div>
@@ -2354,6 +2377,11 @@ const HomePage = () => {
           <MdRefresh size={24} />
         </button>
       )}
+
+      {/* Add the retention policy popup */}
+      {showRetentionPolicyPopup && (
+        <RetentionPolicyPopup onClose={() => setShowRetentionPolicyPopup(false)} />
+      )}
     </div>
   );
 };
@@ -2376,6 +2404,65 @@ const Menu = ({ size }) => {
       <line x1="3" y1="6" x2="21" y2="6"></line>
       <line x1="3" y1="18" x2="21" y2="18"></line>
     </svg>
+  );
+};
+
+// Add this component for the retention policy popup
+const RetentionPolicyPopup = ({ onClose }) => {
+  return (
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50" onClick={onClose}>
+      <div className="bg-[#FFF6E0] text-[#272829] p-6 rounded-lg shadow-xl max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-bold flex items-center">
+            <FaClock className="mr-2" /> Message Retention Policy
+          </h3>
+          <button onClick={onClose} className="text-gray-600 hover:text-gray-800">
+            <FaTimes size={20} />
+          </button>
+        </div>
+        
+        <div className="space-y-4">
+          <p className="text-sm leading-relaxed">
+            For your privacy and to optimize app performance, messages are automatically deleted after a certain period:
+          </p>
+          
+          <div className="bg-[#272829]/5 p-3 rounded-md">
+            <h4 className="font-semibold mb-2 flex items-center">
+              <FaUserFriends className="mr-2 text-blue-600" /> 
+              Friend Messages
+            </h4>
+            <p className="text-sm ml-6">Messages between friends are kept for <span className="font-semibold">48 hours</span></p>
+          </div>
+          
+          <div className="bg-[#272829]/5 p-3 rounded-md">
+            <h4 className="font-semibold mb-2 flex items-center">
+              <FaUser className="mr-2 text-green-600" /> 
+              Nearby Users
+            </h4>
+            <p className="text-sm ml-6">Messages between nearby users are kept for <span className="font-semibold">1 hour</span></p>
+          </div>
+          
+          <div className="bg-[#272829]/5 p-3 rounded-md">
+            <h4 className="font-semibold mb-2 flex items-center">
+              <Info className="mr-2 text-amber-600" size={16} /> 
+              Unread Messages
+            </h4>
+            <p className="text-sm ml-6">Unread messages are preserved for <span className="font-semibold">60 hours</span></p>
+          </div>
+          
+          <p className="text-xs text-[#272829]/70 italic">
+            If you want to save important information, we recommend taking screenshots or notes of critical conversations.
+          </p>
+        </div>
+        
+        <button 
+          onClick={onClose}
+          className="mt-5 w-full py-2 bg-[#272829] text-white rounded-md hover:bg-[#393A3C] transition duration-200"
+        >
+          Got it
+        </button>
+      </div>
+    </div>
   );
 };
 
