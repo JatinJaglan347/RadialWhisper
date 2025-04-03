@@ -1390,7 +1390,7 @@ const HomePage = () => {
                           )}
                           <span
                             className={`absolute bottom-0 right-0 w-3 h-3 ${
-                              isOnline ? "bg-green-500" : "bg-red-500"
+                              user.activeStatus?.isActive ? "bg-green-500" : "bg-red-500"
                             } rounded-full border-2 border-[#272829]`}
                           ></span>
                         </div>
@@ -1399,14 +1399,14 @@ const HomePage = () => {
                             {isFriend ? (
                               <>
                                 {user.fullName}
-                                {isOnline && (
+                                {user.activeStatus?.isActive && (
                                   <span className="ml-2 text-xs text-green-400 font-normal">• online</span>
                                 )}
                               </>
                             ) : (
                               <>
                                 #{user.uniqueTag}
-                                {isOnline && (
+                                {user.activeStatus?.isActive && (
                                   <span className="ml-2 text-xs text-green-400 font-normal">• online</span>
                                 )}
                               </>
@@ -2711,7 +2711,7 @@ const HomePage = () => {
           {contextMenuItems.map((item, index) => (
             <button
               key={index}
-              className="w-full text-left px-4 py-2 hover:bg-[#31333A] transition-colors duration-200 flex items-center"
+              className="w-full text-left px-4 py-2 hover:bg-[#31333A] transition-colors duration-200 flex items-center gap-2"
               onClick={item.action}
             >
               {item.icon}
