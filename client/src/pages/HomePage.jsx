@@ -81,6 +81,7 @@ const HomePage = () => {
   const [location, setLocation] = useState({ latitude: "", longitude: "" });
   const [activeChatUser, setActiveChatUser] = useState(null);
   const [activeChatRoom, setActiveChatRoom] = useState(null);
+  const [waitingForChatConfirmation, setWaitingForChatConfirmation] = useState(false);
   const [chatMessage, setChatMessage] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState({});
@@ -338,6 +339,7 @@ const HomePage = () => {
     const chatStartedHandler = (data) => {
       // setActiveChatRoom(data.roomId);
       console.log("Chat started in room:", data.roomId);
+      setWaitingForChatConfirmation(false);
     };
 
     socket.on("chatStarted", chatStartedHandler);
@@ -495,6 +497,7 @@ const HomePage = () => {
   const handleStartChat = (user) => {
     const currentSocket = useAuthStore.getState().socket;
     if (currentSocket) {
+      setWaitingForChatConfirmation(true);
       currentSocket.emit("leaveAllRooms", () => {
         console.log("Left all previous chat rooms");
         const newRoomId = [authUser.data.user._id, user._id].sort().join("_");
@@ -529,6 +532,11 @@ const HomePage = () => {
   // Send a message to the active chat
   const handleSendMessage = () => {
     if (!chatMessage.trim()) return;
+
+    if (waitingForChatConfirmation) {
+      toast.error("Please wait for the chat to connect...");
+      return;
+    }
 
     if (socket && activeChatRoom) {
       const expectedRoomId = [authUser.data.user._id, activeChatUser._id]

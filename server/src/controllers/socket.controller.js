@@ -192,6 +192,8 @@ export async function joinChat(socket, data, io) {
   }
 
   io.to(roomId).emit("chatStarted", { roomId });
+  // Also emit directly to the socket that initiated the join, ensuring they receive it
+  socket.emit("chatStarted", { roomId });
   logEvent("Chat Started", { roomId, user1: socket.userId, user1FullName: socket.fullName, user2: data.targetUserId });
 }
 
