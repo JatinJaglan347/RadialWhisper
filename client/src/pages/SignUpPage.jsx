@@ -27,6 +27,7 @@ function SignUpPage() {
       latitude: "",
       longitude: "",
     },
+    acceptedTerms: false,
   });
   const [useLiveLocation, setUseLiveLocation] = useState(false);
   const [isPopupVisible, setIsPopupVisible] = useState(false);
@@ -165,6 +166,12 @@ function SignUpPage() {
         !formData.currentLocation.longitude)
     ) {
       toast.error("Current location is required when using live location");
+      return false;
+    }
+
+    // Validate terms and conditions
+    if (!formData.acceptedTerms) {
+      toast.error("You must accept the Terms and Conditions to create an account");
       return false;
     }
 
@@ -556,11 +563,76 @@ function SignUpPage() {
             </div>
           </div>
 
+          {/* Gender disclaimer notice */}
+          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-[#31333A]/70 border border-[#61677A]/30 rounded-xl">
+            <div className="flex items-start">
+              <div className="flex-shrink-0 mt-1">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#FFF6E0]/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h4 className="text-sm sm:text-base font-medium text-[#FFF6E0]/90">Gender Options Notice</h4>
+                <p className="mt-1 text-xs sm:text-sm text-[#D8D9DA]/80 leading-relaxed">
+                  Some gender options in our list are non-traditional and intended for fun or creative user interaction only. 
+                  We respect all gender identities and expressions and do not intend to mock or diminish any person's identity. 
+                  Your selection is private and solely used for personalization within our platform.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Terms and conditions */}
+          <div className="mt-4 sm:mt-6">
+            <div className="flex items-start">
+              <div className="flex items-center h-5">
+                <input
+                  id="terms"
+                  name="terms"
+                  type="checkbox"
+                  checked={formData.acceptedTerms || false}
+                  onChange={(e) => setFormData({ ...formData, acceptedTerms: e.target.checked })}
+                  className="h-4 w-4 sm:h-5 sm:w-5 text-[#FFF6E0] bg-[#272829] border-[#61677A] rounded focus:ring-[#FFF6E0]/30 focus:ring-offset-[#272829]"
+                />
+              </div>
+              <div className="ml-3 text-xs sm:text-sm">
+                <label htmlFor="terms" className="font-medium text-[#D8D9DA]">
+                  I agree to the Terms and Conditions
+                </label>
+                <p className="text-[#D8D9DA]/70 mt-1 leading-relaxed">
+                  By creating an account, you agree to our{" "}
+                  <a
+                    href="/terms"
+                    className="text-[#FFF6E0] hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Terms of Service
+                  </a>{" "}
+                  and{" "}
+                  <a
+                    href="/privacy"
+                    className="text-[#FFF6E0] hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Privacy Policy
+                  </a>
+                  . We collect and process your personal data as described in our policies.
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Submit button */}
           <button
             type="submit"
-            disabled={isSigningUp || isLoading}
-            className="group relative overflow-hidden w-full bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] hover:from-[#D8D9DA] hover:to-[#FFF6E0] text-[#272829] border-none px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-xl font-medium transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl mt-6 sm:mt-8"
+            disabled={isSigningUp || isLoading || !formData.acceptedTerms}
+            className={`group relative overflow-hidden w-full bg-gradient-to-r ${
+              formData.acceptedTerms 
+                ? "from-[#FFF6E0] to-[#D8D9DA] hover:from-[#D8D9DA] hover:to-[#FFF6E0] text-[#272829]" 
+                : "from-[#61677A]/50 to-[#61677A]/30 text-[#D8D9DA]/50 cursor-not-allowed"
+            } border-none px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-xl font-medium transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl mt-6 sm:mt-8`}
           >
             <span className="relative z-10 flex items-center justify-center font-semibold text-sm sm:text-base">
               {isSigningUp ? (
@@ -572,7 +644,9 @@ function SignUpPage() {
                 "Create Account"
               )}
             </span>
-            <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#D8D9DA] to-[#FFF6E0] translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
+            {formData.acceptedTerms && (
+              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#D8D9DA] to-[#FFF6E0] translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
+            )}
           </button>
         </form>
 
