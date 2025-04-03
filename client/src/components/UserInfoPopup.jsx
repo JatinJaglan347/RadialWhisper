@@ -17,13 +17,41 @@ import {
   Copy,
   UserPlus,
   UserMinus,
-  Users
+  Users,
+  MessageSquare,
+  ArrowRight,
+  Clock
 } from 'lucide-react';
 
-const UserInfoPopup = ({ user, onClose, isUserFriend, friendCount, onAddFriend, onRemoveFriend }) => {
+const UserInfoPopup = ({ user, onClose, isUserFriend, friendCount, onAddFriend, onRemoveFriend, sentFriendRequests = [] }) => {
   const [activeSection, setActiveSection] = useState('profile');
   const [isNotificationsMuted, setIsNotificationsMuted] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
+  const [isSendingRequest, setIsSendingRequest] = useState(false);
+  const [friendRequestError, setFriendRequestError] = useState("");
+  const [showPolicyPopup, setShowPolicyPopup] = useState(false);
+
+  // Function to check if a friend request has already been sent to this user
+  const hasSentRequest = () => {
+    return sentFriendRequests.some(request => 
+      (request.receiverId?._id === user._id || request.receiverId === user._id) && 
+      request.status === "pending"
+    );
+  };
+
+  // Extract message counts from error message if available
+  const extractMessageCounts = () => {
+    if (!friendRequestError) return { user1Count: 0, user2Count: 0, requiredCount: 5 };
+    
+    const requiredMatch = friendRequestError.match(/at least (\d+) messages/);
+    const requiredCount = requiredMatch ? parseInt(requiredMatch[1]) : 5;
+    
+    const countsMatch = friendRequestError.match(/You sent (\d+) messages, they sent (\d+) messages/);
+    const user1Count = countsMatch ? parseInt(countsMatch[1]) : 0;
+    const user2Count = countsMatch ? parseInt(countsMatch[2]) : 0;
+    
+    return { user1Count, user2Count, requiredCount };
+  };
 
   // Gender Icon Logic
   const getGenderIcon = (gender) => {
@@ -73,6 +101,43 @@ const UserInfoPopup = ({ user, onClose, isUserFriend, friendCount, onAddFriend, 
       });
   };
 
+  // Handle Add Friend with policy check
+  const handleAddFriend = async () => {
+    // If a request has already been sent, show info message
+    if (hasSentRequest()) {
+      toast.info("Friend request already sent");
+      return;
+    }
+    
+    setIsSendingRequest(true);
+    setFriendRequestError("");
+    setShowPolicyPopup(false);
+    
+    try {
+      await onAddFriend();
+      // If successful, the popup will close or update based on parent component
+    } catch (error) {
+      console.error("Friend request error:", error);
+      if (error.response?.data?.message) {
+        const errorMessage = error.response.data.message;
+        // Check if the error is related to message count policy
+        if (errorMessage.includes("messages with this user before sending")) {
+          setFriendRequestError(errorMessage);
+          setShowPolicyPopup(true);
+          // Don't show toast for this specific error - we'll show the custom UI
+        } else {
+          setFriendRequestError(errorMessage);
+          toast.error(errorMessage);
+        }
+      } else {
+        setFriendRequestError("Failed to send friend request. Please try again.");
+        toast.error("Failed to send friend request. Please try again.");
+      }
+    } finally {
+      setIsSendingRequest(false);
+    }
+  };
+
   // Sidebar Navigation Items
   const navItems = [
     { 
@@ -91,6 +156,100 @@ const UserInfoPopup = ({ user, onClose, isUserFriend, friendCount, onAddFriend, 
       key: 'privacy' 
     }
   ];
+
+  // Render Policy Popup
+  const renderPolicyPopup = () => {
+    if (!showPolicyPopup) return null;
+
+    const { user1Count, user2Count, requiredCount } = extractMessageCounts();
+    
+    return (
+      <div 
+        className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/70 backdrop-blur-sm"
+        onClick={() => setShowPolicyPopup(false)}
+      >
+        <div 
+          className="w-full max-w-md bg-gradient-to-b from-[#272829] to-[#31333A] rounded-2xl p-6 shadow-2xl border border-[#61677A]/40"
+          onClick={e => e.stopPropagation()}
+        >
+          <div className="flex items-start mb-4">
+            <div className="bg-amber-500/20 p-2 rounded-full mr-4">
+              <AlertTriangle className="text-amber-500" size={28} />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-[#FFF6E0] mb-2">
+                Friend Request Policy
+              </h3>
+              <p className="text-[#D8D9DA] text-sm mb-3">
+                We encourage meaningful connections. You need to exchange at least {requiredCount} messages with this user before sending a friend request.
+              </p>
+            </div>
+          </div>
+          
+          <div className="bg-[#1A1B1C] rounded-xl p-4 mb-6">
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-[#61677A] rounded-full flex items-center justify-center text-[#FFF6E0] mr-2">
+                  <User size={16} />
+                </div>
+                <span className="text-[#FFF6E0]">You</span>
+              </div>
+              <div className="flex items-center">
+                <span className="text-[#D8D9DA] text-sm">{user1Count}/{requiredCount} messages</span>
+                <div className="w-20 h-2 bg-[#61677A]/30 rounded-full ml-2 overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-amber-500 to-green-500 rounded-full"
+                    style={{ width: `${Math.min(100, (user1Count/requiredCount) * 100)}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex mb-3">
+              <div className="flex-1 border-t border-dashed border-[#61677A]/30 mt-4"></div>
+              <div className="px-3 text-[#61677A]">
+                <MessageSquare className="mx-auto" size={18} />
+                <ArrowRight className="mx-auto mt-1" size={14} />
+              </div>
+              <div className="flex-1 border-t border-dashed border-[#61677A]/30 mt-4"></div>
+            </div>
+            
+            <div className="flex justify-between items-center">
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-[#61677A] rounded-full flex items-center justify-center text-[#FFF6E0] mr-2">
+                  <img
+                    src={user.profileImageURL || "https://via.placeholder.com/150"}
+                    alt={`${user.uniqueTag}`}
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                </div>
+                <span className="text-[#FFF6E0]">#{user.uniqueTag}</span>
+              </div>
+              <div className="flex items-center">
+                <span className="text-[#D8D9DA] text-sm">{user2Count}/{requiredCount} messages</span>
+                <div className="w-20 h-2 bg-[#61677A]/30 rounded-full ml-2 overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-amber-500 to-green-500 rounded-full"
+                    style={{ width: `${Math.min(100, (user2Count/requiredCount) * 100)}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="text-center">
+            <button
+              onClick={() => setShowPolicyPopup(false)}
+              className="bg-[#61677A] text-[#FFF6E0] px-6 py-3 rounded-full hover:bg-[#61677A]/80 transition-all"
+            >
+              <MessageCircle size={18} className="inline mr-2" />
+              Keep Chatting
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   // Render Active Section Content
   const renderContent = () => {
@@ -126,6 +285,24 @@ const UserInfoPopup = ({ user, onClose, isUserFriend, friendCount, onAddFriend, 
                 </div>
               )}
             </div>
+            
+            {friendRequestError && !showPolicyPopup && (
+              <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 mb-4 flex items-start space-x-3">
+                <AlertTriangle className="text-amber-500 mt-1 flex-shrink-0" size={18} />
+                <div className="text-amber-500 text-sm">
+                  <p className="font-semibold mb-1">Friend Request Policy</p>
+                  <p>{friendRequestError}</p>
+                  <p className="mt-1">
+                    <button 
+                      onClick={() => setShowPolicyPopup(true)}
+                      className="underline hover:text-amber-400 transition-colors"
+                    >
+                      View Details
+                    </button>
+                  </p>
+                </div>
+              </div>
+            )}
             
             <div className="space-y-2">
               <div className="flex items-center justify-between flex-wrap">
@@ -235,6 +412,8 @@ const UserInfoPopup = ({ user, onClose, isUserFriend, friendCount, onAddFriend, 
       className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       onClick={onClose}
     >
+      {renderPolicyPopup()}
+      
       <div 
         className="relative w-full max-w-md h-auto min-h-[60vh] max-h-[90vh] bg-[#272829] rounded-2xl shadow-2xl flex overflow-hidden"
         onClick={(e) => e.stopPropagation()}
@@ -309,13 +488,30 @@ const UserInfoPopup = ({ user, onClose, isUserFriend, friendCount, onAddFriend, 
                   <UserMinus size={20} className="mr-2" />
                   Remove Friend
                 </button>
+              ) : hasSentRequest() ? (
+                <button
+                  disabled
+                  className="flex-1 bg-amber-500/10 text-amber-500 rounded-full py-3 flex items-center justify-center opacity-80 cursor-not-allowed"
+                >
+                  <Clock size={20} className="mr-2" />
+                  Request Sent
+                </button>
               ) : (
                 <button 
-                  onClick={onAddFriend}
-                  className="flex-1 bg-green-500/10 text-green-500 rounded-full py-3 flex items-center justify-center hover:bg-green-500/20 transition-all duration-300"
+                  onClick={handleAddFriend}
+                  disabled={isSendingRequest}
+                  className="flex-1 bg-green-500/10 text-green-500 rounded-full py-3 flex items-center justify-center hover:bg-green-500/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <UserPlus size={20} className="mr-2" />
-                  Add Friend
+                  {isSendingRequest ? (
+                    <>
+                      <span className="animate-pulse">Processing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus size={20} className="mr-2" />
+                      Add Friend
+                    </>
+                  )}
                 </button>
               )}
             </div>

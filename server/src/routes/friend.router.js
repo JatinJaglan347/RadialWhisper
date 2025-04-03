@@ -7,6 +7,7 @@ import {
   removeFriend,
   listFriends,
   listFriendRequests,
+  listSentFriendRequests
 } from "../controllers/friend.controller.js";
 
 const router = Router();
@@ -28,5 +29,8 @@ router.get("/listFriends/:userId", listFriends);
 
 // Endpoint to list all incoming friend requests for a user
 router.get("/requests/:userId", listFriendRequests);
+
+// Endpoint to list all outgoing (sent) friend requests for a user
+router.get("/sent-requests/:userId", listSentFriendRequests);
 
 export default router;

@@ -50,8 +50,10 @@ export const useAuthStore = create((set, get) => ({
 
   friends: [],
   friendRequests: [],
+  sentFriendRequests: [],
   isFetchingFriends: false,
   isFetchingFriendRequests: false,
+  isFetchingSentRequests: false,
 
 
   // Function to check if the user is authenticated
@@ -258,6 +260,7 @@ export const useAuthStore = create((set, get) => ({
         currentUserId: null,
         friends: [], 
         friendRequests: [],
+        sentFriendRequests: [],
       });
   
       // Clear stored user data
@@ -773,6 +776,25 @@ fetchPublicUserInfoRules: async () => {
     }
   },
 
+  fetchSentFriendRequests: async () => {
+    set({ isFetchingSentRequests: true });
+    const { authUser } = get();
+    if (!authUser?.data?.user?._id) {
+      set({ isFetchingSentRequests: false });
+      toast.error("You must be logged in to fetch sent friend requests");
+      return;
+    }
+    try {
+      const res = await axiosInstance.get(`/api/v1/friend/sent-requests/${authUser.data.user._id}`);
+      set({ sentFriendRequests: res.data.sentRequests });
+    } catch (error) {
+      console.error("Error fetching sent friend requests:", error);
+      toast.error(error.response?.data?.message || "Failed to fetch sent friend requests");
+    } finally {
+      set({ isFetchingSentRequests: false });
+    }
+  },
+
   sendFriendRequest: async (receiverId) => {
     const { authUser } = get();
     if (!authUser?.data?.user?._id) {
@@ -785,11 +807,19 @@ fetchPublicUserInfoRules: async () => {
         receiverId,
       });
       toast.success("Friend request sent successfully");
-      // Note: No immediate state update here; receiver's friendRequests will update via API/server
+      // Refresh sent requests list
+      get().fetchSentFriendRequests();
     } catch (error) {
       console.error("Error sending friend request:", error);
       const errorMessage = error.response?.data?.message || "Failed to send friend request";
-      toast.error(errorMessage);
+      
+      // Don't show toast for message exchange policy error (will be handled by UI)
+      if (!errorMessage.includes("messages with this user before sending")) {
+        toast.error(errorMessage);
+      }
+      
+      // Re-throw the error so the UI component can handle it
+      throw error;
     }
   },
 

@@ -3,6 +3,7 @@ import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import Notification from "../models/notification.model.js";
+import { ChatMessage } from "../models/chatMessage.model.js";
 
 // Helper function to send notifications
 const sendNotification = async (recipientId, senderId, type, message) => {
@@ -16,6 +17,36 @@ const sendNotification = async (recipientId, senderId, type, message) => {
   } catch (error) {
     console.error("Notification error:", error);
   }
+};
+
+// Helper function to check if minimum message exchange requirement is met
+const checkMinimumMessageExchange = async (user1Id, user2Id, minCount = 5) => {
+  // Generate room ID (same format as used in chat system)
+  const roomId = [user1Id, user2Id].sort().join("_");
+  
+  // Count messages sent by user1 to user2
+  const user1MessageCount = await ChatMessage.countDocuments({
+    roomId,
+    sender: user1Id,
+    recipient: user2Id
+  });
+  
+  // Count messages sent by user2 to user1
+  const user2MessageCount = await ChatMessage.countDocuments({
+    roomId,
+    sender: user2Id,
+    recipient: user1Id
+  });
+  
+  // Check if both users have sent at least the minimum number of messages
+  const requirementMet = user1MessageCount >= minCount && user2MessageCount >= minCount;
+  
+  return {
+    requirementMet,
+    user1MessageCount,
+    user2MessageCount,
+    requiredCount: minCount
+  };
 };
 
 // Send Friend Request
@@ -49,6 +80,15 @@ export const sendFriendRequest = asyncHandler(async (req, res) => {
   );
   if (alreadyFriends) {
     throw new ApiError(400, "Users are already friends");
+  }
+
+  // Check if minimum message exchange requirement is met
+  const messageCheck = await checkMinimumMessageExchange(senderId, receiverId);
+  if (!messageCheck.requirementMet) {
+    throw new ApiError(400, 
+      `You must exchange at least ${messageCheck.requiredCount} messages with this user before sending a friend request. ` +
+      `Current count: You sent ${messageCheck.user1MessageCount} messages, they sent ${messageCheck.user2MessageCount} messages.`
+    );
   }
 
   // Update receiver's incoming friendRequests array
@@ -263,4 +303,23 @@ export const listFriendRequests = asyncHandler(async (req, res) => {
     throw new ApiError(404, "User not found");
   }
   res.status(200).json({ friendRequests: user.friendRequests });
+});
+
+// List Outgoing Friend Requests (Sent Requests)
+export const listSentFriendRequests = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+  if (!userId) {
+    throw new ApiError(400, "userId is required");
+  }
+
+  const user = await User.findById(userId).populate(
+    "friendRequestsSent.receiverId",
+    "fullName email profileImageURL uniqueTag"
+  );
+  
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+  
+  res.status(200).json({ sentRequests: user.friendRequestsSent });
 });

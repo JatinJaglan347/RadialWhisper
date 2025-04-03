@@ -15,6 +15,8 @@ import {
   X,
   Reply,
   Copy,
+  Calendar,
+  Trash2,
 } from "lucide-react";
 import { useUserActivity } from "../hooks/useUserActivity";
 import EmojiPicker from "../components/EmojiPicker";
@@ -52,6 +54,7 @@ import {
 import { RiUserReceivedLine } from 'react-icons/ri';
 import { GiBowTie } from 'react-icons/gi';
 import { IoCheckmark, IoCheckmarkDone } from 'react-icons/io5';
+import FriendRequestPolicyPopup from "../components/FriendRequestPolicyPopup";
 
 const HomePage = () => {
   useUserActivity();
@@ -66,11 +69,13 @@ const HomePage = () => {
     unreadMessagesBySender,
     messagesByRoom,
     markMessagesAsReadForSender,
-    fetchFriends, // Added to fetch friends list
-    fetchFriendRequests, // Added to fetch friend requests
-    friends, // Added to check friendship status
+    fetchFriends,
+    fetchFriendRequests,
+    friends,
     sendFriendRequest,
     friendRequests,
+    fetchSentFriendRequests,
+    sentFriendRequests,
     acceptFriendRequest,
     rejectFriendRequest,
     removeFriend,
@@ -277,7 +282,8 @@ const HomePage = () => {
     console.log("Fetching friends for fully authenticated user");
     fetchFriends();
     fetchFriendRequests();
-  }, [authUser, fetchFriends, fetchFriendRequests]);
+    fetchSentFriendRequests(); // Add this line to fetch sent friend requests
+  }, [authUser, fetchFriends, fetchFriendRequests, fetchSentFriendRequests]);
 
   // Add this useEffect to load unread messages from localStorage on mount
   useEffect(() => {
@@ -941,6 +947,57 @@ const HomePage = () => {
 
   // Refresh time for fetching nearby users
   const refreshTime = 100000; // 100 seconds
+
+  // Add these new state variables in the component state section (around line 85-90)
+  const [showPolicyPopup, setShowPolicyPopup] = useState(false);
+  const [friendRequestError, setFriendRequestError] = useState("");
+
+  // Add this function to check if a friend request has been sent to a user
+  const hasSentRequestTo = (userId) => {
+    return sentFriendRequests.some(request => 
+      (request.receiverId?._id === userId || request.receiverId === userId) &&
+      request.status === "pending"
+    );
+  };
+
+  // Add a useEffect to fetch sent friend requests when the component mounts
+  useEffect(() => {
+    if (authUser?.data?.user?._id) {
+      fetchSentFriendRequests();
+    }
+  }, [authUser]);
+
+  // Update the handleFriendRequest function
+  const handleFriendRequest = async () => {
+    // If already sent a request, show a toast notification
+    if (hasSentRequestTo(activeChatUser._id)) {
+      toast.info("Friend request already sent");
+      return;
+    }
+
+    try {
+      // First check if we meet the message exchange requirement
+      setFriendRequestError("");
+      await useAuthStore.getState().sendFriendRequest(activeChatUser._id);
+      // If successful, show a success toast
+      toast.success("Friend request sent successfully");
+    } catch (error) {
+      console.error("Error sending friend request:", error);
+      if (error.response?.data?.message) {
+        const errorMessage = error.response.data.message;
+        // Check if the error is related to the message count policy
+        if (errorMessage.includes("messages with this user before sending")) {
+          setFriendRequestError(errorMessage);
+          setShowPolicyPopup(true);
+          // Don't show toast error since we're showing the popup
+        } else {
+          toast.error(errorMessage);
+        }
+      } else {
+        toast.error("Failed to send friend request. Please try again.");
+      }
+    }
+  };
 
   return (
     <div
@@ -2077,17 +2134,34 @@ const HomePage = () => {
                   </button>
                   {/* Friend Request Button */}
                   {!isFriend && (
-                    <button
-                      onClick={() => setShowFriendRequestPopup(true)}
-                      className="p-1.5 text-[#61677A] hover:text-[#272829] bg-[#F0F0F0]/70 hover:bg-[#F0F0F0] rounded-md transition-all duration-200 relative group shadow-sm"
-                      title="Send friend request"
-                    >
-                      <UserPlus size={18} />
-                      <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-36 bg-[#272829] text-[#FFF6E0] text-xs p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
-                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-[#272829]"></div>
-                        Send friend request
-                      </div>
-                    </button>
+                    <>
+                      {hasSentRequestTo(activeChatUser?._id) ? (
+                        <button
+                          className="p-1.5 text-amber-500 bg-amber-500/10 hover:bg-amber-500/20 rounded-md transition-all duration-200 relative group shadow-sm flex items-center"
+                          disabled
+                          title="Friend request sent"
+                        >
+                          <Clock size={18} className="mr-1" />
+                          <span className="text-xs">Request Sent</span>
+                          <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-42 bg-[#272829] text-[#FFF6E0] text-xs p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-[#272829]"></div>
+                            Friend request sent
+                          </div>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleFriendRequest()}
+                          className="p-1.5 text-[#61677A] hover:text-[#272829] bg-[#F0F0F0]/70 hover:bg-[#F0F0F0] rounded-md transition-all duration-200 relative group shadow-sm"
+                          title="Send friend request"
+                        >
+                          <UserPlus size={18} />
+                          <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-36 bg-[#272829] text-[#FFF6E0] text-xs p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-[#272829]"></div>
+                            Send friend request
+                          </div>
+                        </button>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -2325,31 +2399,58 @@ const HomePage = () => {
                   className="p-8 bg-gradient-to-b from-[#FFF6E0] to-[#D8D9DA] rounded-xl shadow-2xl max-w-md m-4 border border-[#61677A]/20 transform transition-all duration-500 animate-scaleIn"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <h3 className="text-2xl font-bold mb-4 text-[#272829]">
-                    Send Friend Request
-                  </h3>
-                  <p className="mb-6 text-[#61677A] leading-relaxed">
-                    By sending a friend request to #{activeChatUser.uniqueTag},
-                    they will be able to see your name and the number of friends
-                    you have. Do you want to proceed?
-                  </p>
-                  <div className="flex gap-4">
-                    <button
-                      onClick={() => {
-                        sendFriendRequest(activeChatUser._id);
-                        setShowFriendRequestPopup(false);
-                      }}
-                      className="flex-1 bg-gradient-to-r from-[#272829] to-[#31333A] text-[#FFF6E0] px-4 py-3 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center transform hover:scale-105"
-                    >
-                      Send Request
-                    </button>
-                    <button
-                      onClick={() => setShowFriendRequestPopup(false)}
-                      className="flex-1 border border-[#272829]/50 text-[#272829] px-4 py-3 rounded-xl hover:bg-[#272829]/5 transition-all duration-300 transform hover:scale-105"
-                    >
-                      Cancel
-                    </button>
-                  </div>
+                  {hasSentRequestTo(activeChatUser?._id) ? (
+                    <>
+                      <div className="flex items-center mb-4">
+                        <div className="bg-amber-500/20 p-2 rounded-full mr-4">
+                          <Clock size={22} className="text-amber-500" />
+                        </div>
+                        <h3 className="text-2xl font-bold text-[#272829]">
+                          Request Already Sent
+                        </h3>
+                      </div>
+                      <p className="mb-6 text-[#61677A] leading-relaxed">
+                        You've already sent a friend request to #{activeChatUser.uniqueTag}. 
+                        They will be notified and can choose to accept or decline your request.
+                      </p>
+                      <div className="flex justify-end">
+                        <button
+                          onClick={() => setShowFriendRequestPopup(false)}
+                          className="bg-[#272829] text-[#FFF6E0] px-4 py-3 rounded-xl hover:bg-[#31333A] transition-all duration-300 flex items-center justify-center"
+                        >
+                          OK, Got It
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <h3 className="text-2xl font-bold mb-4 text-[#272829]">
+                        Send Friend Request
+                      </h3>
+                      <p className="mb-6 text-[#61677A] leading-relaxed">
+                        By sending a friend request to #{activeChatUser.uniqueTag},
+                        they will be able to see your name and the number of friends
+                        you have. Do you want to proceed?
+                      </p>
+                      <div className="flex gap-4">
+                        <button
+                          onClick={() => {
+                            handleFriendRequest();
+                            setShowFriendRequestPopup(false);
+                          }}
+                          className="flex-1 bg-gradient-to-r from-[#272829] to-[#31333A] text-[#FFF6E0] px-4 py-3 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center transform hover:scale-105"
+                        >
+                          Send Request
+                        </button>
+                        <button
+                          onClick={() => setShowFriendRequestPopup(false)}
+                          className="flex-1 border border-[#272829]/50 text-[#272829] px-4 py-3 rounded-xl hover:bg-[#272829]/5 transition-all duration-300 transform hover:scale-105"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             )}
@@ -2362,8 +2463,12 @@ const HomePage = () => {
                 onClose={() => setShowUserInfoPopup(false)}
                 isUserFriend={isUserFriend(activeChatUser._id)}
                 friendCount={friends.length}
-                onAddFriend={() => sendFriendRequest(activeChatUser._id)}
+                onAddFriend={async () => {
+                  // Return a promise that will be handled by the UserInfoPopup component
+                  return useAuthStore.getState().sendFriendRequest(activeChatUser._id);
+                }}
                 onRemoveFriend={() => removeFriend(activeChatUser._id)}
+                sentFriendRequests={sentFriendRequests}
               />
             )}
           </>
@@ -2544,6 +2649,14 @@ const HomePage = () => {
       {/* Add the retention policy popup */}
       {showRetentionPolicyPopup && (
         <RetentionPolicyPopup onClose={() => setShowRetentionPolicyPopup(false)} />
+      )}
+
+      {showPolicyPopup && (
+        <FriendRequestPolicyPopup
+          onClose={() => setShowPolicyPopup(false)}
+          errorMessage={friendRequestError}
+          user={activeChatUser}
+        />
       )}
     </div>
   );
