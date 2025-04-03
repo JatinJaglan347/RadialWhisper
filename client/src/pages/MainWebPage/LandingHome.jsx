@@ -161,7 +161,7 @@ function LandingHome() {
             >
               <div className="bg-gradient-to-r from-[#FFF6E0]/10 to-transparent p-1 inline-block rounded-full mb-6">
                 <span className="bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-[#272829] px-4 py-1 rounded-full text-sm font-medium">
-                  New Release v2.0
+                  Version 1 Beta
                 </span>
               </div>
 
@@ -174,8 +174,7 @@ function LandingHome() {
 
               <p className="text-xl mb-8 text-[#D8D9DA] max-w-lg leading-relaxed">
                 RadialWhisper lets you chat anonymously with people within your
-                custom radius. Adjust your connection range and start chatting
-                today.
+                custom radius. Adjust your connection range and discover meaningful interactions.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
@@ -183,39 +182,24 @@ function LandingHome() {
                   to="/signup"
                   className="group relative overflow-hidden btn bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] hover:from-[#D8D9DA] hover:to-[#FFF6E0] text-[#272829] border-none px-8 py-4 rounded-full font-medium transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl"
                 >
-                  <span className="relative z-10">Get Started</span>
+                  <span className="relative z-10">Join Beta</span>
                   <ChevronRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                   <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#D8D9DA] to-[#FFF6E0] translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
                 </Link>
 
                 <Link
-                  to="/features"
+                  to="/about"
                   className="btn btn-outline text-[#FFF6E0] border-[#FFF6E0] hover:bg-[#FFF6E0] hover:text-[#272829] hover:border-[#FFF6E0] px-8 py-4 rounded-full font-medium transition-all duration-300 shadow-md"
                 >
                   Learn More
                 </Link>
               </div>
 
-              {/* User stats */}
-              <div className="flex mt-12 gap-8">
-                <div>
-                  <p className="text-3xl font-bold bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-transparent bg-clip-text">
-                    500K+
-                  </p>
-                  <p className="text-sm text-[#D8D9DA]">Active Users</p>
-                </div>
-                <div>
-                  <p className="text-3xl font-bold bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-transparent bg-clip-text">
-                    4.8/5
-                  </p>
-                  <p className="text-sm text-[#D8D9DA]">App Rating</p>
-                </div>
-                <div>
-                  <p className="text-3xl font-bold bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-transparent bg-clip-text">
-                    50+
-                  </p>
-                  <p className="text-sm text-[#D8D9DA]">Countries</p>
-                </div>
+              {/* Remove user stats */}
+              <div className="mt-12 px-5 py-4 bg-gradient-to-r from-[#31333A]/80 to-[#31333A]/20 backdrop-blur-sm rounded-lg border border-[#61677A]/30">
+                <p className="text-[#FFF6E0] font-medium">
+                  <span className="text-[#D8D9DA]">🚀</span> RadialWhisper Beta is now live! Be among the first to experience location-based anonymous networking.
+                </p>
               </div>
             </div>
 
@@ -783,125 +767,59 @@ function LandingHome() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-20" data-aos="fade-up">
             <span className="bg-[#61677A]/30 text-[#FFF6E0] px-4 py-1 rounded-full text-sm font-medium inline-block mb-4">
-              Testimonials
+              Potential Use Cases
             </span>
-            <h2 className="text-4xl md:text-6xl font-bold mb-6">
-              What Our Users Say
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              Designed for Real-World Connections
             </h2>
             <p className="text-lg max-w-3xl mx-auto text-[#D8D9DA]">
-              Join thousands of happy users creating meaningful connections
+              Here's how RadialWhisper can enhance your social experience
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Testimonial 1 */}
+            {/* Use Case 1 */}
             <div
               className="bg-gradient-to-br from-[#272829] to-[#31333A] p-8 rounded-xl border border-[#61677A]/30 shadow-xl transition-all duration-500 hover:shadow-2xl hover:translate-y-[-5px]"
               data-aos="fade-up"
               data-aos-delay="100"
             >
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-14 h-14 rounded-full overflow-hidden">
-                  <img
-                    src={`https://api.dicebear.com/9.x/fun-emoji/svg?seed=Sarah`}
-                    alt="User"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div>
-                  <h4 className="font-bold">Sarah T.</h4>
-                  <p className="text-sm text-[#D8D9DA]">New York, NY</p>
-                </div>
+              <div className="bg-[#61677A]/20 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-6">
+                <Users className="h-8 w-8 text-[#FFF6E0]" />
               </div>
-              <div className="flex mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    size={20}
-                    className="text-[#FFF6E0]"
-                    fill="#FFF6E0"
-                  />
-                ))}
-              </div>
+              <h4 className="text-xl font-bold mb-4">Coffee Shop Networking</h4>
               <p className="text-[#D8D9DA] leading-relaxed">
-                "RadialWhisper helped me meet amazing people at a music
-                festival. I connected with others who shared my taste in music,
-                and we ended up enjoying the concert together. Now we're friends
-                who meet regularly!"
+                Connect with others working or relaxing in the same coffee shop. Find potential collaborators, friends, or just enjoy a conversation with someone new.
               </p>
             </div>
 
-            {/* Testimonial 2 */}
+            {/* Use Case 2 */}
             <div
               className="bg-gradient-to-br from-[#272829] to-[#31333A] p-8 rounded-xl border border-[#61677A]/30 shadow-xl transition-all duration-500 hover:shadow-2xl hover:translate-y-[-5px]"
               data-aos="fade-up"
               data-aos-delay="200"
             >
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-14 h-14 rounded-full overflow-hidden">
-                  <img
-                    src={`https://api.dicebear.com/9.x/fun-emoji/svg?seed=Michae`}
-                    alt="User"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div>
-                  <h4 className="font-bold">Michael R.</h4>
-                  <p className="text-sm text-[#D8D9DA]">London, UK</p>
-                </div>
+              <div className="bg-[#61677A]/20 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-6">
+                <MapPin className="h-8 w-8 text-[#FFF6E0]" />
               </div>
-              <div className="flex mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    size={20}
-                    className="text-[#FFF6E0]"
-                    fill="#FFF6E0"
-                  />
-                ))}
-              </div>
+              <h4 className="text-xl font-bold mb-4">Events & Festivals</h4>
               <p className="text-[#D8D9DA] leading-relaxed">
-                "As a frequent traveler, RadialWhisper has been a game changer.
-                I've connected with locals who gave me incredible
-                recommendations and showed me the authentic side of cities I
-                visit. The privacy features make me feel safe."
+                Find others attending the same concert, conference, or festival. Make new connections with people who share your interests and enhance your event experience.
               </p>
             </div>
 
-            {/* Testimonial 3 */}
+            {/* Use Case 3 */}
             <div
               className="bg-gradient-to-br from-[#272829] to-[#31333A] p-8 rounded-xl border border-[#61677A]/30 shadow-xl transition-all duration-500 hover:shadow-2xl hover:translate-y-[-5px]"
               data-aos="fade-up"
               data-aos-delay="300"
             >
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-14 h-14 rounded-full overflow-hidden">
-                  <img
-                    src={`https://api.dicebear.com/9.x/fun-emoji/svg?seed=Jamie`}
-                    alt="User"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div>
-                  <h4 className="font-bold">Jamie L.</h4>
-                  <p className="text-sm text-[#D8D9DA]">Sydney, AU</p>
-                </div>
+              <div className="bg-[#61677A]/20 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-6">
+                <MessageSquare className="h-8 w-8 text-[#FFF6E0]" />
               </div>
-              <div className="flex mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    size={20}
-                    className="text-[#FFF6E0]"
-                    fill="#FFF6E0"
-                  />
-                ))}
-              </div>
+              <h4 className="text-xl font-bold mb-4">Campus Connections</h4>
               <p className="text-[#D8D9DA] leading-relaxed">
-                "I moved to a new city and was having trouble making friends.
-                RadialWhisper helped me connect with people in my neighborhood
-                who had similar interests. The customizable radius is perfect
-                for finding people nearby."
+                Meet fellow students on your campus. From study partners to club members, expand your university network beyond your immediate social circle.
               </p>
             </div>
           </div>
@@ -926,137 +844,327 @@ function LandingHome() {
           <div className="flex flex-col md:flex-row items-center gap-10 md:gap-16">
             <div className="md:w-1/2" data-aos="fade-right">
               <h2 className="text-3xl md:text-5xl font-bold mb-6">
-                Download RadialWhisper Today
+                Join the RadialWhisper Beta
               </h2>
               <p className="text-xl mb-8 text-[#FFF6E0]/90 leading-relaxed">
-                Join over 500,000 users who are already connecting with people
-                nearby. Available on iOS and Android.
+                We're launching our web-based Beta version. Be among the first to experience 
+                proximity-based connections and help shape the future of RadialWhisper.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link
-                  to="/download/ios"
-                  className="btn bg-[#272829] hover:bg-[#31333A] text-[#FFF6E0] px-6 py-4 rounded-xl font-medium transition-all duration-300 shadow-lg flex items-center justify-center gap-3"
-                >
-                  <Smartphone size={24} />
-                  <span>
-                    <span className="text-xs block">Download on the</span>
-                    <span className="font-semibold">App Store</span>
-                  </span>
-                </Link>
-
-                <Link
-                  to="/download/android"
-                  className="btn bg-[#272829] hover:bg-[#31333A] text-[#FFF6E0] px-6 py-4 rounded-xl font-medium transition-all duration-300 shadow-lg flex items-center justify-center gap-3"
-                >
-                  <Smartphone size={24} />
-                  <span>
-                    <span className="text-xs block">Get it on</span>
-                    <span className="font-semibold">Google Play</span>
-                  </span>
-                </Link>
+              <div className="bg-[#272829]/40 backdrop-blur-sm rounded-xl p-6 border border-[#FFF6E0]/10 mb-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="bg-[#FFF6E0]/10 p-2 rounded-full">
+                    <BellRing className="h-5 w-5 text-[#FFF6E0]" />
+                  </div>
+                  <h3 className="font-semibold">Beta Features</h3>
+                </div>
+                <ul className="space-y-2 text-[#D8D9DA]">
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#FFF6E0]"></div>
+                    <span>Web-based platform (no app download required)</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#FFF6E0]"></div>
+                    <span>Location-based anonymous chatting</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#FFF6E0]"></div>
+                    <span>Customizable discovery radius</span>
+                  </li>
+                </ul>
               </div>
+
+              <Link
+                to="/signup"
+                className="btn bg-[#272829] hover:bg-[#31333A] text-[#FFF6E0] px-8 py-4 rounded-xl font-medium transition-all duration-300 shadow-lg flex items-center justify-center gap-3 w-full sm:w-auto"
+              >
+                <span>Get Beta Access</span>
+                <ArrowRight className="h-5 w-5" />
+              </Link>
             </div>
 
             <div className="md:w-1/2 flex justify-center" data-aos="fade-left">
               <div className="relative">
-                {/* Glow effect */}
-                <div className="absolute inset-0 bg-[#FFF6E0]/20 blur-2xl rounded-full transform scale-150"></div>
-
-                <img
-                  src="/api/placeholder/400/200"
-                  alt="RadialWhisper Mobile App"
-                  className="relative z-10 max-w-full"
-                />
+                {/* Animated radar effect */}
+                <div className="relative w-72 h-72 flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-full border-2 border-[#FFF6E0]/10 animate-ping" style={{animationDuration: '2s'}}></div>
+                  <div className="absolute inset-0 scale-75 rounded-full border-2 border-[#FFF6E0]/20 animate-ping" style={{animationDuration: '3s'}}></div>
+                  <div className="absolute inset-0 scale-50 rounded-full border-2 border-[#FFF6E0]/30 animate-ping" style={{animationDuration: '4s'}}></div>
+                  
+                  <div className="w-20 h-20 rounded-full bg-[#272829] border-2 border-[#FFF6E0]/30 flex items-center justify-center z-10">
+                    <Radio className="h-10 w-10 text-[#FFF6E0]" />
+                  </div>
+                  
+                  {/* Dots representing users */}
+                  <div className="absolute top-1/4 right-1/4 w-6 h-6 rounded-full bg-[#FFF6E0]/80 animate-pulse"></div>
+                  <div className="absolute bottom-1/4 left-1/3 w-4 h-4 rounded-full bg-[#FFF6E0]/60 animate-pulse"></div>
+                  <div className="absolute top-1/2 left-1/5 w-5 h-5 rounded-full bg-[#FFF6E0]/70 animate-pulse"></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* FAQ Section */}
+      {/* Move and redesign The Mind Behind RadialWhisper section - improved design */}
+      <div className="py-24 bg-gradient-to-br from-[#272829] to-[#31333A] relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 opacity-5">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                "radial-gradient(circle, #FFF6E0 1px, transparent 1px)",
+              backgroundSize: "40px 40px",
+            }}
+          ></div>
+        </div>
+        
+        <div className="absolute top-1/4 right-0 w-96 h-96 rounded-full bg-[#61677A] blur-[150px] opacity-15 animate-pulse" style={{animationDuration: '10s'}}></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full bg-[#FFF6E0] blur-[150px] opacity-5 animate-pulse" style={{animationDuration: '15s'}}></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-16">
+            {/* Left: Visual element and creator intro */}
+            <div className="lg:w-5/12" data-aos="fade-right">
+              <div className="relative">
+                {/* Decorative elements */}
+                <div className="absolute w-full h-full bg-gradient-to-br from-[#61677A]/20 to-[#D8D9DA]/5 blur-3xl rounded-full transform scale-150 -translate-x-10 translate-y-10"></div>
+                
+                <div className="bg-gradient-to-br from-[#31333A] to-[#272829] rounded-2xl p-10 border border-[#61677A]/30 shadow-xl relative overflow-hidden backdrop-blur-sm">
+                  <div className="absolute -top-28 -right-28 w-56 h-56 rounded-full bg-[#61677A]/10 blur-lg"></div>
+                  
+                  <div className="flex flex-col items-center text-center relative z-10">
+                    <span className="bg-[#61677A]/30 text-[#FFF6E0] px-4 py-1 rounded-full text-sm font-medium inline-block mb-6">
+                      Meet the Creator
+                    </span>
+                    
+                    <div className="group relative w-36 h-36 mb-8">
+                      <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] opacity-50 blur-md group-hover:opacity-70 transition-opacity"></div>
+                      <div className="absolute inset-1 rounded-full border-2 border-[#FFF6E0]/20 overflow-hidden bg-[#31333A]">
+                        <img
+                          src={jatinjatinimg}
+                          alt="Jatin Jaglan"
+                          className="w-full h-full object-cover rounded-full"
+                        />
+                      </div>
+                      <div className="absolute bottom-0 right-0 w-10 h-10 bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] rounded-full flex items-center justify-center border-2 border-[#272829] shadow-lg">
+                        <Radio className="h-5 w-5 text-[#272829]" />
+                      </div>
+                    </div>
+                    
+                    <h3 className="text-3xl font-bold text-[#FFF6E0] mb-2">Jatin Jaglan</h3>
+                    <p className="text-[#D8D9DA] mb-6">Creator & Full-Stack Developer</p>
+                    
+                    <div className="flex justify-center space-x-4 mb-8">
+                      <a
+                        href="https://github.com/JatinJaglan347"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-3 rounded-full bg-[#61677A]/30 hover:bg-[#61677A]/50 transition-colors duration-200 hover:scale-110 transform group"
+                      >
+                        <Github className="h-5 w-5 text-[#FFF6E0] group-hover:text-white" />
+                      </a>
+                      <a
+                        href="https://www.linkedin.com/in/jatinjaglan"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-3 rounded-full bg-[#61677A]/30 hover:bg-[#61677A]/50 transition-colors duration-200 hover:scale-110 transform group"
+                      >
+                        <Linkedin className="h-5 w-5 text-[#FFF6E0] group-hover:text-white" />
+                      </a>
+                      <a
+                        href="https://x.com/Jatin_Jaglan347"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-3 rounded-full bg-[#61677A]/30 hover:bg-[#61677A]/50 transition-colors duration-200 hover:scale-110 transform group"
+                      >
+                        <Twitter className="h-5 w-5 text-[#FFF6E0] group-hover:text-white" />
+                      </a>
+                    </div>
+                    
+                    <Link
+                      to="/anonymous"
+                      className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] hover:from-[#D8D9DA] hover:to-[#FFF6E0] text-[#272829] px-8 py-4 font-medium transition-all duration-300 flex items-center justify-center shadow-lg w-full"
+                    >
+                      <span className="relative z-10">Meet the Mind Behind RadialWhisper</span>
+                      <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                      <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#D8D9DA] to-[#FFF6E0] translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Right: Story and vision */}
+            <div className="lg:w-7/12" data-aos="fade-left">
+              <h2 className="text-4xl md:text-5xl font-bold mb-8">
+                The Vision Behind <span className="bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-transparent bg-clip-text">RadialWhisper</span>
+              </h2>
+              
+              <p className="text-xl text-[#D8D9DA] mb-10 leading-relaxed">
+                "I believe technology should enhance human connections, not replace them. RadialWhisper was born from the desire to use technology to help people connect in the physical world."
+              </p>
+              
+              <div className="space-y-6">
+                <div className="bg-gradient-to-br from-[#31333A] to-[#272829]/80 rounded-xl p-6 border border-[#61677A]/30 transform transition-all duration-300 hover:translate-y-[-5px] hover:shadow-xl">
+                  <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
+                    <div className="bg-[#FFF6E0]/10 p-2 rounded-full">
+                      <Zap className="h-5 w-5 text-[#FFF6E0]" />
+                    </div>
+                    <span>The Spark</span>
+                  </h3>
+                  <p className="text-[#D8D9DA] leading-relaxed">
+                    RadialWhisper began as a solution to a problem I experienced firsthand. While sitting in a crowded university library, I was surrounded by people yet felt completely disconnected. I wondered: what if technology could help bridge this gap instead of widening it?
+                  </p>
+                </div>
+                
+                <div className="bg-gradient-to-br from-[#31333A] to-[#272829]/80 rounded-xl p-6 border border-[#61677A]/30 transform transition-all duration-300 hover:translate-y-[-5px] hover:shadow-xl">
+                  <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
+                    <div className="bg-[#FFF6E0]/10 p-2 rounded-full">
+                      <Shield className="h-5 w-5 text-[#FFF6E0]" />
+                    </div>
+                    <span>Core Values</span>
+                  </h3>
+                  <p className="text-[#D8D9DA] leading-relaxed">
+                    The platform is built on three core principles: privacy-first design, genuine human connection, and digital tools that enhance real-world interactions rather than replacing them.
+                  </p>
+                </div>
+                
+                <div className="bg-gradient-to-br from-[#31333A] to-[#272829]/80 rounded-xl p-6 border border-[#61677A]/30 transform transition-all duration-300 hover:translate-y-[-5px] hover:shadow-xl">
+                  <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
+                    <div className="bg-[#FFF6E0]/10 p-2 rounded-full">
+                      <Users className="h-5 w-5 text-[#FFF6E0]" />
+                    </div>
+                    <span>The Journey</span>
+                  </h3>
+                  <p className="text-[#D8D9DA] leading-relaxed">
+                    Developing RadialWhisper has been a labor of love and learning. From concept to Beta, every feature has been carefully crafted with the user's experience and safety in mind. This Beta launch represents the first step in what I hope will be a technology that meaningfully improves how we connect with each other.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Replace FAQ Section with Community Section */}
       <div className="py-24 md:py-32 relative">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="absolute inset-0 opacity-5">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                "linear-gradient(to right, #FFF6E0 1px, transparent 1px), linear-gradient(to bottom, #FFF6E0 1px, transparent 1px)",
+              backgroundSize: "50px 50px",
+            }}
+          ></div>
+        </div>
+        
+        <div className="absolute top-1/3 left-0 w-80 h-80 rounded-full bg-[#61677A] blur-[100px] opacity-10"></div>
+        <div className="absolute bottom-0 right-0 w-64 h-64 rounded-full bg-[#FFF6E0] blur-[80px] opacity-5"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16" data-aos="fade-up">
             <span className="bg-[#61677A]/30 text-[#FFF6E0] px-4 py-1 rounded-full text-sm font-medium inline-block mb-4">
-              FAQ
+              Community
             </span>
             <h2 className="text-4xl md:text-6xl font-bold mb-6">
-              Frequently Asked Questions
+              Join Our Growing Community
             </h2>
             <p className="text-lg max-w-3xl mx-auto text-[#D8D9DA]">
-              Everything you need to know about RadialWhisper
+              Be part of shaping the future of proximity-based social networking
             </p>
           </div>
-
-          <div className="space-y-6" data-aos="fade-up" data-aos-delay="100">
-            {/* FAQ Item 1 */}
-            <div className="bg-gradient-to-br from-[#272829] to-[#31333A] rounded-xl border border-[#61677A]/30 shadow-lg overflow-hidden">
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8" data-aos="fade-up">
+            {/* Card 1 */}
+            <div className="bg-gradient-to-br from-[#272829] to-[#31333A] rounded-xl border border-[#61677A]/30 shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300 hover:translate-y-[-5px]">
+              <div className="h-24 bg-gradient-to-r from-[#61677A] to-[#4d525f] relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-[#FFF6E0]/10 to-transparent opacity-30"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <BellRing className="h-12 w-12 text-[#FFF6E0] group-hover:scale-110 transition-transform duration-300" />
+                </div>
+              </div>
               <div className="p-6">
-                <h3 className="text-xl font-bold mb-4">
-                  How does RadialWhisper protect my privacy?
-                </h3>
-                <p className="text-[#D8D9DA] leading-relaxed">
-                  RadialWhisper never shares your exact location with other
-                  users. We only show that you're within the radius they've set.
-                  Your personal details remain private unless you choose to
-                  share them. All chats are end-to-end encrypted for maximum
-                  security.
+                <h3 className="text-xl font-bold mb-4 text-[#FFF6E0]">Beta Tester Program</h3>
+                <p className="text-[#D8D9DA] leading-relaxed mb-6">
+                  Join our exclusive beta testing program to get early access to new features and help shape the future of RadialWhisper with your feedback.
                 </p>
+                <Link
+                  to="/signup?beta=true"
+                  className="inline-flex items-center text-[#FFF6E0] hover:text-[#D8D9DA] transition-colors"
+                >
+                  <span>Apply to join</span>
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
               </div>
             </div>
-
-            {/* FAQ Item 2 */}
-            <div className="bg-gradient-to-br from-[#272829] to-[#31333A] rounded-xl border border-[#61677A]/30 shadow-lg overflow-hidden">
+            
+            {/* Card 2 */}
+            <div className="bg-gradient-to-br from-[#272829] to-[#31333A] rounded-xl border border-[#61677A]/30 shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300 hover:translate-y-[-5px]">
+              <div className="h-24 bg-gradient-to-r from-[#61677A] to-[#4d525f] relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-[#FFF6E0]/10 to-transparent opacity-30"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <MessageSquare className="h-12 w-12 text-[#FFF6E0] group-hover:scale-110 transition-transform duration-300" />
+                </div>
+              </div>
               <div className="p-6">
-                <h3 className="text-xl font-bold mb-4">
-                  What's the maximum radius I can set?
-                </h3>
-                <p className="text-[#D8D9DA] leading-relaxed">
-                  Free accounts can set a radius up to 1km. Premium subscribers
-                  can extend this to 5km, perfect for covering larger areas like
-                  campuses, festivals, or neighborhoods.
+                <h3 className="text-xl font-bold mb-4 text-[#FFF6E0]">Community Forums</h3>
+                <p className="text-[#D8D9DA] leading-relaxed mb-6">
+                  Connect with other users, share your experiences, suggest new features, and discuss how RadialWhisper has enhanced your social interactions.
                 </p>
+                <Link
+                  to="/community"
+                  className="inline-flex items-center text-[#FFF6E0] hover:text-[#D8D9DA] transition-colors"
+                >
+                  <span>Visit forums</span>
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
               </div>
             </div>
-
-            {/* FAQ Item 3 */}
-            <div className="bg-gradient-to-br from-[#272829] to-[#31333A] rounded-xl border border-[#61677A]/30 shadow-lg overflow-hidden">
-              <div className="p-6">
-                <h3 className="text-xl font-bold mb-4">
-                  Can I block users I don't want to interact with?
-                </h3>
-                <p className="text-[#D8D9DA] leading-relaxed">
-                  Absolutely! You can block any user at any time. Once blocked,
-                  they won't be able to see your profile or send you messages,
-                  even if you're in the same location.
-                </p>
+            
+            {/* Card 3 */}
+            <div className="bg-gradient-to-br from-[#272829] to-[#31333A] rounded-xl border border-[#61677A]/30 shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300 hover:translate-y-[-5px]">
+              <div className="h-24 bg-gradient-to-r from-[#61677A] to-[#4d525f] relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-[#FFF6E0]/10 to-transparent opacity-30"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Github className="h-12 w-12 text-[#FFF6E0] group-hover:scale-110 transition-transform duration-300" />
+                </div>
               </div>
-            </div>
-
-            {/* FAQ Item 4 */}
-            <div className="bg-gradient-to-br from-[#272829] to-[#31333A] rounded-xl border border-[#61677A]/30 shadow-lg overflow-hidden">
               <div className="p-6">
-                <h3 className="text-xl font-bold mb-4">
-                  Is RadialWhisper available worldwide?
-                </h3>
-                <p className="text-[#D8D9DA] leading-relaxed">
-                  Yes! RadialWhisper is available in over 50 countries and
-                  supports multiple languages. Our user base is growing
-                  globally, making it useful for travelers and locals alike.
+                <h3 className="text-xl font-bold mb-4 text-[#FFF6E0]">Open Source Journey</h3>
+                <p className="text-[#D8D9DA] leading-relaxed mb-6">
+                  Follow our development journey, contribute ideas, or explore how we're building RadialWhisper with a focus on privacy and genuine connections.
                 </p>
+                <a
+                  href="https://github.com/JatinJaglan347"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center text-[#FFF6E0] hover:text-[#D8D9DA] transition-colors"
+                >
+                  <span>View GitHub</span>
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </a>
               </div>
             </div>
           </div>
-
-          <div className="text-center mt-12" data-aos="fade-up">
-            <Link
-              to="/faq"
-              className="inline-flex items-center text-lg font-medium text-[#FFF6E0] hover:text-[#D8D9DA] transition-colors"
-            >
-              View all FAQs
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Link>
+          
+          {/* CTA Banner */}
+          <div className="mt-16 bg-gradient-to-r from-[#31333A] to-[#272829] rounded-xl p-8 border border-[#61677A]/30 shadow-lg" data-aos="fade-up">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+              <div>
+                <h3 className="text-2xl font-bold mb-2 text-[#FFF6E0]">Have ideas to improve RadialWhisper?</h3>
+                <p className="text-[#D8D9DA]">We'd love to hear your thoughts on enhancing the platform.</p>
+              </div>
+              <Link
+                to="/contact"
+                className="btn bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] hover:from-[#D8D9DA] hover:to-[#FFF6E0] text-[#272829] px-6 py-3 rounded-full font-medium transition-all duration-300 flex items-center whitespace-nowrap"
+              >
+                Share Your Ideas
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -1113,109 +1221,6 @@ function LandingHome() {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Creator Credit Section */}
-      <div className="py-16 bg-gradient-to-br from-[#31333A] to-[#272829] relative overflow-hidden">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between">
-            {/* Creator Info */}
-            <div className="md:w-1/2 mb-8 md:mb-0 md:pr-8">
-              <h3 className="text-2xl md:text-3xl font-bold text-[#FFF6E0] mb-3">
-                The Mind Behind RadialWhisper
-              </h3>
-              <p className="text-lg text-[#D8D9DA] mb-6">
-                Crafted with precision and care by a solo developer passionate
-                about connecting people through intuitive technology.
-              </p>
-              <Link
-                to="/anonymous"
-                className="inline-flex items-center px-5 py-3 bg-[#61677A] hover:bg-[#555c6d] text-[#FFF6E0] rounded-lg shadow-md transition-all duration-200 group"
-              >
-                <div className="flex items-center w-auto h-auto group ">
-                  <span className="font-medium">Know more about the Creator</span>
-                  <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-200 group-hover:translate-x-1" />
-                </div>
-              </Link>
-            </div>
-
-            {/* Creator Card */}
-            <div className="md:w-1/2 flex justify-center">
-              <div className="bg-gradient-to-br from-[#3D3F44] to-[#292A2D] p-6 rounded-xl shadow-xl border border-[#61677A]/30 w-full max-w-md">
-              <Link
-                    to="/anonymous"
-                    >
-                <div className="flex items-center space-x-4">
-                  {/* Avatar */}
-                  
-                  <div className="relative">
-
-                    <div className="w-16 h-16 rounded-full overflow-hidden bg-[#61677A]/20">
-                      <img
-                        src={jatinjatinimg}
-                        alt="Creator Avatar"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border-2 border-[#272829]"></div>
-                  </div>
-                  
-                  <div>
-                    <h4 className="text-lg font-semibold text-[#FFF6E0]">
-                      Jatin Jaglan
-                    </h4>
-                    <p className="text-sm text-[#D8D9DA]">
-                      Full-Stack Web Developer
-                    </p>
-                  </div>
-                  
-                </div>
-                </Link>
-
-                <div className="mt-6 pt-6 border-t border-[#61677A]/20">
-                  <div className="flex flex-wrap items-center justify-between gap-2 ">
-                    <div className="text-sm text-[#D8D9DA]">
-                      <span className="block font-medium text-[#FFF6E0]">
-                        Think Ideas to Build
-                      </span>
-                      Turning Visions into Reality
-                    </div>
-                    <div className="flex items-center space-x-3 z-10">
-                      <a
-                        href="https://github.com/JatinJaglan347"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2 rounded-full hover:bg-[#61677A]/30 transition-colors duration-200"
-                      >
-                        <Github className="h-5 w-5 text-[#D8D9DA]" />
-                      </a>
-                      <a
-                        href="https://www.linkedin.com/in/jatinjaglan"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2 rounded-full hover:bg-[#61677A]/30 transition-colors duration-200"
-                      >
-                        <Linkedin className="h-5 w-5 text-[#D8D9DA]" />
-                      </a>
-                      <a
-                        href="https://x.com/Jatin_Jaglan347"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2 rounded-full hover:bg-[#61677A]/30 transition-colors duration-200"
-                      >
-                        <Twitter className="h-5 w-5 text-[#D8D9DA]" />
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Subtle Background Elements */}
-        <div className="absolute top-1/4 left-10 w-72 h-72 rounded-full bg-[#61677A] blur-[120px] opacity-5"></div>
-        <div className="absolute bottom-0 right-10 w-96 h-96 rounded-full bg-[#61677A] blur-[150px] opacity-5"></div>
       </div>
     </div>
   );
