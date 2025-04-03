@@ -874,7 +874,15 @@ const HomePage = () => {
     if (!replyingTo) return null;
     
     const isReplyFromMe = replyingTo.sender === authUser.data.user._id;
-    const replySender = isReplyFromMe ? 'You' : activeChatUser?.fullName || 'User';
+    let replySender;
+    
+    if (isReplyFromMe) {
+      replySender = 'You';
+    } else {
+      // Check if the sender is a friend before showing their full name
+      const isFriend = isUserFriend(activeChatUser?._id);
+      replySender = isFriend ? activeChatUser?.fullName : `#${activeChatUser?.uniqueTag}`;
+    }
     
     return (
       <div className="bg-[#31333A] text-[#FFF6E0] p-2 rounded-t-lg flex justify-between items-start">
@@ -907,7 +915,15 @@ const HomePage = () => {
     
     // Handle case where the original message isn't found in current messages
     const isReplyFromMe = repliedMessage?.sender === authUser.data.user._id;
-    const replySender = isReplyFromMe ? 'You' : activeChatUser?.fullName || 'User';
+    let replySender;
+    
+    if (isReplyFromMe) {
+      replySender = 'You';
+    } else {
+      // Check if the sender is a friend before showing their full name
+      const isFriend = isUserFriend(activeChatUser?._id);
+      replySender = isFriend ? activeChatUser?.fullName : `#${activeChatUser?.uniqueTag}`;
+    }
     
     return (
       <div 
