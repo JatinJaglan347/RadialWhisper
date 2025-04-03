@@ -600,9 +600,18 @@ const HomePage = () => {
 
   // Handle Enter key press in chat input
   const handleKeyPress = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
+    // If emoji picker is open, let it handle its own keyboard events
+    if (showEmojiPicker) {
+      return;
+    }
+    
+    // Send message on Enter, add new line on Shift+Enter
+    if (e.key === "Enter") {
+      if (!e.shiftKey) {
+        e.preventDefault();
+        handleSendMessage();
+      }
+      // If Shift+Enter, let the default behavior happen (add new line)
     }
   };
 
@@ -689,7 +698,12 @@ const HomePage = () => {
   // Add this function to truncate long messages
   const truncateMessage = (message, maxLength = 150) => {
     if (message.length <= maxLength) return message;
-    return message.substring(0, maxLength) + "...";
+    
+    // Find the last space before maxLength
+    let cutoff = message.substring(0, maxLength).lastIndexOf(' ');
+    if (cutoff === -1) cutoff = maxLength; // If no space found, cut at maxLength
+    
+    return message.substring(0, cutoff) + "...";
   };
 
   // Function to handle message click and show context menu
@@ -868,7 +882,7 @@ const HomePage = () => {
           <div className="text-xs font-semibold mb-1">
             Replying to {replySender}
           </div>
-          <div className="text-sm text-[#FFF6E0]/80 truncate max-w-[220px]">
+          <div className="text-sm text-[#FFF6E0]/80 max-w-[220px] overflow-hidden text-ellipsis line-clamp-2 whitespace-pre-line">
             {replyingTo.message}
           </div>
         </div>
@@ -891,18 +905,27 @@ const HomePage = () => {
       msg => msg._id === message.replyTo
     );
     
-    if (!repliedMessage) return null;
-    
-    const isReplyFromMe = repliedMessage.sender === authUser.data.user._id;
+    // Handle case where the original message isn't found in current messages
+    const isReplyFromMe = repliedMessage?.sender === authUser.data.user._id;
     const replySender = isReplyFromMe ? 'You' : activeChatUser?.fullName || 'User';
     
     return (
-      <div className="mb-1 text-xs bg-[#494D5A] p-1.5 rounded-lg text-[#FFF6E0]/80">
+      <div 
+        className="mb-1 text-xs bg-[#494D5A] p-1.5 rounded-lg text-[#FFF6E0]/80 cursor-pointer hover:bg-[#494D5A]/80 transition-colors"
+        onClick={(e) => {
+          e.stopPropagation(); // Prevent triggering the parent message's click handler
+          if (repliedMessage) {
+            scrollToMessage(message.replyTo);
+          } else {
+            toast.info("Original message not available in chat history");
+          }
+        }}
+      >
         <div className="font-semibold text-[#FFF6E0]/90 mb-0.5">
           {replySender}
         </div>
-        <div className="truncate max-w-full">
-          {repliedMessage.message}
+        <div className="max-w-full line-clamp-2 whitespace-pre-line">
+          {repliedMessage ? repliedMessage.message : "Original message not available"}
         </div>
       </div>
     );
@@ -1092,6 +1115,34 @@ const HomePage = () => {
       (req.userId._id === userId || (req.userId && req.userId._id === userId)) && 
       req.status === "pending"
     );
+  };
+
+  // Add this function to scroll to a specific message
+  const scrollToMessage = (messageId) => {
+    // Find the message element by its ID
+    const messageElement = document.getElementById(`message-${messageId}`);
+    
+    if (messageElement) {
+      // Scroll the message into view first
+      messageElement.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center' 
+      });
+      
+      // Add a small delay before applying the highlight to ensure scrolling is complete
+      setTimeout(() => {
+        // Add a temporary highlight class to the message
+        messageElement.classList.add('highlight-message');
+        
+        // Remove the highlight class after a longer delay to match the CSS animation duration
+        setTimeout(() => {
+          messageElement.classList.remove('highlight-message');
+        }, 3500); // 3.5 seconds to match the CSS animation (1.5s x 2 iterations + buffer)
+      }, 300);
+    } else {
+      // If message not found in DOM, show a toast
+      toast.info("Original message not available in chat history");
+    }
   };
 
   return (
@@ -2356,11 +2407,13 @@ const HomePage = () => {
                                   >
                                     {/* Message Bubble */}
                                     <div
+                                      id={`message-${msg._id}`}
                                       className={`
                                         relative p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer
                                         ${isMe 
                                           ? "bg-[#272829] text-[#FFF6E0] rounded-2xl rounded-br-sm" 
                                           : "bg-[#61677A] text-[#FFF6E0] rounded-2xl rounded-bl-sm"}
+                                        highlight-message:animate-pulse highlight-message:bg-opacity-80 highlight-message:ring-2 highlight-message:ring-[#FFF6E0]
                                       `}
                                       onClick={(e) => handleMessageClick(e, msg)}
                                     >
@@ -2368,7 +2421,7 @@ const HomePage = () => {
                                       {renderRepliedMessage(msg)}
                                       
                                       {/* Message Content */}
-                                      <p className="leading-relaxed text-sm md:text-base">
+                                      <p className="leading-relaxed text-sm md:text-base whitespace-pre-line">
                                         {isLongMessage && !isExpanded
                                           ? truncateMessage(msg.message)
                                           : msg.message}
@@ -2473,7 +2526,15 @@ const HomePage = () => {
                 {/* Emoji button with position relative for proper positioning */}
                 <div className="relative z-[9000]">
                   <button
-                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    onClick={() => {
+                      setShowEmojiPicker(!showEmojiPicker);
+                      // Focus the input after closing emoji picker
+                      if (showEmojiPicker) {
+                        setTimeout(() => {
+                          document.getElementById('chatInput')?.focus();
+                        }, 100);
+                      }
+                    }}
                     className="p-2 rounded-full hover:bg-[#D8D9DA] transition-colors text-[#272829]"
                   >
                     <FaSmile size={24} />
@@ -2481,27 +2542,31 @@ const HomePage = () => {
 
                   <EmojiPicker
                     visible={showEmojiPicker}
-                    onEmojiSelect={(emoji) => {
+                    onEmojiSelect={(emoji, event) => {
                       if (emoji) {
-                        setChatMessage(
-                          (prevMessage) => prevMessage + emoji.native
-                        );
+                        setChatMessage(prevMessage => prevMessage + emoji.native);
+                        // Don't close picker when selecting an emoji
                       } else {
+                        // This is triggered when clicking outside or pressing Enter
                         setShowEmojiPicker(false);
+                        setTimeout(() => {
+                          document.getElementById('chatInput')?.focus();
+                        }, 100);
                       }
                     }}
                     position="top"
                   />
                 </div>
 
-                <input
-                  id="chatInput" // Add an ID to the input for focusing
-                  type="text"
+                <textarea
+                  id="chatInput"
+                  rows="1"
                   value={chatMessage}
                   onChange={(e) => setChatMessage(e.target.value)}
                   onKeyDown={handleKeyPress}
-                  className="flex-1 bg-[#272829] text-[#FFF6E0] border-none rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#61677A] transition-all duration-300 shadow-inner placeholder-[#FFF6E0]/50 min-h-[44px]"
+                  className="flex-1 bg-[#272829] text-[#FFF6E0] border-none rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#61677A] transition-all duration-300 shadow-inner placeholder-[#FFF6E0]/50 min-h-[44px] resize-none overflow-auto"
                   placeholder={replyingTo ? "Type your reply..." : "Type a message..."}
+                  style={{ maxHeight: '120px' }}
                 />
 
                 <button

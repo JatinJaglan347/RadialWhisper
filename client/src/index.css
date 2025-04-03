@@ -10,3 +10,63 @@
   .pulse-bg {
     animation: pulse-bg 2s infinite;
   }
+
+  /* Google/Gemini-inspired highlight animation */
+  @keyframes highlight-pulse {
+    0% { 
+      box-shadow: 0 0 10px 3px rgba(66, 133, 244, 0.9);
+      border-color: rgba(66, 133, 244, 1);
+      transform: scale(1.01);
+    }
+    25% { 
+      box-shadow: 0 0 15px 5px rgba(234, 67, 53, 0.9);
+      border-color: rgba(234, 67, 53, 1);
+      transform: scale(1.02);
+    }
+    50% { 
+      box-shadow: 0 0 12px 4px rgba(251, 188, 5, 0.9);
+      border-color: rgba(251, 188, 5, 1);
+      transform: scale(1.01);
+    }
+    75% { 
+      box-shadow: 0 0 15px 5px rgba(52, 168, 83, 0.9);
+      border-color: rgba(52, 168, 83, 1);
+      transform: scale(1.02);
+    }
+    100% { 
+      box-shadow: 0 0 10px 3px rgba(66, 133, 244, 0.9);
+      border-color: rgba(66, 133, 244, 1);
+      transform: scale(1.01);
+    }
+  }
+  
+  /* Siri-inspired highlight animation */
+  @keyframes siri-pulse {
+    0% {
+      box-shadow: 0 0 12px 3px rgba(85, 221, 224, 0.9);
+      border-color: rgba(85, 221, 224, 1);
+      transform: scale(1.01);
+    }
+    33% {
+      box-shadow: 0 0 15px 5px rgba(196, 94, 255, 0.9);
+      border-color: rgba(196, 94, 255, 1);
+      transform: scale(1.02);
+    }
+    66% {
+      box-shadow: 0 0 15px 5px rgba(250, 113, 205, 0.9);
+      border-color: rgba(250, 113, 205, 1);
+      transform: scale(1.02);
+    }
+    100% {
+      box-shadow: 0 0 12px 3px rgba(85, 221, 224, 0.9);
+      border-color: rgba(85, 221, 224, 1);
+      transform: scale(1.01);
+    }
+  }
+  
+  .highlight-message {
+    animation: siri-pulse 4s ease-in-out infinite;
+    position: relative;
+    z-index: 5;
+    border: 2.5px solid transparent !important;
+  }

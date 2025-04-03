@@ -172,18 +172,41 @@ export async function joinChat(socket, data, io) {
 
   // Fetch and send chat history
   try {
-    const history = await ChatMessage.find({ roomId })
+    // First get direct messages for this room
+    const messages = await ChatMessage.find({ roomId })
       .sort({ createdAt: 1 })
       .lean()
       .exec();
-    const formattedHistory = history.map(msg => ({
+    
+    // Find all replyTo message IDs that are in this conversation
+    const replyToIds = messages
+      .filter(msg => msg.replyTo)
+      .map(msg => msg.replyTo);
+    
+    // Fetch any referenced messages that aren't already in the result
+    const messageIds = new Set(messages.map(msg => msg._id.toString()));
+    const missingReplyIds = replyToIds.filter(id => !messageIds.has(id.toString()));
+    
+    let additionalMessages = [];
+    if (missingReplyIds.length > 0) {
+      additionalMessages = await ChatMessage.find({ 
+        _id: { $in: missingReplyIds } 
+      }).lean().exec();
+    }
+    
+    // Combine all messages
+    const allMessages = [...messages, ...additionalMessages];
+    
+    const formattedHistory = allMessages.map(msg => ({
       _id: msg._id,
       sender: msg.sender,
       message: msg.message,
       room: msg.roomId,
       status: msg.status,
-      timestamp: msg.createdAt
+      timestamp: msg.createdAt,
+      replyTo: msg.replyTo
     }));
+    
     socket.emit("chatHistory", { roomId, history: formattedHistory });
     logEvent("Chat History Fetched", { userId: socket.userId, fullName: socket.fullName, roomId, historyCount: formattedHistory.length });
   } catch (error) {

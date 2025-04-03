@@ -984,10 +984,24 @@ fetchPublicUserInfoRules: async () => {
       set((state) => {
         const existingMessages = state.messagesByRoom[data.roomId] || [];
         const historyIds = new Set(data.history.map((msg) => msg._id));
-        const mergedMessages = [
-          ...existingMessages.filter((msg) => !historyIds.has(msg._id)),
-          ...data.history,
-        ].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+        
+        // Create a map of all messages including existing ones for easy lookup
+        const allMessagesMap = new Map();
+        
+        // Add existing messages to the map
+        existingMessages.forEach(msg => {
+          allMessagesMap.set(msg._id, msg);
+        });
+        
+        // Add new history messages to the map, overwriting any duplicates
+        data.history.forEach(msg => {
+          allMessagesMap.set(msg._id, msg);
+        });
+        
+        // Convert map back to array and sort by timestamp
+        const mergedMessages = Array.from(allMessagesMap.values())
+          .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+        
         return {
           messagesByRoom: {
             ...state.messagesByRoom,

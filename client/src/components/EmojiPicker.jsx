@@ -13,8 +13,23 @@ const EmojiPicker = ({ onEmojiSelect, visible = false, position = 'top' }) => {
       }
     };
 
+    // Handle key press events
+    const handleKeyDown = (event) => {
+      if (visible && event.key === 'Enter') {
+        // Prevent the enter key from adding emojis when the picker is open
+        event.preventDefault();
+        // Close the emoji picker
+        onEmojiSelect(null, { type: 'close' });
+      }
+    };
+
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, [visible, onEmojiSelect]);
 
   if (!visible) return null;
