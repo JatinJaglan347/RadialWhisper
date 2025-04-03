@@ -2824,7 +2824,13 @@ const HomePage = () => {
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-[1000]" onClick={() => setShowFullRequestNotification(false)}>
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 overflow-hidden transform transition-all animate-scaleIn" 
                onClick={(e) => e.stopPropagation()}>
-            <div className="bg-gradient-to-r from-amber-500/20 to-amber-500/10 p-4 border-b border-amber-200">
+            <div className="bg-gradient-to-r from-amber-500/20 to-amber-500/10 p-4 border-b border-amber-200 relative">
+              <button 
+                onClick={() => setShowFullRequestNotification(false)}
+                className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 bg-white/30 hover:bg-white/50 p-1.5 rounded-full transition-all duration-200"
+              >
+                <X size={18} />
+              </button>
               <div className="flex items-center">
                 <div className="h-12 w-12 rounded-full bg-amber-500/20 flex-shrink-0 overflow-hidden mr-3 flex items-center justify-center border-2 border-amber-300/30">
                   {activeRequestNotification.userId.profileImageURL ? (
