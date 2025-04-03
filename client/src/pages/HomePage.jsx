@@ -181,7 +181,11 @@ const HomePage = () => {
     // Format: HH:MM AM/PM
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
-  window.scrollTo(0, 0);
+
+  // Added proper useEffect to handle scrolling to top only on component mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   useEffect(() => {
     // Check if user is fully logged in and not in pending state
@@ -189,12 +193,10 @@ const HomePage = () => {
     
     // Skip if user is in pending login state (waiting for device confirmation)
     if (showSingleDevicePrompt) {
-      console.log("Skipping socket connection - user in pending login state");
       return;
     }
     
     if (authUser) {
-      console.log("Connecting socket for fully authenticated user");
       connectSocket();
       const timer = setTimeout(() => {
         const currentSocket = useAuthStore.getState().socket;
@@ -202,16 +204,15 @@ const HomePage = () => {
           currentSocket.emit("registerUser", {
             userId: authUser.data.user._id,
           });
-          console.log("User registered via socket:", authUser.data.user._id);
 
           useAuthStore.getState().setCurrentUserId(authUser.data.user._id);
           // Add socket event listeners for debugging
           currentSocket.on("connect", () => {
-            console.log("Socket connected");
+            // Socket connected
           });
 
           currentSocket.on("disconnect", () => {
-            console.log("Socket disconnected");
+            // Socket disconnected
           });
 
           currentSocket.on("error", (error) => {
@@ -229,12 +230,10 @@ const HomePage = () => {
     // Skip if user is in pending login state
     const { showSingleDevicePrompt } = useAuthStore.getState();
     if (showSingleDevicePrompt) {
-      console.log("Skipping location fetch - user in pending login state");
       return;
     }
     
     if (authUser && !locationPermissionDenied) {
-      console.log("Fetching location for fully authenticated user");
       fetchLocation();
     }
   }, [authUser, locationPermissionDenied]);
@@ -244,7 +243,6 @@ const HomePage = () => {
     // Skip if user is in pending login state
     const { showSingleDevicePrompt } = useAuthStore.getState();
     if (showSingleDevicePrompt) {
-      console.log("Skipping nearby users fetch - user in pending login state");
       return () => {}; // Return empty cleanup function
     }
     
@@ -253,7 +251,6 @@ const HomePage = () => {
       location.longitude &&
       !isInitialFetchDone.current
     ) {
-      console.log("Fetching nearby users for fully authenticated user");
       fetchNearbyUsers(location);
       isInitialFetchDone.current = true;
     }
@@ -262,7 +259,6 @@ const HomePage = () => {
       // Check if user is still fully logged in before fetching
       const { showSingleDevicePrompt } = useAuthStore.getState();
       if (showSingleDevicePrompt) {
-        console.log("Skipping interval fetch - user in pending login state");
         return;
       }
       
@@ -278,11 +274,9 @@ const HomePage = () => {
     // Skip if user is in pending login state
     const { showSingleDevicePrompt } = useAuthStore.getState(); 
     if (showSingleDevicePrompt || !authUser) {
-      console.log("Skipping friends fetch - user in pending login state");
       return;
     }
     
-    console.log("Fetching friends for fully authenticated user");
     fetchFriends();
     fetchFriendRequests();
     fetchSentFriendRequests(); // Add this line to fetch sent friend requests
@@ -347,7 +341,6 @@ const HomePage = () => {
 
     const chatStartedHandler = (data) => {
       // setActiveChatRoom(data.roomId);
-      console.log("Chat started in room:", data.roomId);
       setWaitingForChatConfirmation(false);
     };
 
