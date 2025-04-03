@@ -56,6 +56,7 @@ import { GiBowTie } from 'react-icons/gi';
 import { IoCheckmark, IoCheckmarkDone } from 'react-icons/io5';
 import FriendRequestPolicyPopup from "../components/FriendRequestPolicyPopup";
 
+
 const HomePage = () => {
   useUserActivity();
   const {
@@ -102,6 +103,8 @@ const HomePage = () => {
   const [friendToRemove, setFriendToRemove] = useState(null); // Tracks the friend to be removed
   // Add this new state for tracking expanded messages
   const [expandedMessages, setExpandedMessages] = useState({});
+  // Add state for active friend request notification
+  const [activeRequestNotification, setActiveRequestNotification] = useState(null);
 
   // Add state for selected message and context menu
   const [selectedMessage, setSelectedMessage] = useState(null);
@@ -997,6 +1000,105 @@ const HomePage = () => {
         toast.error("Failed to send friend request. Please try again.");
       }
     }
+  };
+
+  // Add state for controlling whether to show the full notification or just the indicator
+  const [showFullRequestNotification, setShowFullRequestNotification] = useState(false);
+  
+  // Add socket listener for real-time friend request notifications
+  useEffect(() => {
+    if (!socket) return;
+
+    // Listen for new friend requests
+    const handleFriendRequestReceived = (data) => {
+      console.log("Friend request received socket event:", data);
+      // Fetch updated friend requests
+      fetchFriendRequests();
+      
+      // Show toast notification
+      toast.success(`${data.senderName} sent you a friend request`);
+      
+      // If we're currently chatting with the sender, set the request notification
+      // but don't automatically show the full popup
+      if (activeChatUser && activeChatUser._id === data.senderId) {
+        // Find the request object that corresponds to this sender
+        const requestFromSender = friendRequests.find(
+          req => req.userId._id === data.senderId || 
+                (req.userId && req.userId._id === data.senderId)
+        );
+        
+        if (requestFromSender) {
+          setActiveRequestNotification(requestFromSender);
+          setShowFullRequestNotification(false); // Only show indicator initially
+        }
+      }
+    };
+    
+    socket.on("friendRequestReceived", handleFriendRequestReceived);
+    
+    return () => {
+      socket.off("friendRequestReceived", handleFriendRequestReceived);
+    };
+  }, [socket, fetchFriendRequests, activeChatUser, friendRequests]);
+  
+  // Check if there's a pending friend request from the active chat user when they change
+  useEffect(() => {
+    if (activeChatUser && friendRequests && friendRequests.length > 0) {
+      // Look for a pending request from the current chat user
+      const requestFromActiveChatUser = friendRequests.find(
+        req => (req.userId._id === activeChatUser._id || 
+               (req.userId && req.userId._id === activeChatUser._id)) && 
+               req.status === "pending"
+      );
+      
+      if (requestFromActiveChatUser) {
+        setActiveRequestNotification(requestFromActiveChatUser);
+        setShowFullRequestNotification(false); // Reset to only show indicator on chat change
+      } else {
+        // Clear notification if no pending request from this user
+        setActiveRequestNotification(null);
+      }
+    } else {
+      // Clear notification if no active chat user
+      setActiveRequestNotification(null);
+    }
+  }, [activeChatUser, friendRequests]);
+
+  // Function to handle accepting a friend request
+  const handleAcceptFriendRequest = async (senderId) => {
+    try {
+      await acceptFriendRequest(senderId, authUser.data.user._id);
+      toast.success('Friend request accepted!');
+      // Refresh the lists
+      fetchFriendRequests();
+      fetchFriends();
+    } catch (error) {
+      console.error('Error accepting friend request:', error);
+      toast.error('Failed to accept friend request');
+    }
+  };
+
+  // Function to handle rejecting a friend request
+  const handleRejectFriendRequest = async (senderId) => {
+    try {
+      await rejectFriendRequest(senderId, authUser.data.user._id);
+      toast.success('Friend request declined');
+      fetchFriendRequests();
+    } catch (error) {
+      console.error('Error rejecting friend request:', error);
+      toast.error('Failed to decline friend request');
+    }
+  };
+
+  // Add this function for the modification in the render part
+
+
+  // Add this function to check if a friend request has been received from a user
+  const hasFriendRequestFrom = (userId) => {
+    return friendRequests.some(req => 
+      (req.userId._id === userId || (req.userId && req.userId._id === userId)) && 
+      req.status === "pending"
+    );
   };
 
   return (
@@ -2148,6 +2250,32 @@ const HomePage = () => {
                             Friend request sent
                           </div>
                         </button>
+                      ) : hasFriendRequestFrom(activeChatUser?._id) ? (
+                        <button
+                          onClick={() => {
+                            // Find the pending request from the current chat user
+                            const pendingRequest = friendRequests.find(
+                              req => (req.userId._id === activeChatUser._id || 
+                                    (req.userId && req.userId._id === activeChatUser._id)) && 
+                                    req.status === "pending"
+                            );
+                            
+                            // Set the active request notification
+                            if (pendingRequest) {
+                              setActiveRequestNotification(pendingRequest);
+                              setShowFullRequestNotification(true);
+                            }
+                          }}
+                          className="p-1.5 bg-amber-500/20 hover:bg-amber-500/30 rounded-md transition-all duration-200 relative group shadow-sm flex items-center animate-pulse"
+                          title="View friend request"
+                        >
+                          <UserPlus size={18} className="mr-1 text-amber-500" />
+                          <span className="text-xs text-amber-600 font-medium">Friend Request</span>
+                          <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-42 bg-[#272829] text-[#FFF6E0] text-xs p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-[#272829]"></div>
+                            View friend request
+                          </div>
+                        </button>
                       ) : (
                         <button
                           onClick={() => handleFriendRequest()}
@@ -2170,6 +2298,8 @@ const HomePage = () => {
             {/* Messages Area with gradient background and soft pattern */}
             <div className="flex-1 overflow-y-auto p-4 relative bg-[url('/src/assets/images/chat-bg-pattern.png')] bg-repeat bg-[#E9E9E9]/20">
               {activeChatRoom ? (
+                <>
+                
                 <div className="space-y-4 relative z-10">
                   {currentMessages.length > 0 ? (
                     Object.entries(groupMessagesByDate(currentMessages)).map(
@@ -2327,6 +2457,7 @@ const HomePage = () => {
                   )}
                   <div ref={messagesEndRef} />
                 </div>
+                </>
               ) : (
                 <div className="flex items-center justify-center h-full text-[#61677A]">
                   <div className="text-center">
@@ -2469,6 +2600,22 @@ const HomePage = () => {
                 }}
                 onRemoveFriend={() => removeFriend(activeChatUser._id)}
                 sentFriendRequests={sentFriendRequests}
+                hasReceivedFriendRequest={hasFriendRequestFrom(activeChatUser?._id)}
+                onViewFriendRequest={() => {
+                  // Find the pending request from the current user
+                  const pendingRequest = friendRequests.find(
+                    req => (req.userId._id === activeChatUser._id || 
+                          (req.userId && req.userId._id === activeChatUser._id)) && 
+                          req.status === "pending"
+                  );
+                  
+                  // Set the active request notification
+                  if (pendingRequest) {
+                    setActiveRequestNotification(pendingRequest);
+                    setShowFullRequestNotification(true);
+                    setShowUserInfoPopup(false); // Close the user info popup
+                  }
+                }}
               />
             )}
           </>
@@ -2601,11 +2748,24 @@ const HomePage = () => {
             opacity: 1;
           }
         }
+        @keyframes slideInUp {
+          from {
+            transform: translateY(20px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
         .animate-fadeIn {
           animation: fadeIn 0.3s ease-in-out forwards;
         }
         .animate-scaleIn {
           animation: scaleIn 0.4s ease-out forwards;
+        }
+        .animate-slideInUp {
+          animation: slideInUp 0.3s ease-out forwards;
         }
         .scale-102 {
           transform: scale(1.02);
@@ -2657,6 +2817,72 @@ const HomePage = () => {
           errorMessage={friendRequestError}
           user={activeChatUser}
         />
+      )}
+
+      {/* Friend Request Full Screen Modal */}
+      {showFullRequestNotification && activeRequestNotification && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-[1000]" onClick={() => setShowFullRequestNotification(false)}>
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 overflow-hidden transform transition-all animate-scaleIn" 
+               onClick={(e) => e.stopPropagation()}>
+            <div className="bg-gradient-to-r from-amber-500/20 to-amber-500/10 p-4 border-b border-amber-200">
+              <div className="flex items-center">
+                <div className="h-12 w-12 rounded-full bg-amber-500/20 flex-shrink-0 overflow-hidden mr-3 flex items-center justify-center border-2 border-amber-300/30">
+                  {activeRequestNotification.userId.profileImageURL ? (
+                    <img 
+                      src={activeRequestNotification.userId.profileImageURL} 
+                      alt={activeRequestNotification.userId.fullName} 
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center bg-amber-500/30 text-amber-600">
+                      {activeRequestNotification.userId.fullName.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-800">{activeRequestNotification.userId.fullName}</h3>
+                  <p className="text-gray-600 text-sm">#{activeRequestNotification.userId.uniqueTag}</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-5">
+              <div className="flex items-center mb-4">
+                <UserPlus className="text-amber-500 mr-2" size={20} />
+                <h3 className="text-lg font-semibold text-gray-800">Friend Request</h3>
+              </div>
+              
+              <p className="text-gray-600 mb-6">
+                {activeRequestNotification.userId.fullName} would like to add you as a friend. 
+                Would you like to accept this request?
+                <span className="block mt-2 text-sm text-gray-500">
+                  Note: If you accept, they will be able to see your full name and the number of friends you have.
+                </span>
+              </p>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    handleAcceptFriendRequest(activeRequestNotification.userId._id);
+                    setShowFullRequestNotification(false);
+                  }}
+                  className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-lg flex items-center justify-center font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-300"
+                >
+                  <Check size={18} className="mr-2" /> Accept
+                </button>
+                <button
+                  onClick={() => {
+                    handleRejectFriendRequest(activeRequestNotification.userId._id);
+                    setShowFullRequestNotification(false);
+                  }}
+                  className="flex-1 bg-gradient-to-r from-gray-200 to-gray-300 text-gray-700 py-3 rounded-lg flex items-center justify-center font-medium hover:from-gray-300 hover:to-gray-400 transition-all duration-300"
+                >
+                  <X size={18} className="mr-2" /> Decline
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

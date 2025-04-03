@@ -23,7 +23,17 @@ import {
   Clock
 } from 'lucide-react';
 
-const UserInfoPopup = ({ user, onClose, isUserFriend, friendCount, onAddFriend, onRemoveFriend, sentFriendRequests = [] }) => {
+const UserInfoPopup = ({ 
+  user, 
+  onClose, 
+  isUserFriend, 
+  friendCount, 
+  onAddFriend, 
+  onRemoveFriend, 
+  sentFriendRequests = [],
+  hasReceivedFriendRequest = false,
+  onViewFriendRequest = null
+}) => {
   const [activeSection, setActiveSection] = useState('profile');
   const [isNotificationsMuted, setIsNotificationsMuted] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
@@ -487,6 +497,14 @@ const UserInfoPopup = ({ user, onClose, isUserFriend, friendCount, onAddFriend, 
                 >
                   <UserMinus size={20} className="mr-2" />
                   Remove Friend
+                </button>
+              ) : hasReceivedFriendRequest ? (
+                <button 
+                  onClick={onViewFriendRequest}
+                  className="flex-1 bg-amber-500/10 text-amber-500 rounded-full py-3 flex items-center justify-center hover:bg-amber-500/20 transition-all duration-300 animate-pulse"
+                >
+                  <UserPlus size={20} className="mr-2" />
+                  View Friend Request
                 </button>
               ) : hasSentRequest() ? (
                 <button

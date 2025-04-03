@@ -303,6 +303,133 @@ export async function handleMessage(socket, data, io) {
   }
 }
 
+// -------------------- FRIEND REQUEST EVENTS --------------------
+export async function emitFriendRequest(io, senderId, receiverId, requestData) {
+  try {
+    // Find receiver's socket if they're online
+    const receiverUser = connectedUsers.get(receiverId);
+    const senderUser = connectedUsers.get(senderId);
+    
+    if (receiverUser && receiverUser.socketId) {
+      // Emit friend request to receiver
+      io.to(receiverUser.socketId).emit("friendRequestReceived", {
+        senderId,
+        senderName: senderUser?.fullName || "Unknown User",
+        requestData
+      });
+      
+      logEvent("Friend Request Emitted", {
+        senderId,
+        senderName: senderUser?.fullName || "Unknown User",
+        receiverId,
+        receiverName: receiverUser.fullName
+      });
+    }
+    
+    // Also notify the sender's socket that the request was sent successfully
+    if (senderUser && senderUser.socketId) {
+      io.to(senderUser.socketId).emit("friendRequestSent", {
+        receiverId,
+        receiverName: receiverUser?.fullName || "Unknown User",
+        requestData
+      });
+    }
+  } catch (error) {
+    logEvent("Emit Friend Request Error", { error: error.toString(), senderId, receiverId });
+  }
+}
+
+export async function emitFriendRequestAccepted(io, senderId, receiverId) {
+  try {
+    // Find both users' sockets if they're online
+    const senderUser = connectedUsers.get(senderId);
+    const receiverUser = connectedUsers.get(receiverId);
+    
+    // Emit to sender (original requester)
+    if (senderUser && senderUser.socketId) {
+      io.to(senderUser.socketId).emit("friendRequestAccepted", {
+        friendId: receiverId,
+        friendName: receiverUser?.fullName || "Unknown User"
+      });
+      
+      logEvent("Friend Request Accepted Notification (to sender)", {
+        senderId,
+        senderName: senderUser.fullName,
+        receiverId,
+        receiverName: receiverUser?.fullName || "Unknown User"
+      });
+    }
+    
+    // Emit to receiver (who accepted the request)
+    if (receiverUser && receiverUser.socketId) {
+      io.to(receiverUser.socketId).emit("friendRequestAccepted", {
+        friendId: senderId,
+        friendName: senderUser?.fullName || "Unknown User"
+      });
+      
+      logEvent("Friend Request Accepted Notification (to receiver)", {
+        senderId,
+        senderName: senderUser?.fullName || "Unknown User",
+        receiverId,
+        receiverName: receiverUser.fullName
+      });
+    }
+  } catch (error) {
+    logEvent("Emit Friend Request Accepted Error", { error: error.toString(), senderId, receiverId });
+  }
+}
+
+export async function emitFriendRequestRejected(io, senderId, receiverId) {
+  try {
+    // Find sender's socket if they're online
+    const senderUser = connectedUsers.get(senderId);
+    
+    if (senderUser && senderUser.socketId) {
+      io.to(senderUser.socketId).emit("friendRequestRejected", {
+        receiverId
+      });
+      
+      logEvent("Friend Request Rejected Notification", {
+        senderId,
+        senderName: senderUser.fullName,
+        receiverId
+      });
+    }
+  } catch (error) {
+    logEvent("Emit Friend Request Rejected Error", { error: error.toString(), senderId, receiverId });
+  }
+}
+
+export async function emitFriendRemoved(io, userId, friendId) {
+  try {
+    // Find both users' sockets if they're online
+    const user = connectedUsers.get(userId);
+    const friend = connectedUsers.get(friendId);
+    
+    // Notify both users about the friendship removal
+    if (user && user.socketId) {
+      io.to(user.socketId).emit("friendRemoved", {
+        friendId
+      });
+    }
+    
+    if (friend && friend.socketId) {
+      io.to(friend.socketId).emit("friendRemoved", {
+        friendId: userId
+      });
+    }
+    
+    logEvent("Friend Removed Notification", {
+      userId,
+      userName: user?.fullName || "Unknown User",
+      friendId,
+      friendName: friend?.fullName || "Unknown User"
+    });
+  } catch (error) {
+    logEvent("Emit Friend Removed Error", { error: error.toString(), userId, friendId });
+  }
+}
+
 // -------------------- MARK MESSAGES AS READ --------------------
 export async function markMessagesAsRead(socket, data, io) {
   if (!data.roomId) {

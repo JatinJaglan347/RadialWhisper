@@ -1,5 +1,16 @@
 import { Server } from "socket.io";
-import { registerUser, joinChat, handleMessage, disconnect, markMessagesAsRead } from "../controllers/socket.controller.js";
+import { 
+  registerUser, 
+  joinChat, 
+  handleMessage, 
+  disconnect, 
+  markMessagesAsRead,
+  emitFriendRequest,
+  emitFriendRequestAccepted,
+  emitFriendRequestRejected,
+  emitFriendRemoved
+} from "../controllers/socket.controller.js";
+import { setIo } from "../controllers/friend.controller.js";
 
 /**
  * Initialize Socket.io and bind the socket events to controller functions.
@@ -9,13 +20,16 @@ import { registerUser, joinChat, handleMessage, disconnect, markMessagesAsRead }
 export function initializeSocket(server) {
   const io = new Server(server, {
     pingInterval: 30000, // 30 seconds between pings
-  pingTimeout: 5000,   // 5 seconds to receive a pong response
+    pingTimeout: 5000,   // 5 seconds to receive a pong response
     cors: {
       origin: process.env.CORS_ORIGIN || "*", // Allow all origins for testing
       methods: ["GET", "POST"],
       credentials: true,
     },
   });
+  
+  // Share io instance with friend controller for emitting events
+  setIo(io);
 
   // Debug: Log when the server starts listening for WebSocket connections
   console.log("✅ Socket.io initialized and waiting for connections...");

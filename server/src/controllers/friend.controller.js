@@ -4,6 +4,18 @@ import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import Notification from "../models/notification.model.js";
 import { ChatMessage } from "../models/chatMessage.model.js";
+import { 
+  emitFriendRequest, 
+  emitFriendRequestAccepted, 
+  emitFriendRequestRejected, 
+  emitFriendRemoved 
+} from "./socket.controller.js";
+
+// Get io from global scope for socket events
+let io;
+export const setIo = (socketIo) => {
+  io = socketIo;
+};
 
 // Helper function to send notifications
 const sendNotification = async (recipientId, senderId, type, message) => {
@@ -115,6 +127,14 @@ export const sendFriendRequest = asyncHandler(async (req, res) => {
     `${sender.fullName} sent you a friend request`
   );
 
+  // Emit socket event for real-time updates
+  if (io) {
+    emitFriendRequest(io, senderId, receiverId, {
+      status: "pending",
+      createdAt: new Date()
+    });
+  }
+
   res.status(200).json({ message: "Friend request sent successfully" });
 });
 
@@ -174,6 +194,11 @@ export const acceptFriendRequest = asyncHandler(async (req, res) => {
     `${receiver.fullName} accepted your friend request`
   );
 
+  // Emit socket event for real-time updates
+  if (io) {
+    emitFriendRequestAccepted(io, senderId, receiverId);
+  }
+
   res.status(200).json({ message: "Friend request accepted successfully" });
 });
 
@@ -218,6 +243,11 @@ export const rejectFriendRequest = asyncHandler(async (req, res) => {
     "friendRequestRejected",
     `${receiver.fullName} rejected your friend request`
   );
+
+  // Emit socket event for real-time updates
+  if (io) {
+    emitFriendRequestRejected(io, senderId, receiverId);
+  }
 
   res.status(200).json({ message: "Friend request rejected successfully" });
 });
@@ -267,6 +297,11 @@ export const removeFriend = asyncHandler(async (req, res) => {
     "friendRemoved",
     `${user.fullName} removed you from their friend list`
   );
+
+  // Emit socket event for real-time updates
+  if (io) {
+    emitFriendRemoved(io, userId, friendId);
+  }
 
   res.status(200).json({ message: "Friend removed successfully" });
 });

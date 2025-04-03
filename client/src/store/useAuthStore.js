@@ -1088,6 +1088,41 @@ fetchPublicUserInfoRules: async () => {
       });
     });
 
+    // Friend request socket events
+    newSocket.on("friendRequestReceived", (data) => {
+      console.log("Friend request received:", data);
+      // Show a toast notification
+      toast.success(`${data.senderName} sent you a friend request`);
+      // Refresh friend requests
+      get().fetchFriendRequests();
+    });
+    
+    newSocket.on("friendRequestSent", (data) => {
+      console.log("Friend request sent confirmation:", data);
+      // Refresh sent friend requests to update UI
+      get().fetchSentFriendRequests();
+    });
+    
+    newSocket.on("friendRequestAccepted", (data) => {
+      console.log("Friend request accepted:", data);
+      toast.success(`${data.friendName} accepted your friend request`);
+      // Refresh both friends list and sent requests
+      get().fetchFriends();
+      get().fetchSentFriendRequests();
+    });
+    
+    newSocket.on("friendRequestRejected", (data) => {
+      console.log("Friend request rejected:", data);
+      // Refresh sent friend requests to update UI
+      get().fetchSentFriendRequests();
+    });
+    
+    newSocket.on("friendRemoved", (data) => {
+      console.log("Friend removed:", data);
+      // Refresh friends list
+      get().fetchFriends();
+    });
+
     set({ socket: newSocket });
   },
   
