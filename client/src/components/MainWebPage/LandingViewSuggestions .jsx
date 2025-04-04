@@ -247,7 +247,7 @@ const LandingViewSuggestions = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Category filter */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-[#D8D9DA] flex items-center gap-1.5">
+                <label className=" text-sm font-medium text-[#D8D9DA] flex items-center gap-1.5">
                   <Tag size={14} />
                   Category
                 </label>
@@ -281,7 +281,7 @@ const LandingViewSuggestions = () => {
               
               {/* Sort Order */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-[#D8D9DA] flex items-center gap-1.5">
+                <label className=" text-sm font-medium text-[#D8D9DA] flex items-center gap-1.5">
                   <ArrowUpDown size={14} />
                   Sort By
                 </label>
@@ -343,7 +343,7 @@ const LandingViewSuggestions = () => {
               
               {/* Time Filter */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-[#D8D9DA] flex items-center gap-1.5">
+                <label className=" text-sm font-medium text-[#D8D9DA] flex items-center gap-1.5">
                   <Clock size={14} />
                   Time Period
                 </label>
