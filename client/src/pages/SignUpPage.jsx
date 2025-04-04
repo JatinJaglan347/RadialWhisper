@@ -40,6 +40,9 @@ function SignUpPage() {
   useEffect(() => {
     fetchPublicUserInfoRules();
   }, [fetchPublicUserInfoRules]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // Get the values from the API response
   const genderOptions = userInfoRules?.genderList || [];

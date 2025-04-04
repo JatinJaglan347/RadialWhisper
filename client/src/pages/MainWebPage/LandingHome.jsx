@@ -1158,7 +1158,7 @@ function LandingHome() {
                 <p className="text-[#D8D9DA]">We'd love to hear your thoughts on enhancing the platform.</p>
               </div>
               <Link
-                to="/contact"
+                to="/suggestion"
                 className="btn bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] hover:from-[#D8D9DA] hover:to-[#FFF6E0] text-[#272829] px-6 py-3 rounded-full font-medium transition-all duration-300 flex items-center whitespace-nowrap"
               >
                 Share Your Ideas
