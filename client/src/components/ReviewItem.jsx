@@ -375,7 +375,7 @@ const ReviewItem = ({ review, onReviewUpdated, onReviewDeleted, showEditOption =
   return (
     <div className="group bg-[#31333A] rounded-xl overflow-hidden transition-all duration-300 relative">
       {/* Border glow effect on hover */}
-      <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500/0 to-amber-500/0 group-hover:from-amber-500/30 group-hover:to-pink-500/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm rounded-xl"></div>
+      <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500/0 to-amber-500/0 group-hover:from-amber-500/10 group-hover:to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm rounded-xl"></div>
       
       {/* Content */}
       <div className="relative z-10 p-6">
@@ -394,10 +394,6 @@ const ReviewItem = ({ review, onReviewUpdated, onReviewDeleted, showEditOption =
                 )}
               </div>
               
-              {/* Subtle ring for own review */}
-              {isOwnReview && (
-                <div className="absolute -inset-1 rounded-xl bg-gradient-to-r from-amber-400/30 to-pink-400/30 opacity-70 blur-sm"></div>
-              )}
             </div>
             
             <div>

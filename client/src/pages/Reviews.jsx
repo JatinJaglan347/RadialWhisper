@@ -424,7 +424,7 @@ const Reviews = () => {
                             <Star size={14} fill={filterStars === star ? "#FFF6E0" : "#FFC107"} className="text-yellow-400" />
                           </button>
                           
-                          <div className="flex-1 h-8 bg-[#272829] rounded-full overflow-hidden border border-[#393B40] relative">
+                          <div className="flex-1 h-4 bg-[#272829] rounded-full overflow-hidden border border-[#393B40] relative">
                             <div 
                               className={`h-full rounded-full flex items-center relative overflow-hidden ${
                                 star === 5 ? 'bg-gradient-to-r from-yellow-400 to-yellow-500' :
@@ -440,7 +440,7 @@ const Reviews = () => {
                               {/* Shimmer effect */}
                               <div className="absolute inset-0 w-full h-full shimmer-effect"></div>
                               
-                              {getTotalReviews() > 0 && (ratingDistribution[star - 1] / getTotalReviews()) * 100 > 10 && (
+                              {getTotalReviews() > 0 && (ratingDistribution[star - 1] / getTotalReviews()) * 100  && (
                                 <span className="text-xs text-white font-medium ml-3 drop-shadow-md relative z-10">
                                   {Math.round((ratingDistribution[star - 1] / getTotalReviews()) * 100)}%
                                 </span>
