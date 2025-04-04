@@ -40,7 +40,13 @@ export const getAllReviews = async (req, res) => {
     const skip = (page - 1) * limit;
     
     // Build query object for filtering
-    const query = { isApproved: true };
+    const query = {};
+    
+    // Only show approved reviews by default, unless includeAll is specified
+    // This allows admins to see unapproved reviews
+    if (req.query.includeAll !== 'true') {
+      query.isApproved = true;
+    }
     
     // Add rating filter if provided
     if (req.query.rating) {
@@ -195,6 +201,7 @@ export const deleteReview = async (req, res) => {
   try {
     const { reviewId } = req.params;
     const userId = req.user._id;
+    const userRole = req.user.userRole;
     
     const review = await Review.findById(reviewId);
     
@@ -202,8 +209,11 @@ export const deleteReview = async (req, res) => {
       return res.status(404).json({ message: 'Review not found' });
     }
     
-    // Check if user owns the review
-    if (review.userId.toString() !== userId.toString()) {
+    // Check if user owns the review or is an admin/king
+    const isAdminOrKing = userRole === 'admin' || userRole === 'king';
+    const isOwner = review.userId.toString() === userId.toString();
+    
+    if (!isOwner && !isAdminOrKing) {
       return res.status(403).json({ message: 'Unauthorized to delete this review' });
     }
     
@@ -371,6 +381,40 @@ export const getReviewStats = async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching review statistics:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Toggle review approval status (for admins)
+export const toggleReviewApproval = async (req, res) => {
+  try {
+    const { reviewId } = req.params;
+    const { isApproved } = req.body;
+    const userId = req.user._id;
+    const userRole = req.user.userRole;
+    
+    // Check if user is admin or king
+    if (userRole !== 'admin' && userRole !== 'king') {
+      return res.status(403).json({ message: 'Unauthorized to modify review approval status' });
+    }
+    
+    const review = await Review.findById(reviewId);
+    
+    if (!review) {
+      return res.status(404).json({ message: 'Review not found' });
+    }
+    
+    // Update the approval status
+    review.isApproved = isApproved;
+    await review.save();
+    
+    return res.status(200).json({
+      success: true,
+      data: review,
+      message: `Review ${isApproved ? 'approved' : 'unapproved'} successfully`
+    });
+  } catch (error) {
+    console.error('Error toggling review approval:', error);
     return res.status(500).json({ message: 'Internal server error' });
   }
 }; 

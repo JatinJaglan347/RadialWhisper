@@ -1232,7 +1232,7 @@ fetchPublicUserInfoRules: async () => {
   },
 
   // Function to get all reviews with pagination
-  fetchReviews: async (page = 1, limit = 5, rating = null, sortBy = null, searchQuery = null) => {
+  fetchReviews: async (page = 1, limit = 5, rating = null, sortBy = null, searchQuery = null, includeAll = false) => {
     set({ isLoadingReviews: true });
     try {
       // Build query params
@@ -1253,6 +1253,11 @@ fetchPublicUserInfoRules: async () => {
       // Add search query if present
       if (searchQuery && searchQuery.trim()) {
         queryParams.append('search', searchQuery.trim());
+      }
+      
+      // Add includeAll parameter for admin views
+      if (includeAll) {
+        queryParams.append('includeAll', 'true');
       }
       
       const url = `/api/v1/reviews?${queryParams.toString()}`;
@@ -1409,6 +1414,21 @@ fetchPublicUserInfoRules: async () => {
       console.error("❌ Error in deleteReview:", error);
       const errorMessage = error.response?.data?.message || "Failed to delete review";
       toast.error(errorMessage);
+    }
+  },
+
+  // Function to toggle review approval status (admin/king only)
+  toggleReviewApproval: async (reviewId, isApproved) => {
+    try {
+      const res = await axiosInstance.put(`/api/v1/reviews/${reviewId}/approval`, { isApproved });
+      console.log("✅ Review Approval Updated:", res.data);
+      toast.success(isApproved ? "Review approved successfully" : "Review unapproved successfully");
+      return res.data;
+    } catch (error) {
+      console.error("❌ Error in toggleReviewApproval:", error);
+      const errorMessage = error.response?.data?.message || "Failed to update review approval status";
+      toast.error(errorMessage);
+      throw error;
     }
   },
 

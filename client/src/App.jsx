@@ -40,6 +40,7 @@ import ManageBansPage from "./pages/ModerationPages/ManageBansPage.jsx";
 import ManageSuggestionsPage from "./pages/ModerationPages/ManageSuggestionsPage.jsx";
 import ManageContactsPage from "./pages/ModerationPages/ManageContactsPage.jsx";
 import ManageAdminsPage from "./pages/ModerationPages/ManageAdminsPage.jsx";
+import ManageReviewsPage from "./pages/ModerationPages/ManageReviewsPage.jsx";
 import PremiumPlan from "./pages/PremiumPlan.jsx";
 import LandingFooter from "./components/MainWebPage/LandingFooter.jsx";
 import FounderPage from "./pages/FounderPage.jsx";
@@ -410,6 +411,24 @@ function App() {
                       <Navigate to="/banned" />
                     ) : hasAdminAccess ? (
                       <ConfigRulesPage />
+                    ) : (
+                      <Navigate to="/" />
+                    )
+                  ) : (
+                    <Navigate to="/login" />
+                  )
+                }
+              />
+
+              {/* Reviews Management */}
+              <Route
+                path="reviews"
+                element={
+                  authUser ? (
+                    isUserBanned() ? (
+                      <Navigate to="/banned" />
+                    ) : hasAdminAccess ? (
+                      <ManageReviewsPage />
                     ) : (
                       <Navigate to="/" />
                     )

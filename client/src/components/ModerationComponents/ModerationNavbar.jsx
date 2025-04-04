@@ -13,7 +13,8 @@ import {
   LogOut,
   LayoutDashboard,
   Crown,
-  Skull
+  Skull,
+  Star
 } from 'lucide-react';
 import { useAuthStore } from "../../store/useAuthStore";
 
@@ -173,6 +174,13 @@ const ModerationNavbar = () => {
       label: 'Manage Suggestions',
       description: 'User feedback and ideas',
       roles: ['moderator', 'admin', 'king']
+    },
+    { 
+      path: '/op/reviews', 
+      icon: <Star size={20} />, 
+      label: 'Manage Reviews',
+      description: 'User ratings and comments',
+      roles: ['admin', 'king'] // Only admin and king can access
     },
     { 
       path: '/op/reports', 

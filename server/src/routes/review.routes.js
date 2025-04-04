@@ -8,7 +8,8 @@ import {
   markReviewHelpful,
   likeReview,
   getUserReviews,
-  getReviewStats
+  getReviewStats,
+  toggleReviewApproval
 } from '../controllers/review.controller.js';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
 
@@ -30,5 +31,6 @@ router.put('/:reviewId', verifyJWT, updateReview);
 router.delete('/:reviewId', verifyJWT, deleteReview);
 router.put('/:reviewId/helpful', verifyJWT, markReviewHelpful);
 router.put('/:reviewId/like', verifyJWT, likeReview);
+router.put('/:reviewId/approval', verifyJWT, toggleReviewApproval);
 
 export default router; 
