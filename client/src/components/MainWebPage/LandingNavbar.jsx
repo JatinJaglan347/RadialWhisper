@@ -74,6 +74,7 @@ const LandingNavbar = () => {
             <Link to="/" className="px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Home</Link>
             <Link to="/chat" className="px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Chat</Link>
             <Link to="/about" className="px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">About</Link>
+            <Link to="/reviews" className="px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Reviews</Link>
             <Link to="/suggestion" className="px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Suggestion</Link>
             <Link to="/contact" className="px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Contact</Link>
             
@@ -175,6 +176,7 @@ const LandingNavbar = () => {
             <Link to="/" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Home</Link>
             <Link to="/chat" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Chat</Link>
             <Link to="/about" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">About</Link>
+            <Link to="/reviews" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Reviews</Link>
             <Link to="/suggestion" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Suggestion</Link>
             <Link to="/contact" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Contact</Link>
             

@@ -1191,9 +1191,184 @@ fetchPublicUserInfoRules: async () => {
     }
   },
 
+  reviews: [], // Stores all reviews
+  isLoadingReviews: false,
+  singleReview: null,
 
-  
-  
+  // Function to create a review
+  createReview: async (data) => {
+    try {
+      const res = await axiosInstance.post('/api/v1/reviews', data);
+      console.log("✅ Review Created:", res.data);
+      toast.success("Review submitted successfully");
+      // Refresh reviews after submission
+      get().fetchReviews();
+      return res.data;
+    } catch (error) {
+      console.error("❌ Error in createReview:", error);
+      const errorMessage = error.response?.data?.message || "Failed to submit review";
+      toast.error(errorMessage);
+    }
+  },
+
+  // Function to get all reviews with pagination
+  fetchReviews: async (page = 1, limit = 5) => {
+    set({ isLoadingReviews: true });
+    try {
+      const res = await axiosInstance.get(`/api/v1/reviews?page=${page}&limit=${limit}`);
+      console.log("📌 Fetched Reviews:", res.data);
+      set({ 
+        reviews: res.data.data,
+        pagination: res.data.pagination
+      });
+      return res.data;
+    } catch (error) {
+      console.error("❌ Error in fetchReviews:", error);
+      toast.error("Failed to load reviews");
+    } finally {
+      set({ isLoadingReviews: false });
+    }
+  },
+
+  // Function to get reviews by the current user
+  fetchUserReviews: async () => {
+    const { authUser } = get();
+    if (!authUser?.data?.user?._id) {
+      toast.error("You must be logged in to view your reviews");
+      return { data: [] };
+    }
+
+    try {
+      const res = await axiosInstance.get('/api/v1/reviews/user');
+      console.log("📌 Fetched User Reviews:", res.data);
+      return res.data;
+    } catch (error) {
+      console.error("❌ Error in fetchUserReviews:", error);
+      toast.error("Failed to load your reviews");
+      return { data: [] };
+    }
+  },
+
+  // Function to get a review by ID
+  fetchReviewById: async (reviewId) => {
+    try {
+      const res = await axiosInstance.get(`/api/v1/reviews/${reviewId}`);
+      console.log("📌 Fetched Review:", res.data);
+      set({ singleReview: res.data.data });
+      return res.data;
+    } catch (error) {
+      console.error("❌ Error in fetchReviewById:", error);
+      toast.error("Failed to load review details");
+    }
+  },
+
+  // Function to like a review
+  likeReview: async (reviewId) => {
+    const { authUser, reviews } = get();
+    if (!authUser?.data?.user?._id) {
+      toast.error("You must be logged in to like a review");
+      return;
+    }
+
+    try {
+      const res = await axiosInstance.put(`/api/v1/reviews/${reviewId}/like`);
+      console.log("👍 Review Like Updated:", res.data);
+      
+      // Find the current review to preserve its user data
+      const currentReview = reviews.find(review => review._id === reviewId);
+      
+      // Update the review in state without fetching all reviews again
+      set((state) => {
+        const updatedReviews = state.reviews.map(review => {
+          if (review._id === reviewId) {
+            // Preserve user data when updating the review
+            return {
+              ...res.data.data,
+              userId: currentReview.userId // Keep the original user data
+            };
+          }
+          return review;
+        });
+        return { reviews: updatedReviews };
+      });
+      
+      toast.success(res.data.hasLiked ? "Review liked" : "Review unliked");
+      return res.data;
+    } catch (error) {
+      console.error("❌ Error in likeReview:", error);
+      toast.error("Failed to update like status");
+    }
+  },
+
+  // Function to mark a review as helpful
+  markReviewHelpful: async (reviewId) => {
+    const { authUser, reviews } = get();
+    if (!authUser?.data?.user?._id) {
+      toast.error("You must be logged in to mark a review as helpful");
+      return;
+    }
+
+    try {
+      const res = await axiosInstance.put(`/api/v1/reviews/${reviewId}/helpful`);
+      console.log("🌟 Review Marked Helpful:", res.data);
+      
+      // Find the current review to preserve its user data
+      const currentReview = reviews.find(review => review._id === reviewId);
+      
+      // Update the review in state without fetching all reviews again
+      set((state) => {
+        const updatedReviews = state.reviews.map(review => {
+          if (review._id === reviewId) {
+            // Preserve user data when updating the review
+            return {
+              ...res.data.data,
+              userId: currentReview.userId // Keep the original user data
+            };
+          }
+          return review;
+        });
+        return { reviews: updatedReviews };
+      });
+      
+      toast.success(res.data.hasMarked ? "Marked as helpful" : "Removed helpful mark");
+      return res.data;
+    } catch (error) {
+      console.error("❌ Error in markReviewHelpful:", error);
+      toast.error("Failed to update helpful status");
+    }
+  },
+
+  // Function to update a review
+  updateReview: async (reviewId, data) => {
+    try {
+      const res = await axiosInstance.put(`/api/v1/reviews/${reviewId}`, data);
+      console.log("✏️ Review Updated:", res.data);
+      toast.success("Review updated successfully");
+      // Refresh reviews after update
+      get().fetchReviews();
+      return res.data;
+    } catch (error) {
+      console.error("❌ Error in updateReview:", error);
+      const errorMessage = error.response?.data?.message || "Failed to update review";
+      toast.error(errorMessage);
+    }
+  },
+
+  // Function to delete a review
+  deleteReview: async (reviewId) => {
+    try {
+      const res = await axiosInstance.delete(`/api/v1/reviews/${reviewId}`);
+      console.log("🗑️ Review Deleted:", res.data);
+      toast.success("Review deleted successfully");
+      // Refresh reviews after deletion
+      get().fetchReviews();
+      return res.data;
+    } catch (error) {
+      console.error("❌ Error in deleteReview:", error);
+      const errorMessage = error.response?.data?.message || "Failed to delete review";
+      toast.error(errorMessage);
+    }
+  },
 
 }));
 

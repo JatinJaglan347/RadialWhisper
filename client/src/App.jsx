@@ -45,6 +45,8 @@ import LandingFooter from "./components/MainWebPage/LandingFooter.jsx";
 import FounderPage from "./pages/FounderPage.jsx";
 import BannedUserPage from "./pages/BannedUserPage.jsx";
 import LandingFeatures from "./pages/MainWebPage/LandingFeatures.jsx";
+import Reviews from "./pages/Reviews.jsx";
+import UserReviewsPage from "./pages/UserReviewsPage.jsx";
 
 function App() {
   const {
@@ -199,6 +201,13 @@ function App() {
             <Route path="/terms" element={<LandingTerms />} />
             <Route path="/privacy" element={<LandingPrivacy />} />
             <Route path="/features" element={<LandingFeatures/>} />
+            <Route path="/reviews" element={<Reviews />} />
+            <Route 
+              path="/my-reviews" 
+              element={
+                authUser ? <UserReviewsPage /> : <Navigate to="/login" />
+              } 
+            />
 
             {/* Authentication routes at root level */}
             <Route
