@@ -1194,6 +1194,8 @@ fetchPublicUserInfoRules: async () => {
   reviews: [], // Stores all reviews
   isLoadingReviews: false,
   singleReview: null,
+  reviewStats: null, // Add this for storing overall review statistics
+  isLoadingReviewStats: false, // Add this for tracking loading state
 
   // Function to create a review
   createReview: async (data) => {
@@ -1203,6 +1205,8 @@ fetchPublicUserInfoRules: async () => {
       toast.success("Review submitted successfully");
       // Refresh reviews after submission
       get().fetchReviews();
+      // Refresh review stats after submission
+      get().fetchReviewStats();
       return res.data;
     } catch (error) {
       console.error("❌ Error in createReview:", error);
@@ -1211,11 +1215,49 @@ fetchPublicUserInfoRules: async () => {
     }
   },
 
+  // Function to get overall review statistics
+  fetchReviewStats: async () => {
+    set({ isLoadingReviewStats: true });
+    try {
+      const res = await axiosInstance.get('/api/v1/reviews/stats');
+      console.log("📊 Fetched Review Stats:", res.data);
+      set({ reviewStats: res.data.data });
+      return res.data;
+    } catch (error) {
+      console.error("❌ Error in fetchReviewStats:", error);
+      toast.error("Failed to load review statistics");
+    } finally {
+      set({ isLoadingReviewStats: false });
+    }
+  },
+
   // Function to get all reviews with pagination
-  fetchReviews: async (page = 1, limit = 5) => {
+  fetchReviews: async (page = 1, limit = 5, rating = null, sortBy = null, searchQuery = null) => {
     set({ isLoadingReviews: true });
     try {
-      const res = await axiosInstance.get(`/api/v1/reviews?page=${page}&limit=${limit}`);
+      // Build query params
+      const queryParams = new URLSearchParams();
+      queryParams.append('page', page);
+      queryParams.append('limit', limit);
+      
+      // Add rating filter if present
+      if (rating) {
+        queryParams.append('rating', rating);
+      }
+      
+      // Add sort parameter if present
+      if (sortBy) {
+        queryParams.append('sort', sortBy);
+      }
+      
+      // Add search query if present
+      if (searchQuery && searchQuery.trim()) {
+        queryParams.append('search', searchQuery.trim());
+      }
+      
+      const url = `/api/v1/reviews?${queryParams.toString()}`;
+      const res = await axiosInstance.get(url);
+      
       console.log("📌 Fetched Reviews:", res.data);
       set({ 
         reviews: res.data.data,

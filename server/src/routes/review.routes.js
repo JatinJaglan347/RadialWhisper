@@ -7,7 +7,8 @@ import {
   deleteReview, 
   markReviewHelpful,
   likeReview,
-  getUserReviews
+  getUserReviews,
+  getReviewStats
 } from '../controllers/review.controller.js';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
 
@@ -15,6 +16,7 @@ const router = express.Router();
 
 // Public routes
 router.get('/', getAllReviews);
+router.get('/stats', getReviewStats);
 
 // Protected routes (require authentication)
 router.post('/', verifyJWT, createReview);

@@ -39,26 +39,80 @@ export const getAllReviews = async (req, res) => {
     const limit = parseInt(req.query.limit) || 5;
     const skip = (page - 1) * limit;
     
-    const totalReviews = await Review.countDocuments({ isApproved: true });
+    // Build query object for filtering
+    const query = { isApproved: true };
+    
+    // Add rating filter if provided
+    if (req.query.rating) {
+      query.rating = parseInt(req.query.rating);
+    }
+    
+    // Add search query if provided
+    if (req.query.search) {
+      const searchRegex = new RegExp(req.query.search, 'i');
+      query.$or = [
+        { content: searchRegex },
+        // Add more fields to search if needed
+      ];
+    }
+    
+    // Get total matching documents with the filters
+    const totalReviews = await Review.countDocuments(query);
     const totalPages = Math.ceil(totalReviews / limit);
     
-    const reviews = await Review.find({ isApproved: true })
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
+    // Build the query with sort options
+    let reviewsQuery = Review.find(query)
       .populate('userId', 'fullName profileImageURL')
-      .lean();
+      .skip(skip)
+      .limit(limit);
+    
+    // Add sorting if provided
+    if (req.query.sort) {
+      let sortOption = {};
+      
+      switch (req.query.sort) {
+        case 'newest':
+          sortOption = { createdAt: -1 };
+          break;
+        case 'oldest':
+          sortOption = { createdAt: 1 };
+          break;
+        case 'highest':
+          sortOption = { rating: -1 };
+          break;
+        case 'lowest':
+          sortOption = { rating: 1 };
+          break;
+        case 'mostLiked':
+          sortOption = { likes: -1 };
+          break;
+        case 'mostHelpful':
+          sortOption = { helpful: -1 };
+          break;
+        default:
+          sortOption = { createdAt: -1 }; // Default to newest
+      }
+      
+      reviewsQuery = reviewsQuery.sort(sortOption);
+    } else {
+      // Default sort by most recent
+      reviewsQuery = reviewsQuery.sort({ createdAt: -1 });
+    }
+    
+    // Execute query
+    const reviews = await reviewsQuery.lean();
     
     return res.status(200).json({
       success: true,
       data: reviews,
       pagination: {
-        totalReviews,
+        total: totalReviews,
         totalPages,
         currentPage: page,
         pageSize: limit,
         hasNext: page < totalPages,
-        hasPrev: page > 1
+        hasPrev: page > 1,
+        pages: totalPages
       }
     });
   } catch (error) {
@@ -279,6 +333,44 @@ export const getUserReviews = async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching user reviews:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// New function to get overall review statistics
+export const getReviewStats = async (req, res) => {
+  try {
+    // Get all reviews (only the necessary fields for stats)
+    const allReviews = await Review.find({ isApproved: true })
+      .select('rating likes helpful likedBy helpfulBy')
+      .lean();
+    
+    // Calculate overall rating
+    const totalRating = allReviews.reduce((sum, review) => sum + review.rating, 0);
+    const averageRating = allReviews.length > 0 ? (totalRating / allReviews.length).toFixed(1) : 0;
+    
+    // Calculate rating distribution
+    const ratingDistribution = [0, 0, 0, 0, 0]; // Index 0 = 1 star, Index 4 = 5 stars
+    allReviews.forEach(review => {
+      ratingDistribution[review.rating - 1]++;
+    });
+    
+    // Calculate total likes and helpful
+    const totalLikes = allReviews.reduce((sum, review) => sum + (review.likes || 0), 0);
+    const totalHelpful = allReviews.reduce((sum, review) => sum + (review.helpful || 0), 0);
+    
+    return res.status(200).json({
+      success: true,
+      data: {
+        totalReviews: allReviews.length,
+        averageRating,
+        ratingDistribution,
+        totalLikes,
+        totalHelpful
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching review statistics:', error);
     return res.status(500).json({ message: 'Internal server error' });
   }
 }; 
