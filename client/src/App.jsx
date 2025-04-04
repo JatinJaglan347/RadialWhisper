@@ -44,6 +44,7 @@ import PremiumPlan from "./pages/PremiumPlan.jsx";
 import LandingFooter from "./components/MainWebPage/LandingFooter.jsx";
 import FounderPage from "./pages/FounderPage.jsx";
 import BannedUserPage from "./pages/BannedUserPage.jsx";
+import LandingFeatures from "./pages/MainWebPage/LandingFeatures.jsx";
 
 function App() {
   const {
@@ -197,6 +198,7 @@ function App() {
             <Route path="/banned" element={<BannedUserPage />} />
             <Route path="/terms" element={<LandingTerms />} />
             <Route path="/privacy" element={<LandingPrivacy />} />
+            <Route path="/features" element={<LandingFeatures/>} />
 
             {/* Authentication routes at root level */}
             <Route
