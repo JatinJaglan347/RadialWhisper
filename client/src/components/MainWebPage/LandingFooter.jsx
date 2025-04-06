@@ -15,8 +15,10 @@ const LandingFooter = () => {
             <h3 className="text-lg font-bold mb-4 text-[#FFF6E0]">Navigation</h3>
             <ul className="space-y-2">
               <li><Link to="/" className="hover:text-[#FFF6E0] text-sm">Home</Link></li>
-              <li><Link to="/about" className="hover:text-[#FFF6E0] text-sm">About</Link></li>
+              <li><Link to="/how-it-works" className="hover:text-[#FFF6E0] text-sm">How It Works</Link></li>
               <li><Link to="/features" className="hover:text-[#FFF6E0] text-sm">Features</Link></li>
+              <li><Link to="/premium" className="hover:text-[#FFF6E0] text-sm">Premium</Link></li>
+              <li><Link to="/about" className="hover:text-[#FFF6E0] text-sm">About</Link></li>
               <li><Link to="/contact" className="hover:text-[#FFF6E0] text-sm">Contact</Link></li>
             </ul>
           </div>

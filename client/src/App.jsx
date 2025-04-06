@@ -22,6 +22,7 @@ import LandingContact from "./pages/MainWebPage/LandingContact.jsx";
 import LandingSuggestion from "./pages/MainWebPage/LandingSuggestion.jsx";
 import LandingTerms from "./pages/MainWebPage/LandingTerms.jsx";
 import LandingPrivacy from "./pages/MainWebPage/LandingPrivacy.jsx";
+import LandingHowItWorks from "./pages/MainWebPage/LandingHowItWorks.jsx";
 import DashboardPage from "./pages/ModerationPages/DashboardPage.jsx";
 // Admin Panel Pages (import placeholders - you'll need to create these)
 // import ManageUsersPage from './pages/ModerationPages/ManageUsersPage.jsx';
@@ -203,6 +204,7 @@ function App() {
             <Route path="/privacy" element={<LandingPrivacy />} />
             <Route path="/features" element={<LandingFeatures/>} />
             <Route path="/reviews" element={<Reviews />} />
+            <Route path="/how-it-works" element={<LandingHowItWorks />} />
 
             {/* Authentication routes at root level */}
             <Route

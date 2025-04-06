@@ -563,6 +563,14 @@ function SignUpPage() {
                     </span>
                   </div>
                 )}
+              
+              {/* Radius information notice */}
+              <div className="mt-2 p-2 bg-[#911B1C]/40 border-l-2 border-[#FFF6E0]/30 rounded-r-lg text-xs text-[#D8D9DA]/80 flex items-start">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5 text-[#FFF6E0]/70 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Your account will be set up with a default radius of 100m. You can adjust this range from your profile settings after signing up.</span>
+              </div>
             </div>
           </div>
 

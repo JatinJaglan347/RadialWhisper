@@ -1091,13 +1091,13 @@ function LandingHome() {
                 <p className="text-[#D8D9DA] leading-relaxed mb-6">
                   Join our exclusive beta testing program to get early access to new features and help shape the future of RadialWhisper with your feedback.
                 </p>
-                <Link
-                  to="/signup?beta=true"
-                  className="inline-flex items-center text-[#FFF6E0] hover:text-[#D8D9DA] transition-colors"
+                <div
+                 
+                  className="inline-flex items-center text-[#FFF6E0] hover:text-[#D8D9DA] transition-colors cursor-pointer"
                 >
-                  <span>Apply to join</span>
+                  <span>Coming soon!</span>
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                </Link>
+                </div>
               </div>
             </div>
             
@@ -1115,7 +1115,7 @@ function LandingHome() {
                   Connect with other users, share your experiences, suggest new features, and discuss how RadialWhisper has enhanced your social interactions.
                 </p>
                 <Link
-                  to="/community"
+                  to="/suggestion"
                   className="inline-flex items-center text-[#FFF6E0] hover:text-[#D8D9DA] transition-colors"
                 >
                   <span>Visit forums</span>
@@ -1138,7 +1138,7 @@ function LandingHome() {
                   Follow our development journey, contribute ideas, or explore how we're building RadialWhisper with a focus on privacy and genuine connections.
                 </p>
                 <a
-                  href="https://github.com/JatinJaglan347"
+                  href="https://github.com/JatinJaglan347/RadialWhisper"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center text-[#FFF6E0] hover:text-[#D8D9DA] transition-colors"

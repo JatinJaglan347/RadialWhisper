@@ -72,6 +72,9 @@ const LandingNavbar = () => {
           
           <div className="hidden md:flex items-center space-x-4">
             <Link to="/" className="px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Home</Link>
+            <Link to="/how-it-works" className="px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">How It Works</Link>
+            <Link to="/features" className="px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Features</Link>
+            <Link to="/premium" className="px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Premium</Link>
             <Link to="/chat" className="px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Chat</Link>
             <Link to="/about" className="px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">About</Link>
             <Link to="/reviews" className="px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Reviews</Link>
@@ -174,6 +177,9 @@ const LandingNavbar = () => {
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             <Link to="/" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Home</Link>
+            <Link to="/how-it-works" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">How It Works</Link>
+            <Link to="/features" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Features</Link>
+            <Link to="/premium" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Premium</Link>
             <Link to="/chat" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Chat</Link>
             <Link to="/about" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">About</Link>
             <Link to="/reviews" onClick={handleMenuItemClick} className="block px-3 py-2 rounded-md hover:bg-[#61677A] font-medium">Reviews</Link>
