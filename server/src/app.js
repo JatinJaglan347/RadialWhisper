@@ -33,6 +33,7 @@ import contact from './routes/contact.routes.js'
 import activityStatus from './routes/activityStatus.routes.js'
 import friend from './routes/friend.router.js'
 import reviewRouter from './routes/review.routes.js'
+import overlordRouter from './routes/overlord.routes.js'
 
 // Routes declaration
 app.use("/api/v1/user", userRouter);
@@ -45,6 +46,7 @@ app.use("/api/v1/suggestions", suggestionRouter);
 app.use("/api/v1/contact", contact);
 app.use("/api/v1/friend", friend);
 app.use("/api/v1/reviews", reviewRouter);
+app.use("/api/v1/overlord", overlordRouter);
 
 // Error handling middleware (place it here)
 app.use((err, req, res, next) => {

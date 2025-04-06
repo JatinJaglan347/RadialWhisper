@@ -1,0 +1,3217 @@
+{
+  "contacts": [
+    {
+      "_id": "67d6bc9a8d2f0ed84251058e",
+      "name": "test",
+      "email": "test@gmail.com",
+      "subject": "Promote me",
+      "message": "i want to become admin",
+      "isExistingUser": true,
+      "user": "67860cde14e86ce92b2b9cef",
+      "contactCompleted": false,
+      "createdAt": "2025-03-16T11:57:14.107Z",
+      "updatedAt": "2025-03-16T11:57:14.108Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d6bddc8d2f0ed8425105dc",
+      "name": "jatin",
+      "email": "okjatin@gmail.com",
+      "subject": "nothing",
+      "message": "nothing",
+      "isExistingUser": false,
+      "user": null,
+      "contactCompleted": false,
+      "createdAt": "2025-03-16T12:02:36.427Z",
+      "updatedAt": "2025-03-16T12:02:36.428Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e79cc7b87ded8dd0739ec1",
+      "name": "test",
+      "email": "test@gmail.com",
+      "subject": "Account Ban Appeal",
+      "message": "hello",
+      "isExistingUser": true,
+      "user": "67860cde14e86ce92b2b9cef",
+      "contactCompleted": false,
+      "createdAt": "2025-03-29T07:09:59.335Z",
+      "updatedAt": "2025-03-29T07:09:59.336Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ed0aa3d9f95e947767c075",
+      "name": "Kartik Arora",
+      "email": "kartik@gmail.com",
+      "subject": "Account Ban Appeal",
+      "message": "Sorry daddy",
+      "isExistingUser": true,
+      "user": "67ed094bd9f95e947767bb7e",
+      "contactCompleted": true,
+      "createdAt": "2025-04-02T10:00:03.447Z",
+      "updatedAt": "2025-04-02T10:00:03.449Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ed0c70d9f95e947767c708",
+      "name": "Kashish",
+      "email": "kashishbarthwal2874@gmail.com",
+      "subject": "Account Ban Appeal",
+      "message": "aae khol aacount mera",
+      "isExistingUser": true,
+      "user": "67ed0a24d9f95e947767be4e",
+      "contactCompleted": true,
+      "createdAt": "2025-04-02T10:07:44.361Z",
+      "updatedAt": "2025-04-02T10:07:44.362Z",
+      "__v": 0
+    }
+  ],
+  "userinforules": [
+    {
+      "_id": "679680b228a6613c223cf992",
+      "fullName": {
+        "minLength": 3,
+        "maxLength": 44
+      },
+      "password": {
+        "minCharLength": 8,
+        "requireUpperCase": true,
+        "requireNumber": true,
+        "requireSpecialChar": true
+      },
+      "genderList": [
+        {
+          "0": "Male",
+          "1": "Female",
+          "2": "Non-binary",
+          "3": "Genderfluid",
+          "4": "Agender",
+          "5": "Transgender",
+          "6": "Intersex",
+          "7": "Attack Helicopter",
+          "8": "Cloud",
+          "9": "Pussy(cat)",
+          "10": "The Internet",
+          "11": "Penguin in a Suit",
+          "12": "Cock(male chicken)",
+          "13": "Supercar",
+          "14": "Tank",
+          "15": "Pookie",
+          "16": "Mig-31",
+          "17": "usb cable 1m",
+          "18": "USB CABLE 1.5M",
+          "19": "Mario",
+          "20": "Jaat",
+          "21": "Jatt",
+          "22": "Bobarai"
+        }
+      ],
+      "dateOfBirth": {
+        "minAge": 18,
+        "maxAge": 100
+      },
+      "bio": {
+        "options": [
+          "Adventurous",
+          "Bookworm",
+          "Foodie",
+          "Fitness Enthusiast",
+          "Tech Geek",
+          "Music Lover",
+          "Travel Junkie",
+          "Nature Lover",
+          "Pet Friendly",
+          "Night Owl",
+          "Early Bird",
+          "Movie Buff",
+          "Art Enthusiast",
+          "gamer",
+          "Artist"
+        ],
+        "selectionLimit": 6
+      },
+      "locationRadiusPreference": {
+        "minLength": 50,
+        "maxLength": 1200
+      },
+      "__v": 0
+    }
+  ],
+  "reviews": [
+    {
+      "_id": "67efa66db9fdae0363cf6f28",
+      "userId": "67860cde14e86ce92b2b9cef",
+      "rating": 5,
+      "content": "Nice app too good",
+      "likes": 2,
+      "likedBy": [
+        "67860d4114e86ce92b2b9d00",
+        "67860cde14e86ce92b2b9cef"
+      ],
+      "helpful": 0,
+      "helpfulBy": [],
+      "isApproved": true,
+      "createdAt": "2025-04-04T09:29:17.282Z",
+      "updatedAt": "2025-04-04T18:50:01.917Z",
+      "__v": 8
+    },
+    {
+      "_id": "67efa6b8b9fdae0363cf7212",
+      "userId": "67860d4114e86ce92b2b9d00",
+      "rating": 5,
+      "content": "greate app",
+      "likes": 0,
+      "likedBy": [],
+      "helpful": 0,
+      "helpfulBy": [],
+      "isApproved": true,
+      "createdAt": "2025-04-04T09:30:32.905Z",
+      "updatedAt": "2025-04-04T18:50:01.907Z",
+      "__v": 12
+    },
+    {
+      "_id": "67efafafb9fdae0363cf7628",
+      "userId": "67860cde14e86ce92b2b9cef",
+      "rating": 5,
+      "content": "jhgfjhg\nhg\n'hgj\nghgj",
+      "likes": 0,
+      "likedBy": [],
+      "helpful": 0,
+      "helpfulBy": [],
+      "isApproved": true,
+      "createdAt": "2025-04-04T10:08:47.269Z",
+      "updatedAt": "2025-04-04T18:50:03.400Z",
+      "__v": 0
+    },
+    {
+      "_id": "67efafb7b9fdae0363cf763c",
+      "userId": "67860cde14e86ce92b2b9cef",
+      "rating": 4,
+      "content": "fasfdasdfasdfas asfd asfd",
+      "likes": 0,
+      "likedBy": [],
+      "helpful": 0,
+      "helpfulBy": [],
+      "isApproved": true,
+      "createdAt": "2025-04-04T10:08:55.883Z",
+      "updatedAt": "2025-04-04T18:50:01.752Z",
+      "__v": 0
+    },
+    {
+      "_id": "67efafc4b9fdae0363cf7678",
+      "userId": "67860cde14e86ce92b2b9cef",
+      "rating": 5,
+      "content": "asf asf asdfaxadsfas casd",
+      "likes": 0,
+      "likedBy": [],
+      "helpful": 0,
+      "helpfulBy": [],
+      "isApproved": true,
+      "createdAt": "2025-04-04T10:09:08.438Z",
+      "updatedAt": "2025-04-04T18:50:03.399Z",
+      "__v": 0
+    },
+    {
+      "_id": "67efafcfb9fdae0363cf7691",
+      "userId": "67860d4114e86ce92b2b9d00",
+      "rating": 4,
+      "content": "asdfa sdfasa sdfasdfasdf",
+      "likes": 0,
+      "likedBy": [],
+      "helpful": 0,
+      "helpfulBy": [],
+      "isApproved": true,
+      "createdAt": "2025-04-04T10:09:19.807Z",
+      "updatedAt": "2025-04-04T18:50:01.698Z",
+      "__v": 0
+    },
+    {
+      "_id": "67efafd7b9fdae0363cf76aa",
+      "userId": "67860d4114e86ce92b2b9d00",
+      "rating": 4,
+      "content": "asdfasxcasdfasdcawdfgsdf",
+      "likes": 0,
+      "likedBy": [],
+      "helpful": 0,
+      "helpfulBy": [],
+      "isApproved": true,
+      "createdAt": "2025-04-04T10:09:27.298Z",
+      "updatedAt": "2025-04-04T18:50:01.703Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f1873051d8101ebc7b4836",
+      "userId": "67860cde14e86ce92b2b9cef",
+      "rating": 4,
+      "content": "hello hkjhkj kjhkj kjhk hk",
+      "likes": 0,
+      "likedBy": [],
+      "helpful": 0,
+      "helpfulBy": [],
+      "isApproved": true,
+      "createdAt": "2025-04-05T19:40:32.223Z",
+      "updatedAt": "2025-04-05T19:40:32.223Z",
+      "__v": 0
+    }
+  ],
+  "users": [
+    {
+      "_id": "67860cde14e86ce92b2b9cef",
+      "fullName": "test123",
+      "email": "test@gmail.com",
+      "password": "$2b$10$cg4Y3k3yMXZPo2bhpPhFIOuyFFRVUgxoVnJS.Kbv5p4dtFBuaSiLe",
+      "gender": "Male",
+      "dateOfBirth": "2025-01-14T00:00:00.000Z",
+      "uniqueTag": "4N12D9",
+      "bio": [
+        "Adventurous",
+        "Fitness Enthusiast",
+        "Nature Lover",
+        "Gamer"
+      ],
+      "currentLocation": {
+        "type": "Point",
+        "coordinates": [
+          76.8293460645663,
+          30.73316004456346
+        ]
+      },
+      "previousLocation": {
+        "type": "Point",
+        "coordinates": [
+          76.82946253797382,
+          30.73308211010755
+        ]
+      },
+      "userRole": "king",
+      "onscreen": {
+        "current": false
+      },
+      "banned": {
+        "current": {
+          "status": false,
+          "reason": "Unbanned",
+          "actionBy": "65b9e2b0c5d4b6a1f2e8a3d8",
+          "date": "2025-02-13T09:44:01.986Z"
+        },
+        "history": [
+          {
+            "status": true,
+            "reason": "Violation of terms",
+            "actionBy": "65b9e2b0c5d4b6a1f2e8a3d9",
+            "date": "2025-02-13T09:34:30.919Z",
+            "_id": "67adbca638717a7ed4d82c9e"
+          },
+          {
+            "status": true,
+            "reason": "Behaviour sus",
+            "actionBy": "65b9e2b0c5d4b6a1f2e8a3d8",
+            "date": "2025-02-13T09:43:01.374Z",
+            "_id": "67adbea538717a7ed4d82ca3"
+          },
+          {
+            "status": false,
+            "reason": "Unbanned",
+            "actionBy": "65b9e2b0c5d4b6a1f2e8a3d8",
+            "date": "2025-02-13T09:44:01.986Z",
+            "_id": "67adbee138717a7ed4d82caa"
+          }
+        ]
+      },
+      "profileImageURL": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=30.73308211010755-76.82946253797382",
+      "locationRadiusPreference": 100,
+      "locationUpdatedAt": "2025-04-06T09:44:50.133Z",
+      "friendList": [
+        {
+          "friendId": "67ed094bd9f95e947767bb7e",
+          "since": "2025-04-02T09:55:05.128Z",
+          "_id": "67ed0979d9f95e947767bc79"
+        },
+        {
+          "friendId": "67ed0a24d9f95e947767be4e",
+          "since": "2025-04-02T10:14:32.500Z",
+          "_id": "67ed0e08d9f95e947767cd90"
+        },
+        {
+          "friendId": "67860d4114e86ce92b2b9d00",
+          "since": "2025-04-03T10:14:09.558Z",
+          "_id": "67ee5f717e0c9c0d64a8d3ce"
+        }
+      ],
+      "friendRequests": [],
+      "createdAt": "2025-01-14T07:06:06.529Z",
+      "updatedAt": "2025-04-06T08:21:08.561Z",
+      "__v": 148,
+      "activeStatus": {
+        "isActive": false,
+        "lastActive": "2025-04-06T09:03:14.896Z"
+      },
+      "friendRequestsSent": [
+        {
+          "receiverId": "67860d4114e86ce92b2b9d00",
+          "status": "accepted",
+          "createdAt": "2025-04-02T17:58:51.976Z",
+          "_id": "67ed7adbae319790fbf86bfd"
+        },
+        {
+          "receiverId": "67c5f0f05ecd52abcf3fb59c",
+          "status": "rejected",
+          "createdAt": "2025-04-03T09:28:58.341Z",
+          "_id": "67ee54da7e0c9c0d64a891a3"
+        },
+        {
+          "receiverId": "67c5f0f05ecd52abcf3fb59c",
+          "status": "rejected",
+          "createdAt": "2025-04-03T09:50:23.687Z",
+          "_id": "67ee59df7e0c9c0d64a8a970"
+        },
+        {
+          "receiverId": "67c5f0f05ecd52abcf3fb59c",
+          "status": "accepted",
+          "createdAt": "2025-04-03T12:25:53.914Z",
+          "_id": "67ee7e5129b5122e157a7e54"
+        }
+      ],
+      "tokenVersion": 16,
+      "activeSessions": [
+        {
+          "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Nzg2MGNkZTE0ZTg2Y2U5MmIyYjljZWYiLCJ0b2tlblZlcnNpb24iOjE2LCJpYXQiOjE3NDM5MjkxNDUsImV4cCI6MTc0NTY1NzE0NX0.gN3zrIOHVp_0bxqFYDX7NzdSFbqObPuoSTW1mvdkXQY",
+          "deviceInfo": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+          "ip": "::1",
+          "lastActive": "2025-04-06T08:45:45.548Z",
+          "issuedAt": "2025-04-06T08:45:45.548Z",
+          "_id": "67f23f399625b1e701beb879"
+        }
+      ],
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Nzg2MGNkZTE0ZTg2Y2U5MmIyYjljZWYiLCJ0b2tlblZlcnNpb24iOjE2LCJpYXQiOjE3NDM5MjkxNDUsImV4cCI6MTc0NTY1NzE0NX0.gN3zrIOHVp_0bxqFYDX7NzdSFbqObPuoSTW1mvdkXQY",
+      "autoGenProfileImageURL": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=30.73316004456346-76.8293460645663"
+    },
+    {
+      "_id": "67860d4114e86ce92b2b9d00",
+      "fullName": "test1",
+      "email": "test1@gmail.com",
+      "password": "$2b$10$fk2zDJK1LT0PeEGn3Y7fQe2FvWqI7EXJVIJC1NwQf74x4vAp.nCAm",
+      "gender": "Transgender",
+      "dateOfBirth": "2025-01-14T00:00:00.000Z",
+      "uniqueTag": "KHPR24",
+      "bio": [
+        "Adventurous",
+        "Fitness Enthusiast",
+        "Tech Geek",
+        "Nature Lover"
+      ],
+      "currentLocation": {
+        "type": "Point",
+        "coordinates": [
+          76.82944291756633,
+          30.73303596472306
+        ]
+      },
+      "previousLocation": {
+        "type": "Point",
+        "coordinates": [
+          76.82929274442961,
+          30.732847461083615
+        ]
+      },
+      "userRole": "admin",
+      "onscreen": {
+        "current": false
+      },
+      "banned": {
+        "current": {
+          "status": false,
+          "reason": "Unbanned",
+          "actionBy": null,
+          "date": "2025-03-30T06:10:54.511Z"
+        },
+        "history": [
+          {
+            "status": true,
+            "reason": "nothing",
+            "actionBy": "65b9e2b0c5d4b6a1f2e8a3d8",
+            "date": "2025-03-15T20:25:32.418Z",
+            "_id": "67d5e23c1b7945f145c68816"
+          },
+          {
+            "status": false,
+            "reason": "Unbanned",
+            "actionBy": "65b9e2b0c5d4b6a1f2e8a3d8",
+            "date": "2025-03-15T20:26:01.634Z",
+            "_id": "67d5e2591b7945f145c6881c"
+          },
+          {
+            "status": true,
+            "reason": "testing ",
+            "actionBy": null,
+            "date": "2025-03-29T07:15:50.607Z",
+            "_id": "67e79e26b87ded8dd0739f30"
+          },
+          {
+            "status": false,
+            "reason": "Unbanned",
+            "actionBy": null,
+            "date": "2025-03-29T07:38:50.149Z",
+            "_id": "67e7a38ab87ded8dd073d7d3"
+          },
+          {
+            "status": true,
+            "reason": "jjh",
+            "actionBy": null,
+            "date": "2025-03-29T07:39:07.039Z",
+            "_id": "67e7a39bb87ded8dd073d7ff"
+          },
+          {
+            "status": false,
+            "reason": "Unbanned",
+            "actionBy": null,
+            "date": "2025-03-29T07:39:21.909Z",
+            "_id": "67e7a3a9b87ded8dd073d85b"
+          },
+          {
+            "status": true,
+            "reason": "jkjkj",
+            "actionBy": null,
+            "date": "2025-03-29T07:40:26.162Z",
+            "_id": "67e7a3eab87ded8dd073d9c0"
+          },
+          {
+            "status": false,
+            "reason": "Unbanned",
+            "actionBy": null,
+            "date": "2025-03-29T07:41:33.056Z",
+            "_id": "67e7a42db87ded8dd073da1b"
+          },
+          {
+            "status": true,
+            "reason": "njnjkjk",
+            "actionBy": null,
+            "date": "2025-03-29T07:46:15.470Z",
+            "_id": "67e7a547b87ded8dd073dc97"
+          },
+          {
+            "status": false,
+            "reason": "Unbanned",
+            "actionBy": null,
+            "date": "2025-03-30T05:01:07.640Z",
+            "_id": "67e8d0137b8ba8814e82ca88"
+          },
+          {
+            "status": true,
+            "reason": "jhvjk",
+            "actionBy": null,
+            "date": "2025-03-30T06:10:39.817Z",
+            "_id": "67e8e05f8d2ceeb25a42c856"
+          },
+          {
+            "status": false,
+            "reason": "Unbanned",
+            "actionBy": null,
+            "date": "2025-03-30T06:10:54.511Z",
+            "_id": "67e8e06e8d2ceeb25a42c8ce"
+          }
+        ]
+      },
+      "profileImageURL": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=30.73303596472306-76.82944291756633",
+      "locationRadiusPreference": 100,
+      "locationUpdatedAt": "2025-04-06T08:22:01.179Z",
+      "friendList": [
+        {
+          "friendId": "67860cde14e86ce92b2b9cef",
+          "since": "2025-04-03T10:14:09.702Z",
+          "_id": "67ee5f717e0c9c0d64a8d3e0"
+        }
+      ],
+      "friendRequests": [],
+      "createdAt": "2025-01-14T07:07:45.639Z",
+      "updatedAt": "2025-01-14T07:07:45.711Z",
+      "__v": 94,
+      "activeStatus": {
+        "isActive": false,
+        "lastActive": "2025-04-06T08:22:01.333Z"
+      },
+      "friendRequestsSent": [
+        {
+          "receiverId": "67c5f0f05ecd52abcf3fb59c",
+          "status": "rejected",
+          "createdAt": "2025-04-03T09:36:17.763Z",
+          "_id": "67ee56917e0c9c0d64a89b86"
+        },
+        {
+          "receiverId": "67860cde14e86ce92b2b9cef",
+          "status": "accepted",
+          "createdAt": "2025-04-03T10:14:01.876Z",
+          "_id": "67ee5f697e0c9c0d64a8d385"
+        }
+      ],
+      "activeSessions": [],
+      "tokenVersion": 7,
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Nzg2MGQ0MTE0ZTg2Y2U5MmIyYjlkMDAiLCJ0b2tlblZlcnNpb24iOjcsImlhdCI6MTc0MzkyNTQ4OSwiZXhwIjoxNzQ1NjUzNDg5fQ.BWjIcG4BrWhbHoeDsWY5cI-5Q57A-iK6QnkvQlKAWGE"
+    },
+    {
+      "_id": "67c5f091576c349f736412d2",
+      "fullName": "test2",
+      "email": "test2@gmail.com",
+      "password": "$2b$10$reZON5e.Z3kuCYkpfF9Vy.MY2NtRBqbtg6RvRYF5DER41QlKBPReu",
+      "gender": "Agender",
+      "dateOfBirth": "2025-03-19T00:00:00.000Z",
+      "uniqueTag": "NZ2LSA",
+      "bio": [
+        "Foodie",
+        "Tech Geek"
+      ],
+      "currentLocation": {
+        "type": "Point",
+        "coordinates": [
+          76.8294150566748,
+          30.73304100547926
+        ]
+      },
+      "previousLocation": {
+        "type": "Point",
+        "coordinates": [
+          76.82928077119819,
+          30.733119099056356
+        ]
+      },
+      "userRole": "moderator",
+      "onscreen": {
+        "current": false
+      },
+      "banned": {
+        "current": {
+          "status": false,
+          "reason": "Unbanned",
+          "actionBy": null,
+          "date": "2025-03-17T03:49:28.018Z"
+        },
+        "history": [
+          {
+            "status": true,
+            "reason": "nothing",
+            "actionBy": "65b9e2b0c5d4b6a1f2e8a3d8",
+            "date": "2025-03-15T20:18:08.831Z",
+            "_id": "67d5e0808b9e0e74829dd927"
+          },
+          {
+            "status": false,
+            "reason": "Unbanned",
+            "actionBy": "65b9e2b0c5d4b6a1f2e8a3d8",
+            "date": "2025-03-15T20:18:20.489Z",
+            "_id": "67d5e08c8b9e0e74829dd93b"
+          },
+          {
+            "status": true,
+            "reason": "fuck you ",
+            "actionBy": null,
+            "date": "2025-03-17T03:49:15.599Z",
+            "_id": "67d79bbb56eb748c68fb243c"
+          },
+          {
+            "status": false,
+            "reason": "Unbanned",
+            "actionBy": null,
+            "date": "2025-03-17T03:49:28.018Z",
+            "_id": "67d79bc856eb748c68fb2446"
+          }
+        ]
+      },
+      "profileImageURL": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=30.73304100547926-76.8294150566748",
+      "locationRadiusPreference": 100,
+      "locationUpdatedAt": "2025-03-28T10:50:53.804Z",
+      "friendList": [],
+      "friendRequests": [],
+      "createdAt": "2025-03-03T18:10:25.300Z",
+      "updatedAt": "2025-03-03T18:10:25.373Z",
+      "__v": 4,
+      "activeStatus": {
+        "isActive": false,
+        "lastActive": "2025-03-28T10:51:31.023Z"
+      },
+      "friendRequestsSent": [],
+      "activeSessions": [],
+      "tokenVersion": 1
+    },
+    {
+      "_id": "67c5f0f05ecd52abcf3fb59c",
+      "fullName": "jatin",
+      "email": "jatin@gmail.com",
+      "password": "$2b$10$mbmS7Fqz0kqub4x/L8nSa.zdoPKLfTg8cf6TnFZM89WWiYvJ/Jkf2",
+      "gender": "Agender",
+      "dateOfBirth": "2025-03-02T00:00:00.000Z",
+      "uniqueTag": "KSPCBD",
+      "bio": [
+        "Adventurous",
+        "Fitness Enthusiast",
+        "Travel Junkie"
+      ],
+      "currentLocation": {
+        "type": "Point",
+        "coordinates": [
+          76.82922526798238,
+          30.73302778663011
+        ]
+      },
+      "previousLocation": {
+        "type": "Point",
+        "coordinates": [
+          76.82922526798791,
+          30.7330277866245
+        ]
+      },
+      "userRole": "normalUser",
+      "onscreen": {
+        "current": false
+      },
+      "banned": {
+        "current": {
+          "status": false,
+          "reason": ""
+        },
+        "history": []
+      },
+      "profileImageURL": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=30.73302778663011-76.82922526798238",
+      "locationRadiusPreference": 500,
+      "locationUpdatedAt": "2025-04-04T20:53:41.270Z",
+      "friendList": [],
+      "friendRequests": [],
+      "createdAt": "2025-03-03T18:12:00.720Z",
+      "updatedAt": "2025-04-03T09:53:31.573Z",
+      "__v": 70,
+      "activeStatus": {
+        "isActive": false,
+        "lastActive": "2025-04-04T21:03:03.932Z"
+      },
+      "friendRequestsSent": [
+        {
+          "receiverId": "67860d4114e86ce92b2b9d00",
+          "status": "rejected",
+          "createdAt": "2025-04-03T09:07:41.968Z",
+          "_id": "67ee4fddd109c908d9560cf8"
+        },
+        {
+          "receiverId": "67860d4114e86ce92b2b9d00",
+          "status": "rejected",
+          "createdAt": "2025-04-03T09:31:52.273Z",
+          "_id": "67ee55887e0c9c0d64a896b0"
+        },
+        {
+          "receiverId": "67860d4114e86ce92b2b9d00",
+          "status": "accepted",
+          "createdAt": "2025-04-03T09:33:12.350Z",
+          "_id": "67ee55d87e0c9c0d64a89815"
+        }
+      ],
+      "activeSessions": [],
+      "tokenVersion": 4
+    },
+    {
+      "_id": "67ed094bd9f95e947767bb7e",
+      "fullName": "Kartik Arora",
+      "email": "kartik@gmail.com",
+      "password": "$2b$10$.7UtvijL2EdE6fxchaP1Ee7Sa1kK1HOUsRStSG0dUkPGQFd1zB6kK",
+      "gender": "Male",
+      "dateOfBirth": "2003-07-28T00:00:00.000Z",
+      "uniqueTag": "EZRAQH",
+      "bio": [
+        "Adventurous",
+        "Travel Junkie"
+      ],
+      "currentLocation": {
+        "type": "Point",
+        "coordinates": [
+          76.66028780534569,
+          30.51632193557979
+        ]
+      },
+      "previousLocation": {
+        "type": "Point",
+        "coordinates": [
+          76.66026926015343,
+          30.51630355505285
+        ]
+      },
+      "userRole": "admin",
+      "activeStatus": {
+        "isActive": false,
+        "lastActive": "2025-04-02T10:18:15.406Z"
+      },
+      "banned": {
+        "current": {
+          "status": false,
+          "reason": "Unbanned",
+          "actionBy": null,
+          "date": "2025-04-02T10:00:18.903Z"
+        },
+        "history": [
+          {
+            "status": true,
+            "reason": "fuck you bitch \n",
+            "actionBy": null,
+            "date": "2025-04-02T09:58:38.526Z",
+            "_id": "67ed0a4ed9f95e947767bef0"
+          },
+          {
+            "status": false,
+            "reason": "Unbanned",
+            "actionBy": null,
+            "date": "2025-04-02T10:00:18.903Z",
+            "_id": "67ed0ab2d9f95e947767c09f"
+          }
+        ]
+      },
+      "profileImageURL": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=30.51632193557979-76.66028780534569",
+      "locationRadiusPreference": 100,
+      "locationUpdatedAt": "2025-04-02T10:15:30.360Z",
+      "friendList": [
+        {
+          "friendId": "67860cde14e86ce92b2b9cef",
+          "since": "2025-04-02T09:55:05.275Z",
+          "_id": "67ed0979d9f95e947767bc7d"
+        },
+        {
+          "friendId": "67ed09bbd9f95e947767bcef",
+          "since": "2025-04-02T10:15:36.458Z",
+          "_id": "67ed0e48d9f95e947767cee1"
+        }
+      ],
+      "friendRequests": [],
+      "friendRequestsSent": [
+        {
+          "receiverId": "67860cde14e86ce92b2b9cef",
+          "status": "accepted",
+          "createdAt": "2025-04-02T09:54:56.769Z",
+          "_id": "67ed0970d9f95e947767bc5b"
+        },
+        {
+          "receiverId": "67ed09bbd9f95e947767bcef",
+          "status": "pending",
+          "createdAt": "2025-04-02T10:05:23.422Z",
+          "_id": "67ed0be3d9f95e947767c46e"
+        }
+      ],
+      "createdAt": "2025-04-02T09:54:19.737Z",
+      "updatedAt": "2025-04-02T09:54:19.807Z",
+      "__v": 5,
+      "activeSessions": [],
+      "tokenVersion": 1
+    },
+    {
+      "_id": "67ed09bbd9f95e947767bcef",
+      "fullName": "Joel Matthew",
+      "email": "joel465.be22@chitkara.edu.in",
+      "password": "$2b$10$4mrHIYm9aV/C.mnGPoyocenPv2h4hyF/C.yo87MQCJQede832V6u.",
+      "gender": "Male",
+      "dateOfBirth": "2004-07-29T00:00:00.000Z",
+      "uniqueTag": "0PM94R",
+      "bio": [
+        "Adventurous",
+        "Bookworm",
+        "Foodie",
+        "Fitness Enthusiast",
+        "Tech Geek",
+        "Night Owl"
+      ],
+      "currentLocation": {
+        "type": "Point",
+        "coordinates": [
+          76.6605028,
+          30.5161951
+        ]
+      },
+      "previousLocation": {
+        "coordinates": []
+      },
+      "userRole": "normalUser",
+      "activeStatus": {
+        "isActive": false,
+        "lastActive": "2025-04-02T09:59:02.112Z"
+      },
+      "banned": {
+        "current": {
+          "status": false,
+          "reason": ""
+        },
+        "history": []
+      },
+      "profileImageURL": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=91.79518538766185",
+      "locationRadiusPreference": 100,
+      "locationUpdatedAt": "2025-04-02T09:56:11.932Z",
+      "friendList": [
+        {
+          "friendId": "67ed094bd9f95e947767bb7e",
+          "since": "2025-04-02T10:15:36.624Z",
+          "_id": "67ed0e48d9f95e947767cee7"
+        }
+      ],
+      "friendRequests": [
+        {
+          "userId": "67ed094bd9f95e947767bb7e",
+          "status": "pending",
+          "createdAt": "2025-04-02T10:05:23.302Z",
+          "_id": "67ed0be3d9f95e947767c46c"
+        }
+      ],
+      "friendRequestsSent": [
+        {
+          "receiverId": "67c5f0f05ecd52abcf3fb59c",
+          "status": "rejected",
+          "createdAt": "2025-04-02T09:57:05.654Z",
+          "_id": "67ed09f1d9f95e947767bd97"
+        },
+        {
+          "receiverId": "67ed094bd9f95e947767bb7e",
+          "status": "accepted",
+          "createdAt": "2025-04-02T09:57:21.973Z",
+          "_id": "67ed0a01d9f95e947767bdf3"
+        }
+      ],
+      "createdAt": "2025-04-02T09:56:11.932Z",
+      "updatedAt": "2025-04-02T09:56:12.000Z",
+      "__v": 5,
+      "activeSessions": [],
+      "tokenVersion": 1
+    },
+    {
+      "_id": "67ed0a24d9f95e947767be4e",
+      "fullName": "Kashish",
+      "email": "kashishbarthwal2874@gmail.com",
+      "password": "$2b$10$H4Azh1cUW5/8LkozsyFUL.TqszXk49u4G8ku6G.kiOyPFOKpQlmbO",
+      "gender": "Female",
+      "dateOfBirth": "2004-07-28T00:00:00.000Z",
+      "uniqueTag": "J2GC8K",
+      "bio": [
+        "Music Lover",
+        "Travel Junkie",
+        "Nature Lover"
+      ],
+      "currentLocation": {
+        "type": "Point",
+        "coordinates": [
+          76.6528112,
+          30.5145926
+        ]
+      },
+      "previousLocation": {
+        "type": "Point",
+        "coordinates": [
+          76.6605233,
+          30.5162187
+        ]
+      },
+      "userRole": "moderator",
+      "activeStatus": {
+        "isActive": false,
+        "lastActive": "2025-04-02T10:17:51.145Z"
+      },
+      "banned": {
+        "current": {
+          "status": false,
+          "reason": "Unbanned",
+          "actionBy": null,
+          "date": "2025-04-02T10:09:46.304Z"
+        },
+        "history": [
+          {
+            "status": true,
+            "reason": "joel",
+            "actionBy": null,
+            "date": "2025-04-02T10:07:06.367Z",
+            "_id": "67ed0c4ad9f95e947767c6cb"
+          },
+          {
+            "status": false,
+            "reason": "Unbanned",
+            "actionBy": null,
+            "date": "2025-04-02T10:09:46.304Z",
+            "_id": "67ed0cead9f95e947767c75a"
+          }
+        ]
+      },
+      "profileImageURL": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=30.5145926-76.6528112",
+      "locationRadiusPreference": 100,
+      "locationUpdatedAt": "2025-04-02T10:14:19.403Z",
+      "friendList": [
+        {
+          "friendId": "67860cde14e86ce92b2b9cef",
+          "since": "2025-04-02T10:14:33.251Z",
+          "_id": "67ed0e09d9f95e947767cd97"
+        }
+      ],
+      "friendRequests": [],
+      "friendRequestsSent": [
+        {
+          "receiverId": "67860cde14e86ce92b2b9cef",
+          "status": "accepted",
+          "createdAt": "2025-04-02T10:12:51.316Z",
+          "_id": "67ed0da3d9f95e947767cb10"
+        }
+      ],
+      "createdAt": "2025-04-02T09:57:56.865Z",
+      "updatedAt": "2025-04-02T09:57:56.930Z",
+      "__v": 2,
+      "activeSessions": [],
+      "tokenVersion": 1
+    },
+    {
+      "_id": "67ee8875bd5b736a93b896bb",
+      "fullName": "Jatin Jaglan",
+      "email": "jaglan@gmail.com",
+      "password": "$2b$10$Oekv0b16USdHx9V.CZWVweMR.FU18RlNHdPUCu.mFic.UbW7Ivw3.",
+      "gender": "Female",
+      "dateOfBirth": "2004-07-03T00:00:00.000Z",
+      "uniqueTag": "VLREBG",
+      "bio": [
+        "Adventurous",
+        "Music Lover",
+        "Travel Junkie",
+        "Art Enthusiast",
+        "Nature Lover",
+        "Pet Friendly"
+      ],
+      "currentLocation": {
+        "type": "Point",
+        "coordinates": [
+          76.82937871673026,
+          30.733201894108248
+        ]
+      },
+      "previousLocation": {
+        "type": "Point",
+        "coordinates": [
+          76.82948830291797,
+          30.73309889322255
+        ]
+      },
+      "userRole": "normalUser",
+      "activeStatus": {
+        "isActive": false,
+        "lastActive": "2025-04-03T17:04:19.872Z"
+      },
+      "banned": {
+        "current": {
+          "status": false,
+          "reason": ""
+        },
+        "history": []
+      },
+      "tokenVersion": 1,
+      "profileImageURL": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=30.733201894108248-76.82937871673026",
+      "locationRadiusPreference": 100,
+      "locationUpdatedAt": "2025-04-03T13:25:32.734Z",
+      "friendList": [],
+      "friendRequests": [],
+      "friendRequestsSent": [],
+      "createdAt": "2025-04-03T13:09:09.909Z",
+      "activeSessions": [],
+      "updatedAt": "2025-04-03T13:09:09.978Z",
+      "__v": 1
+    },
+    {
+      "_id": "67f239ee5b070f10e7df5ae9",
+      "fullName": "Jatin Jaglan",
+      "email": "jatinjaglan@gmail.com",
+      "password": "$2b$10$QhFVLLTb5iSgaB6px0CK3.LA00cT/qaifWaNaYnhrs27paBU8v9Xi",
+      "gender": "The Internet",
+      "dateOfBirth": "2004-07-03T00:00:00.000Z",
+      "uniqueTag": "3C8JYO",
+      "bio": [
+        "Travel Junkie",
+        "Movie Buff",
+        "Art Enthusiast"
+      ],
+      "currentLocation": {
+        "type": "Point",
+        "coordinates": [
+          76.82944289284615,
+          30.733036006769968
+        ]
+      },
+      "previousLocation": {
+        "type": "Point",
+        "coordinates": [
+          76.82944296167865,
+          30.733036130538213
+        ]
+      },
+      "userRole": "normalUser",
+      "activeStatus": {
+        "isActive": true,
+        "lastActive": "2025-04-06T09:47:47.663Z"
+      },
+      "banned": {
+        "current": {
+          "status": false,
+          "reason": "Unbanned by admin",
+          "actionBy": "67860cde14e86ce92b2b9cef",
+          "date": "2025-04-06T09:39:17.647Z"
+        },
+        "history": [
+          {
+            "status": false,
+            "reason": "Unbanned",
+            "date": "2025-04-06T08:38:21.305Z",
+            "_id": "67f23d7d38f88d694d0e0ffd"
+          },
+          {
+            "status": true,
+            "reason": "test",
+            "date": "2025-04-06T08:39:12.292Z",
+            "_id": "67f23db038f88d694d0e106a"
+          },
+          {
+            "status": false,
+            "reason": "Unbanned",
+            "actionBy": null,
+            "date": "2025-04-06T08:48:37.426Z",
+            "_id": "67f23fe59625b1e701bebb1e"
+          },
+          {
+            "status": true,
+            "reason": "Banned by admin",
+            "actionBy": "67860cde14e86ce92b2b9cef",
+            "date": "2025-04-06T09:24:44.991Z",
+            "_id": "67f2485c096ff4338be77e32"
+          },
+          {
+            "status": false,
+            "reason": "Unbanned by admin",
+            "actionBy": "67860cde14e86ce92b2b9cef",
+            "date": "2025-04-06T09:24:51.843Z",
+            "_id": "67f24863096ff4338be77e53"
+          },
+          {
+            "status": true,
+            "reason": "Banned by admin",
+            "actionBy": "67860cde14e86ce92b2b9cef",
+            "date": "2025-04-06T09:24:53.573Z",
+            "_id": "67f24865096ff4338be77e75"
+          },
+          {
+            "status": false,
+            "reason": "Unbanned by admin",
+            "actionBy": "67860cde14e86ce92b2b9cef",
+            "date": "2025-04-06T09:38:36.802Z",
+            "_id": "67f24b9c04aa846fccbf646f"
+          },
+          {
+            "status": true,
+            "reason": "Banned by admin",
+            "actionBy": "67860cde14e86ce92b2b9cef",
+            "date": "2025-04-06T09:38:39.048Z",
+            "_id": "67f24b9f04aa846fccbf6493"
+          },
+          {
+            "status": false,
+            "reason": "Unbanned by admin",
+            "actionBy": "67860cde14e86ce92b2b9cef",
+            "date": "2025-04-06T09:39:17.647Z",
+            "_id": "67f24bc504aa846fccbf6619"
+          }
+        ]
+      },
+      "tokenVersion": 1,
+      "profileImageURL": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=30.733080658514243-76.8294113534501",
+      "locationRadiusPreference": 500,
+      "locationUpdatedAt": "2025-04-06T09:16:41.112Z",
+      "friendList": [],
+      "friendRequests": [],
+      "friendRequestsSent": [],
+      "createdAt": "2025-04-06T08:23:10.188Z",
+      "activeSessions": [
+        {
+          "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2YyMzllZTViMDcwZjEwZTdkZjVhZTkiLCJ0b2tlblZlcnNpb24iOjEsImlhdCI6MTc0MzkzMDc0OCwiZXhwIjoxNzQ1NjU4NzQ4fQ.nzVSFc7cGOuf029cPNOpH_iBkXmIo2JaAkJahsa7QTo",
+          "deviceInfo": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+          "ip": "::1",
+          "lastActive": "2025-04-06T09:12:28.808Z",
+          "issuedAt": "2025-04-06T09:12:28.808Z",
+          "_id": "67f2457c475fe0a1688cfeb8"
+        }
+      ],
+      "updatedAt": "2025-04-06T08:38:21.307Z",
+      "__v": 11,
+      "autoGenProfileImageURL": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=30.733036006769968-76.82944289284615",
+      "customProfileImageURL": "",
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2YyMzllZTViMDcwZjEwZTdkZjVhZTkiLCJ0b2tlblZlcnNpb24iOjEsImlhdCI6MTc0MzkzMDc0OCwiZXhwIjoxNzQ1NjU4NzQ4fQ.nzVSFc7cGOuf029cPNOpH_iBkXmIo2JaAkJahsa7QTo"
+    }
+  ],
+  "activeusersnapshots": [
+    {
+      "_id": "67d428509d6b6147081de722",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-14T13:00:00.517Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d4297ca4f92dd642a71d73",
+      "activeUserCount": 3,
+      "timestamp": "2025-03-14T13:05:00.461Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d42aa8a4f92dd642a71ec7",
+      "activeUserCount": 3,
+      "timestamp": "2025-03-14T13:10:00.850Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d42bd4a4f92dd642a71f52",
+      "activeUserCount": 3,
+      "timestamp": "2025-03-14T13:15:00.218Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d42d00a4f92dd642a72054",
+      "activeUserCount": 11,
+      "timestamp": "2025-03-14T13:20:00.606Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d42e2c893d165f5bf56be1",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-14T13:25:00.244Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d42f58c1ff7369d1e32da9",
+      "activeUserCount": 3,
+      "timestamp": "2025-03-14T13:30:00.585Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d431b07d0b95fe24cefce7",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-14T13:40:00.555Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d432dcc175635d093f9525",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-14T13:45:00.594Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d43408c175635d093f95c3",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-14T13:50:00.995Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d43534c175635d093f96c5",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-14T13:55:00.380Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d43660c175635d093f97a3",
+      "activeUserCount": 4,
+      "timestamp": "2025-03-14T14:00:00.968Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d4378cc175635d093f9879",
+      "activeUserCount": 5,
+      "timestamp": "2025-03-14T14:05:00.334Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d439e4c175635d093f991d",
+      "activeUserCount": 6,
+      "timestamp": "2025-03-14T14:15:00.256Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d43b10c175635d093f991f",
+      "activeUserCount": 6,
+      "timestamp": "2025-03-14T14:20:00.654Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d43c3cc175635d093f9921",
+      "activeUserCount": 6,
+      "timestamp": "2025-03-14T14:25:00.247Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d43d68c175635d093f9923",
+      "activeUserCount": 6,
+      "timestamp": "2025-03-14T14:30:00.848Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d43e94c175635d093f9925",
+      "activeUserCount": 6,
+      "timestamp": "2025-03-14T14:35:00.449Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d43fc0c175635d093f9927",
+      "activeUserCount": 6,
+      "timestamp": "2025-03-14T14:40:00.017Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d440ecc175635d093f9929",
+      "activeUserCount": 6,
+      "timestamp": "2025-03-14T14:45:00.610Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d44218c175635d093f992b",
+      "activeUserCount": 6,
+      "timestamp": "2025-03-14T14:50:00.232Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d44344c175635d093f992d",
+      "activeUserCount": 6,
+      "timestamp": "2025-03-14T14:55:00.821Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d44470c175635d093f992f",
+      "activeUserCount": 6,
+      "timestamp": "2025-03-14T15:00:00.269Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d4459cc175635d093f9946",
+      "activeUserCount": 4,
+      "timestamp": "2025-03-14T15:05:00.616Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d44b78744af6790c968ec4",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-14T15:30:00.356Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d45988744af6790c96917c",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-14T16:30:00.961Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d46798744af6790c969a6e",
+      "activeUserCount": 1,
+      "timestamp": "2025-03-14T17:30:00.211Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d475a87f0b88fe26b73c06",
+      "activeUserCount": 3,
+      "timestamp": "2025-03-14T18:30:00.292Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d53a8854b5d328f9bb51a9",
+      "activeUserCount": 1,
+      "timestamp": "2025-03-15T08:30:00.164Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d58ee854b5d328f9bb524b",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-15T14:30:00.390Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d59cf854b5d328f9bb524f",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-15T15:30:00.267Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d5ab0856c1609609fbcbcc",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-15T16:30:00.264Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d5b918b214afd5b4d96d54",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-15T17:30:00.056Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d5c72846997590212d1faf",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-15T18:30:00.474Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d5d53804c252a6512ce79a",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-15T19:30:00.857Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d5e3481b7945f145c68863",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-15T20:30:00.532Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d66fe8c666063f167a2686",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-16T06:30:00.690Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d67df8c666063f167a281b",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-16T07:30:00.114Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d69a18c666063f167a2d90",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-16T09:30:00.415Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d6a82873c8e2046b8bbf82",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-16T10:30:00.992Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d6c4488d2f0ed8425109ca",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-16T12:30:00.964Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d6d258b25264019bade66a",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-16T13:30:00.561Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d6e0687d66dca52390bdd6",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-16T14:30:00.554Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d6ee78bf295ac84478e55e",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-16T15:30:00.101Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d6fc882c162b6e01886dd6",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-16T16:30:00.135Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d70a984e1466626ac36348",
+      "activeUserCount": 1,
+      "timestamp": "2025-03-16T17:30:00.745Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d7a54879cd1781a960a043",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-17T04:30:00.604Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d7b3583cf959c71765d711",
+      "activeUserCount": 4,
+      "timestamp": "2025-03-17T05:30:00.563Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d8f6c87b080e2c97812fb2",
+      "activeUserCount": 1,
+      "timestamp": "2025-03-18T04:30:00.102Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d904d869a8546f40fb86a0",
+      "activeUserCount": 1,
+      "timestamp": "2025-03-18T05:30:00.221Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d93d18ad5ca5e00c5a4c98",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-18T09:30:00.502Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d975585f68a09a224af329",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-18T13:30:00.062Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d9ad98ad5169aaac595273",
+      "activeUserCount": 5,
+      "timestamp": "2025-03-18T17:30:00.532Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d9bba83fba14f8e6cce400",
+      "activeUserCount": 3,
+      "timestamp": "2025-03-18T18:30:00.968Z",
+      "__v": 0
+    },
+    {
+      "_id": "67da4848b61d8b86e9ac6551",
+      "activeUserCount": 1,
+      "timestamp": "2025-03-19T04:30:00.006Z",
+      "__v": 0
+    },
+    {
+      "_id": "67da56585b5af0a8ba7b9543",
+      "activeUserCount": 1,
+      "timestamp": "2025-03-19T05:30:00.384Z",
+      "__v": 0
+    },
+    {
+      "_id": "67da6468f093c593b766a03b",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-19T06:30:00.061Z",
+      "__v": 0
+    },
+    {
+      "_id": "67da8e989589bfe7f40f6206",
+      "activeUserCount": 1,
+      "timestamp": "2025-03-19T09:30:00.247Z",
+      "__v": 0
+    },
+    {
+      "_id": "67db99c874ccba530456fc29",
+      "activeUserCount": 3,
+      "timestamp": "2025-03-20T04:30:00.443Z",
+      "__v": 0
+    },
+    {
+      "_id": "67dda218814fb613aab36190",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-21T17:30:00.427Z",
+      "__v": 0
+    },
+    {
+      "_id": "67dec968b77ac887d497abfc",
+      "activeUserCount": 1,
+      "timestamp": "2025-03-22T14:30:00.425Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ded778b77ac887d497afac",
+      "activeUserCount": 1,
+      "timestamp": "2025-03-22T15:30:00.170Z",
+      "__v": 0
+    },
+    {
+      "_id": "67dee588b77ac887d497b060",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-22T16:30:00.513Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e028f8b76c7576b81c52fc",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-23T15:30:00.059Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e03708233a9683572eca52",
+      "activeUserCount": 2,
+      "timestamp": "2025-03-23T16:30:00.489Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e04518fe17f18a23f14a75",
+      "activeUserCount": 3,
+      "timestamp": "2025-03-23T17:30:00.888Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e05328fa83e08755504938",
+      "activeUserCount": 3,
+      "timestamp": "2025-03-23T18:30:00.809Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e0dfc8da4844b0ab23aab8",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-24T04:30:00.957Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e0fbe8495caf84fba41cff",
+      "activeUserCount": 9,
+      "timestamp": "2025-03-24T06:30:00.895Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e19698d4b437a847cbde08",
+      "activeUserCount": 24,
+      "timestamp": "2025-03-24T17:30:00.890Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e1a4a8d4b437a847cbe714",
+      "activeUserCount": 30,
+      "timestamp": "2025-03-24T18:30:00.931Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e25b78f67adb5398345b6f",
+      "activeUserCount": 2,
+      "timestamp": "2025-03-25T07:30:00.211Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e401581e858e279ec43ed3",
+      "activeUserCount": 2,
+      "timestamp": "2025-03-26T13:30:00.618Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e40f683f935ff21c872afc",
+      "activeUserCount": 14,
+      "timestamp": "2025-03-26T14:30:00.634Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e41d783f935ff21c87463c",
+      "activeUserCount": 83,
+      "timestamp": "2025-03-26T15:30:00.481Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e42b8808e9b921e36e097c",
+      "activeUserCount": 31,
+      "timestamp": "2025-03-26T16:30:00.792Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e4399809f5baa5b1f7514b",
+      "activeUserCount": 2,
+      "timestamp": "2025-03-26T17:30:00.029Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e447a809f5baa5b1f757f9",
+      "activeUserCount": 2,
+      "timestamp": "2025-03-26T18:30:00.543Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e4d448746c7e035822de54",
+      "activeUserCount": 2,
+      "timestamp": "2025-03-27T04:30:00.490Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e51a9869a98d35f8bfe949",
+      "activeUserCount": 2,
+      "timestamp": "2025-03-27T09:30:00.198Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e58b18b2a1fd721114486b",
+      "activeUserCount": 2,
+      "timestamp": "2025-03-27T17:30:00.661Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e59928b2a1fd7211144fab",
+      "activeUserCount": 3,
+      "timestamp": "2025-03-27T18:30:00.488Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e64ff814c027c3b137b262",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-28T07:30:00.143Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e65e087cab728c3eed18d3",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-28T08:30:00.436Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e66c187cab728c3eed1f5f",
+      "activeUserCount": 20,
+      "timestamp": "2025-03-28T09:30:00.877Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e67a288c3bffb3e9da1b19",
+      "activeUserCount": 4,
+      "timestamp": "2025-03-28T10:30:00.093Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e688388c3bffb3e9da2f64",
+      "activeUserCount": 4,
+      "timestamp": "2025-03-28T11:30:00.603Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e696488c3bffb3e9da49ed",
+      "activeUserCount": 6,
+      "timestamp": "2025-03-28T12:30:00.410Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e6a4588c3bffb3e9da5bb6",
+      "activeUserCount": 6,
+      "timestamp": "2025-03-28T13:30:00.209Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e6ce88a4723b1b0cd84bd7",
+      "activeUserCount": 2,
+      "timestamp": "2025-03-28T16:30:00.731Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e6dc9876cacbec84f2d9ff",
+      "activeUserCount": 3,
+      "timestamp": "2025-03-28T17:30:00.483Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e6eaa876cacbec84f2fcb7",
+      "activeUserCount": 3,
+      "timestamp": "2025-03-28T18:30:00.642Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e7a178b87ded8dd073a567",
+      "activeUserCount": 1,
+      "timestamp": "2025-03-29T07:30:00.092Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e8d6d88d2ceeb25a42bdb0",
+      "activeUserCount": 3,
+      "timestamp": "2025-03-30T05:30:00.183Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e8e4e88d2ceeb25a42d42e",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-30T06:30:00.464Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e8f2f8687656c4ecd78340",
+      "activeUserCount": 0,
+      "timestamp": "2025-03-30T07:30:00.091Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e97188e46a0e1269e469a6",
+      "activeUserCount": 1,
+      "timestamp": "2025-03-30T16:30:00.747Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ea1a48da7c580e16db2087",
+      "activeUserCount": 1,
+      "timestamp": "2025-03-31T04:30:00.976Z",
+      "__v": 0
+    },
+    {
+      "_id": "67eccb58aa7ccd4c5154da8b",
+      "activeUserCount": 0,
+      "timestamp": "2025-04-02T05:30:00.769Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ecd968428c38014d25af40",
+      "activeUserCount": 3,
+      "timestamp": "2025-04-02T06:30:00.036Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ed7418ae319790fbf85aa6",
+      "activeUserCount": 0,
+      "timestamp": "2025-04-02T17:30:00.687Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ed82285ad8b2dc08cc4a1a",
+      "activeUserCount": 0,
+      "timestamp": "2025-04-02T18:30:00.563Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ed903841585a86465a75c2",
+      "activeUserCount": 2,
+      "timestamp": "2025-04-02T19:30:00.332Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ed9e48ac68fa878ef717cf",
+      "activeUserCount": 1,
+      "timestamp": "2025-04-02T20:30:00.610Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee4708345ced15f95476ed",
+      "activeUserCount": 9,
+      "timestamp": "2025-04-03T08:30:00.121Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee55187e0c9c0d64a89547",
+      "activeUserCount": 3,
+      "timestamp": "2025-04-03T09:30:00.843Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee63287e0c9c0d64a8e733",
+      "activeUserCount": 2,
+      "timestamp": "2025-04-03T10:30:00.137Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee7138b49c684a9de949c8",
+      "activeUserCount": 0,
+      "timestamp": "2025-04-03T11:30:00.392Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee7f4829b5122e157a8167",
+      "activeUserCount": 6,
+      "timestamp": "2025-04-03T12:30:00.589Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee8d58bd5b736a93b89a02",
+      "activeUserCount": 2,
+      "timestamp": "2025-04-03T13:30:00.791Z",
+      "__v": 0
+    },
+    {
+      "_id": "67eec598aab9126b777042c5",
+      "activeUserCount": 1,
+      "timestamp": "2025-04-03T17:30:00.865Z",
+      "__v": 0
+    },
+    {
+      "_id": "67eed3a8aab9126b777046c3",
+      "activeUserCount": 1,
+      "timestamp": "2025-04-03T18:30:00.482Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ef7c68aac882e4ddbe6705",
+      "activeUserCount": 0,
+      "timestamp": "2025-04-04T06:30:00.514Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ef8a78aac882e4ddbe6a02",
+      "activeUserCount": 0,
+      "timestamp": "2025-04-04T07:30:00.546Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ef9888aac882e4ddbe7426",
+      "activeUserCount": 0,
+      "timestamp": "2025-04-04T08:30:00.273Z",
+      "__v": 0
+    },
+    {
+      "_id": "67efa698b9fdae0363cf7163",
+      "activeUserCount": 1,
+      "timestamp": "2025-04-04T09:30:00.946Z",
+      "__v": 0
+    },
+    {
+      "_id": "67efb4a8d8fc972580a7b5ad",
+      "activeUserCount": 0,
+      "timestamp": "2025-04-04T10:30:00.459Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f01718b2dbce179a93fe82",
+      "activeUserCount": 0,
+      "timestamp": "2025-04-04T17:30:00.695Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f025281756cc37d84a9271",
+      "activeUserCount": 0,
+      "timestamp": "2025-04-04T18:30:00.068Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f041487e967c211dd0e2fb",
+      "activeUserCount": 3,
+      "timestamp": "2025-04-04T20:30:00.034Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f04f58cf136c5281a293ff",
+      "activeUserCount": 0,
+      "timestamp": "2025-04-04T21:30:00.284Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f15a8851d8101ebc7b2b3a",
+      "activeUserCount": 0,
+      "timestamp": "2025-04-05T16:30:00.630Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f1689851d8101ebc7b2b95",
+      "activeUserCount": 0,
+      "timestamp": "2025-04-05T17:30:00.550Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f176a851d8101ebc7b2bac",
+      "activeUserCount": 0,
+      "timestamp": "2025-04-05T18:30:00.666Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f184b851d8101ebc7b446a",
+      "activeUserCount": 0,
+      "timestamp": "2025-04-05T19:30:00.633Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f21f6811a42d5440b55030",
+      "activeUserCount": 1,
+      "timestamp": "2025-04-06T06:30:00.873Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f22d7811a42d5440b567dd",
+      "activeUserCount": 1,
+      "timestamp": "2025-04-06T07:30:00.957Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f23b885b070f10e7df5b89",
+      "activeUserCount": 1,
+      "timestamp": "2025-04-06T08:30:00.139Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f24998096ff4338be7805b",
+      "activeUserCount": 0,
+      "timestamp": "2025-04-06T09:30:00.717Z",
+      "__v": 0
+    }
+  ],
+  "notifications": [
+    {
+      "_id": "67e65bad7cab728c3eed1839",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRequestRejected",
+      "message": "test1 rejected your friend request",
+      "createdAt": "2025-03-28T08:19:57.090Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e65bcc7cab728c3eed1846",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequest",
+      "message": "test sent you a friend request",
+      "createdAt": "2025-03-28T08:20:28.791Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e672167cab728c3eed262b",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequest",
+      "message": "test sent you a friend request",
+      "createdAt": "2025-03-28T09:55:34.613Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e678628c3bffb3e9da193a",
+      "recipient": "67c5f091576c349f736412d2",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequest",
+      "message": "test sent you a friend request",
+      "createdAt": "2025-03-28T10:22:26.850Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e67f148c3bffb3e9da28a6",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67c5f091576c349f736412d2",
+      "type": "friendRequestAccepted",
+      "message": "test2 accepted your friend request",
+      "createdAt": "2025-03-28T10:51:00.297Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e67f418c3bffb3e9da29a5",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRequestAccepted",
+      "message": "test1 accepted your friend request",
+      "createdAt": "2025-03-28T10:51:45.501Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e68f8e8c3bffb3e9da3d69",
+      "recipient": "67c5f091576c349f736412d2",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRemoved",
+      "message": "test removed you from their friend list",
+      "createdAt": "2025-03-28T12:01:18.292Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e68fdb8c3bffb3e9da3e2d",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRemoved",
+      "message": "test removed you from their friend list",
+      "createdAt": "2025-03-28T12:02:35.268Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e690b28c3bffb3e9da3f39",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequest",
+      "message": "test sent you a friend request",
+      "createdAt": "2025-03-28T12:06:10.816Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e690bc8c3bffb3e9da3f8c",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRequestAccepted",
+      "message": "test1 accepted your friend request",
+      "createdAt": "2025-03-28T12:06:20.741Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e690dc8c3bffb3e9da400a",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRemoved",
+      "message": "test removed you from their friend list",
+      "createdAt": "2025-03-28T12:06:52.483Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e691648c3bffb3e9da40c9",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequest",
+      "message": "test sent you a friend request",
+      "createdAt": "2025-03-28T12:09:08.929Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e6916a8c3bffb3e9da4118",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRequestAccepted",
+      "message": "test1 accepted your friend request",
+      "createdAt": "2025-03-28T12:09:14.161Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e691c88c3bffb3e9da4372",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRemoved",
+      "message": "test removed you from their friend list",
+      "createdAt": "2025-03-28T12:10:48.130Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e6942b8c3bffb3e9da4486",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequest",
+      "message": "test sent you a friend request",
+      "createdAt": "2025-03-28T12:20:59.988Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e694358c3bffb3e9da44d5",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRequestAccepted",
+      "message": "test1 accepted your friend request",
+      "createdAt": "2025-03-28T12:21:09.614Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e69a318c3bffb3e9da51dd",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRequest",
+      "message": "jatin sent you a friend request",
+      "createdAt": "2025-03-28T12:46:41.773Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e69a348c3bffb3e9da51eb",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRequest",
+      "message": "jatin sent you a friend request",
+      "createdAt": "2025-03-28T12:46:44.487Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e69a408c3bffb3e9da5207",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRemoved",
+      "message": "test1 removed you from their friend list",
+      "createdAt": "2025-03-28T12:46:56.785Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e69a498c3bffb3e9da521d",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRequest",
+      "message": "test1 sent you a friend request",
+      "createdAt": "2025-03-28T12:47:05.172Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e69a4f8c3bffb3e9da5237",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRequestAccepted",
+      "message": "test1 accepted your friend request",
+      "createdAt": "2025-03-28T12:47:11.090Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e6c9fea4723b1b0cd843e7",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRemoved",
+      "message": "test1 removed you from their friend list",
+      "createdAt": "2025-03-28T16:10:38.615Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e6ca20a4723b1b0cd8449a",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequestAccepted",
+      "message": "test accepted your friend request",
+      "createdAt": "2025-03-28T16:11:12.948Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e6ca22a4723b1b0cd844be",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequestAccepted",
+      "message": "test accepted your friend request",
+      "createdAt": "2025-03-28T16:11:14.292Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e6ca2fa4723b1b0cd844f6",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRemoved",
+      "message": "test removed you from their friend list",
+      "createdAt": "2025-03-28T16:11:27.373Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e6ca39a4723b1b0cd84510",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequest",
+      "message": "test sent you a friend request",
+      "createdAt": "2025-03-28T16:11:37.020Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e6cb36a4723b1b0cd84648",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRequestAccepted",
+      "message": "test1 accepted your friend request",
+      "createdAt": "2025-03-28T16:15:50.481Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e6d8c0a4723b1b0cd85add",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRemoved",
+      "message": "test removed you from their friend list",
+      "createdAt": "2025-03-28T17:13:36.712Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e6daf876cacbec84f2d584",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequest",
+      "message": "test sent you a friend request",
+      "createdAt": "2025-03-28T17:23:04.247Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e6db0176cacbec84f2d5e3",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRequestAccepted",
+      "message": "test1 accepted your friend request",
+      "createdAt": "2025-03-28T17:23:13.166Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e6e04d76cacbec84f2e2fc",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRequestRejected",
+      "message": "jatin rejected your friend request",
+      "createdAt": "2025-03-28T17:45:49.155Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e6e05576cacbec84f2e357",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRemoved",
+      "message": "jatin removed you from their friend list",
+      "createdAt": "2025-03-28T17:45:57.811Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e6e05f76cacbec84f2e36b",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRemoved",
+      "message": "test1 removed you from their friend list",
+      "createdAt": "2025-03-28T17:46:07.132Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e6e0ae76cacbec84f2e435",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRequest",
+      "message": "jatin sent you a friend request",
+      "createdAt": "2025-03-28T17:47:26.131Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e6e0b676cacbec84f2e4aa",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequestAccepted",
+      "message": "test accepted your friend request",
+      "createdAt": "2025-03-28T17:47:34.479Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e6e11e76cacbec84f2e51e",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRequest",
+      "message": "test1 sent you a friend request",
+      "createdAt": "2025-03-28T17:49:18.662Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e6e36676cacbec84f2e9a0",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequestAccepted",
+      "message": "test accepted your friend request",
+      "createdAt": "2025-03-28T17:59:02.020Z",
+      "__v": 0
+    },
+    {
+      "_id": "67e6e3b576cacbec84f2ec68",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRemoved",
+      "message": "test1 removed you from their friend list",
+      "createdAt": "2025-03-28T18:00:21.947Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ea1159da7c580e16db1cbb",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRequest",
+      "message": "test1 sent you a friend request",
+      "createdAt": "2025-03-31T03:51:53.976Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ea115eda7c580e16db1cd8",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequest",
+      "message": "test sent you a friend request",
+      "createdAt": "2025-03-31T03:51:58.488Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ea1169da7c580e16db1d39",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequestAccepted",
+      "message": "test accepted your friend request",
+      "createdAt": "2025-03-31T03:52:09.231Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ea1182da7c580e16db1d7e",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRemoved",
+      "message": "test removed you from their friend list",
+      "createdAt": "2025-03-31T03:52:34.655Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ea1188da7c580e16db1da3",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRemoved",
+      "message": "test removed you from their friend list",
+      "createdAt": "2025-03-31T03:52:40.030Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ea1190da7c580e16db1dc0",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequest",
+      "message": "test sent you a friend request",
+      "createdAt": "2025-03-31T03:52:48.519Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ea1196da7c580e16db1e27",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRequestAccepted",
+      "message": "test1 accepted your friend request",
+      "createdAt": "2025-03-31T03:52:54.639Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ed0448068f168a58264e2a",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequest",
+      "message": "test sent you a friend request",
+      "createdAt": "2025-04-02T09:32:56.689Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ed0970d9f95e947767bc5d",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67ed094bd9f95e947767bb7e",
+      "type": "friendRequest",
+      "message": "Kartik Arora sent you a friend request",
+      "createdAt": "2025-04-02T09:54:56.835Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ed0979d9f95e947767bc7f",
+      "recipient": "67ed094bd9f95e947767bb7e",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequestAccepted",
+      "message": "test accepted your friend request",
+      "createdAt": "2025-04-02T09:55:05.355Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ed09f1d9f95e947767bd99",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67ed09bbd9f95e947767bcef",
+      "type": "friendRequest",
+      "message": "Joel Matthew sent you a friend request",
+      "createdAt": "2025-04-02T09:57:05.719Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ed0a02d9f95e947767bdf5",
+      "recipient": "67ed094bd9f95e947767bb7e",
+      "sender": "67ed09bbd9f95e947767bcef",
+      "type": "friendRequest",
+      "message": "Joel Matthew sent you a friend request",
+      "createdAt": "2025-04-02T09:57:22.047Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ed0be3d9f95e947767c470",
+      "recipient": "67ed09bbd9f95e947767bcef",
+      "sender": "67ed094bd9f95e947767bb7e",
+      "type": "friendRequest",
+      "message": "Kartik Arora sent you a friend request",
+      "createdAt": "2025-04-02T10:05:23.492Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ed0da3d9f95e947767cb12",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67ed0a24d9f95e947767be4e",
+      "type": "friendRequest",
+      "message": "Kashish sent you a friend request",
+      "createdAt": "2025-04-02T10:12:51.388Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ed0e09d9f95e947767cda3",
+      "recipient": "67ed0a24d9f95e947767be4e",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequestAccepted",
+      "message": "test accepted your friend request",
+      "createdAt": "2025-04-02T10:14:33.600Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ed0e48d9f95e947767cee9",
+      "recipient": "67ed09bbd9f95e947767bcef",
+      "sender": "67ed094bd9f95e947767bb7e",
+      "type": "friendRequestAccepted",
+      "message": "Kartik Arora accepted your friend request",
+      "createdAt": "2025-04-02T10:15:36.690Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ed7ad6ae319790fbf86bdc",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRemoved",
+      "message": "test removed you from their friend list",
+      "createdAt": "2025-04-02T17:58:46.405Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ed7adcae319790fbf86bff",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequest",
+      "message": "test sent you a friend request",
+      "createdAt": "2025-04-02T17:58:52.076Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ed7ae5ae319790fbf86c81",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRequestAccepted",
+      "message": "test1 accepted your friend request",
+      "createdAt": "2025-04-02T17:59:01.076Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ed929a41585a86465a7f1e",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRemoved",
+      "message": "test1 removed you from their friend list",
+      "createdAt": "2025-04-02T19:40:10.870Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee4794345ced15f9547905",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRequest",
+      "message": "test1 sent you a friend request",
+      "createdAt": "2025-04-03T08:32:20.640Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee499effca222bc5100641",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRequestAccepted",
+      "message": "jatin accepted your friend request",
+      "createdAt": "2025-04-03T08:41:02.752Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee49aeffca222bc510075d",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRemoved",
+      "message": "jatin removed you from their friend list",
+      "createdAt": "2025-04-03T08:41:18.781Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee49e3ffca222bc51009a3",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRequestRejected",
+      "message": "jatin rejected your friend request",
+      "createdAt": "2025-04-03T08:42:11.170Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee4a94ffca222bc5100e11",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRequest",
+      "message": "jatin sent you a friend request",
+      "createdAt": "2025-04-03T08:45:08.167Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee4aacffca222bc5100f03",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequestRejected",
+      "message": "test rejected your friend request",
+      "createdAt": "2025-04-03T08:45:32.575Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee4ab6ffca222bc5100f9b",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRequest",
+      "message": "jatin sent you a friend request",
+      "createdAt": "2025-04-03T08:45:42.890Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee4abdffca222bc5101083",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequestAccepted",
+      "message": "test accepted your friend request",
+      "createdAt": "2025-04-03T08:45:49.796Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee4acaffca222bc510117a",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRemoved",
+      "message": "test removed you from their friend list",
+      "createdAt": "2025-04-03T08:46:02.332Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee4c4aece84b5367c38f11",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRequest",
+      "message": "jatin sent you a friend request",
+      "createdAt": "2025-04-03T08:52:26.962Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee4c57ece84b5367c38f50",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRequestAccepted",
+      "message": "test1 accepted your friend request",
+      "createdAt": "2025-04-03T08:52:39.096Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee4cdaece84b5367c39068",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRemoved",
+      "message": "jatin removed you from their friend list",
+      "createdAt": "2025-04-03T08:54:50.592Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee4cf1ece84b5367c390b5",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRequest",
+      "message": "test1 sent you a friend request",
+      "createdAt": "2025-04-03T08:55:13.977Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee4f04d109c908d9560a2c",
+      "recipient": "67ed09bbd9f95e947767bcef",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRequestRejected",
+      "message": "jatin rejected your friend request",
+      "createdAt": "2025-04-03T09:04:04.788Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee4f07d109c908d9560a5c",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRequestRejected",
+      "message": "jatin rejected your friend request",
+      "createdAt": "2025-04-03T09:04:07.455Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee4f21d109c908d9560b27",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequest",
+      "message": "test sent you a friend request",
+      "createdAt": "2025-04-03T09:04:33.960Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee4f36d109c908d9560b5e",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRequestAccepted",
+      "message": "jatin accepted your friend request",
+      "createdAt": "2025-04-03T09:04:54.080Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee4f51d109c908d9560bbb",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRemoved",
+      "message": "jatin removed you from their friend list",
+      "createdAt": "2025-04-03T09:05:21.375Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee4f54d109c908d9560bdc",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRequest",
+      "message": "jatin sent you a friend request",
+      "createdAt": "2025-04-03T09:05:24.245Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee4f5cd109c908d9560c0d",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequestAccepted",
+      "message": "test accepted your friend request",
+      "createdAt": "2025-04-03T09:05:32.364Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee4fded109c908d9560cfa",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRequest",
+      "message": "jatin sent you a friend request",
+      "createdAt": "2025-04-03T09:07:42.050Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee5160d109c908d95619ac",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRemoved",
+      "message": "jatin removed you from their friend list",
+      "createdAt": "2025-04-03T09:14:08.178Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee5176d109c908d9561a46",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRequest",
+      "message": "jatin sent you a friend request",
+      "createdAt": "2025-04-03T09:14:30.953Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee52fed109c908d956252f",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequest",
+      "message": "test sent you a friend request",
+      "createdAt": "2025-04-03T09:21:02.701Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee5308d109c908d9562569",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRequestAccepted",
+      "message": "jatin accepted your friend request",
+      "createdAt": "2025-04-03T09:21:12.625Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee544c7e0c9c0d64a88fe9",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRemoved",
+      "message": "test removed you from their friend list",
+      "createdAt": "2025-04-03T09:26:36.747Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee545f7e0c9c0d64a89016",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequestRejected",
+      "message": "test rejected your friend request",
+      "createdAt": "2025-04-03T09:26:55.874Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee54677e0c9c0d64a8903c",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRequestRejected",
+      "message": "test1 rejected your friend request",
+      "createdAt": "2025-04-03T09:27:03.814Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee54707e0c9c0d64a8906d",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRequest",
+      "message": "test1 sent you a friend request",
+      "createdAt": "2025-04-03T09:27:12.299Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee54da7e0c9c0d64a891a5",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequest",
+      "message": "test sent you a friend request",
+      "createdAt": "2025-04-03T09:28:58.423Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee55737e0c9c0d64a895c6",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRequestRejected",
+      "message": "jatin rejected your friend request",
+      "createdAt": "2025-04-03T09:31:31.776Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee55827e0c9c0d64a8967b",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRequestRejected",
+      "message": "jatin rejected your friend request",
+      "createdAt": "2025-04-03T09:31:46.022Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee55887e0c9c0d64a896b2",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRequest",
+      "message": "jatin sent you a friend request",
+      "createdAt": "2025-04-03T09:31:52.361Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee559b7e0c9c0d64a8971d",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRequestRejected",
+      "message": "test1 rejected your friend request",
+      "createdAt": "2025-04-03T09:32:11.713Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee559f7e0c9c0d64a89763",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRequest",
+      "message": "test1 sent you a friend request",
+      "createdAt": "2025-04-03T09:32:15.225Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee55b97e0c9c0d64a897b3",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRequestRejected",
+      "message": "jatin rejected your friend request",
+      "createdAt": "2025-04-03T09:32:41.477Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee55d87e0c9c0d64a89817",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRequest",
+      "message": "jatin sent you a friend request",
+      "createdAt": "2025-04-03T09:33:12.415Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee56877e0c9c0d64a899e5",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRequestAccepted",
+      "message": "test1 accepted your friend request",
+      "createdAt": "2025-04-03T09:36:07.949Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee568a7e0c9c0d64a89ab6",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRemoved",
+      "message": "test1 removed you from their friend list",
+      "createdAt": "2025-04-03T09:36:10.870Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee56917e0c9c0d64a89b88",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRequest",
+      "message": "test1 sent you a friend request",
+      "createdAt": "2025-04-03T09:36:17.836Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee59df7e0c9c0d64a8a972",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequest",
+      "message": "test sent you a friend request",
+      "createdAt": "2025-04-03T09:50:23.761Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee5b3f7e0c9c0d64a8acfc",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRequestRejected",
+      "message": "jatin rejected your friend request",
+      "createdAt": "2025-04-03T09:56:15.340Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee5b407e0c9c0d64a8ad29",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRequestRejected",
+      "message": "jatin rejected your friend request",
+      "createdAt": "2025-04-03T09:56:16.340Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee5f6a7e0c9c0d64a8d387",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "type": "friendRequest",
+      "message": "test1 sent you a friend request",
+      "createdAt": "2025-04-03T10:14:02.006Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee5f717e0c9c0d64a8d3e2",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequestAccepted",
+      "message": "test accepted your friend request",
+      "createdAt": "2025-04-03T10:14:09.775Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee7e5229b5122e157a7e56",
+      "recipient": "67c5f0f05ecd52abcf3fb59c",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "type": "friendRequest",
+      "message": "test sent you a friend request",
+      "createdAt": "2025-04-03T12:25:54.004Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee7e5729b5122e157a7e99",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRequestAccepted",
+      "message": "jatin accepted your friend request",
+      "createdAt": "2025-04-03T12:25:59.054Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ee7e5b29b5122e157a7efd",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "sender": "67c5f0f05ecd52abcf3fb59c",
+      "type": "friendRemoved",
+      "message": "jatin removed you from their friend list",
+      "createdAt": "2025-04-03T12:26:03.846Z",
+      "__v": 0
+    }
+  ],
+  "suggestions": [
+    {
+      "_id": "67d3d724612c20645fe190e4",
+      "title": "guhjkk",
+      "category": "Feature Request",
+      "description": "tdfyhgjkl;;jhgfdfghjkhkgjfdgsfghjhj",
+      "user": "67860cde14e86ce92b2b9cef",
+      "likes": 2,
+      "likedBy": [
+        "67860d4114e86ce92b2b9d00",
+        "67860cde14e86ce92b2b9cef"
+      ],
+      "createdAt": "2025-03-14T07:13:40.901Z",
+      "updatedAt": "2025-03-14T07:13:40.901Z",
+      "__v": 30
+    },
+    {
+      "_id": "67d3de2a612c20645fe19218",
+      "title": "Updated Suggestion Title",
+      "category": "Updated Category",
+      "description": "This is an updated suggestion description.",
+      "user": "67860cde14e86ce92b2b9cef",
+      "likes": 1,
+      "likedBy": [
+        "67860cde14e86ce92b2b9cef"
+      ],
+      "createdAt": "2025-03-14T07:43:38.239Z",
+      "updatedAt": "2025-03-14T07:43:38.240Z",
+      "__v": 3
+    },
+    {
+      "_id": "67d3ea2b612c20645fe19a6f",
+      "title": "fgchvbjnm,",
+      "category": "Documentation",
+      "description": "retdfghjklhgfdssghjkl;jhgfdsfghjkllhg",
+      "user": "67860d4114e86ce92b2b9d00",
+      "likes": 0,
+      "likedBy": [],
+      "createdAt": "2025-03-14T08:34:51.182Z",
+      "updatedAt": "2025-03-14T08:34:51.182Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d3eb76612c20645fe19a78",
+      "title": "fdxgchvbjn",
+      "category": "UI/UX Improvement",
+      "description": "dfghjkkhgfdsghjkbvnc ftghcvb nhjkjkn",
+      "user": "67860d4114e86ce92b2b9d00",
+      "likes": 0,
+      "likedBy": [],
+      "createdAt": "2025-03-14T08:40:22.114Z",
+      "updatedAt": "2025-03-14T08:40:22.114Z",
+      "__v": 4
+    },
+    {
+      "_id": "67d6a9bc73c8e2046b8bc031",
+      "title": "test123",
+      "category": "Bug Report",
+      "description": "heloooooooooooooooooooooooooooo",
+      "user": "67c5f0f05ecd52abcf3fb59c",
+      "likes": 1,
+      "likedBy": [
+        "67860cde14e86ce92b2b9cef"
+      ],
+      "createdAt": "2025-03-16T10:36:44.624Z",
+      "updatedAt": "2025-03-16T10:36:44.625Z",
+      "__v": 3
+    },
+    {
+      "_id": "67ef9933aac882e4ddbe7460",
+      "title": "ghfj",
+      "category": "Feature Request",
+      "description": "gfchvjbknlmkjlhgfcgvbnjkhgfjkllkhvvc",
+      "user": "67860cde14e86ce92b2b9cef",
+      "likes": 0,
+      "likedBy": [],
+      "createdAt": "2025-04-04T08:32:51.087Z",
+      "updatedAt": "2025-04-04T08:32:51.088Z",
+      "__v": 4
+    }
+  ],
+  "systemconfigs": [
+    {
+      "_id": "67f24e48c4f8984efd958a63",
+      "registrationEnabled": true,
+      "registrationDisabledMessage": "User registration is currently disabled by the administrator.",
+      "registrationStatusLastUpdated": "2025-04-06T09:50:00.191Z",
+      "createdAt": "2025-04-06T09:50:00.197Z",
+      "updatedAt": "2025-04-06T09:50:00.197Z",
+      "__v": 0
+    }
+  ],
+  "chatmessages": [
+    {
+      "_id": "67ef82f7aac882e4ddbe68af",
+      "roomId": "67860cde14e86ce92b2b9cef_67ed094bd9f95e947767bb7e",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "recipient": "67ed094bd9f95e947767bb7e",
+      "message": "hello",
+      "replyTo": null,
+      "status": "sent",
+      "createdAt": "2025-04-04T06:57:59.624Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ef8300aac882e4ddbe68b1",
+      "roomId": "67860cde14e86ce92b2b9cef_67ed094bd9f95e947767bb7e",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "recipient": "67ed094bd9f95e947767bb7e",
+      "message": "what you do ",
+      "replyTo": "67ef82f7aac882e4ddbe68af",
+      "status": "sent",
+      "createdAt": "2025-04-04T06:58:08.219Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ef8305aac882e4ddbe68b3",
+      "roomId": "67860cde14e86ce92b2b9cef_67ed094bd9f95e947767bb7e",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "recipient": "67ed094bd9f95e947767bb7e",
+      "message": "heheheee",
+      "replyTo": null,
+      "status": "sent",
+      "createdAt": "2025-04-04T06:58:13.063Z",
+      "__v": 0
+    },
+    {
+      "_id": "67ef831caac882e4ddbe68b5",
+      "roomId": "67860cde14e86ce92b2b9cef_67ed094bd9f95e947767bb7e",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "recipient": "67ed094bd9f95e947767bb7e",
+      "message": "hhhee",
+      "replyTo": "67ef8300aac882e4ddbe68b1",
+      "status": "sent",
+      "createdAt": "2025-04-04T06:58:36.475Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f21f6b11a42d5440b5503b",
+      "roomId": "67860cde14e86ce92b2b9cef_67860d4114e86ce92b2b9d00",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "message": "hello",
+      "replyTo": null,
+      "status": "read",
+      "createdAt": "2025-04-06T06:30:03.274Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f21f6c11a42d5440b5503d",
+      "roomId": "67860cde14e86ce92b2b9cef_67860d4114e86ce92b2b9d00",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "message": "kug",
+      "replyTo": null,
+      "status": "read",
+      "createdAt": "2025-04-06T06:30:04.184Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f21f6c11a42d5440b5503f",
+      "roomId": "67860cde14e86ce92b2b9cef_67860d4114e86ce92b2b9d00",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "message": "hhjg",
+      "replyTo": null,
+      "status": "read",
+      "createdAt": "2025-04-06T06:30:04.931Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f21f6d11a42d5440b55041",
+      "roomId": "67860cde14e86ce92b2b9cef_67860d4114e86ce92b2b9d00",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "message": "hgf",
+      "replyTo": null,
+      "status": "read",
+      "createdAt": "2025-04-06T06:30:05.715Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f21f6e11a42d5440b55043",
+      "roomId": "67860cde14e86ce92b2b9cef_67860d4114e86ce92b2b9d00",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "message": "gf",
+      "replyTo": null,
+      "status": "read",
+      "createdAt": "2025-04-06T06:30:06.434Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f21f6f11a42d5440b55045",
+      "roomId": "67860cde14e86ce92b2b9cef_67860d4114e86ce92b2b9d00",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "message": "ghfg",
+      "replyTo": null,
+      "status": "read",
+      "createdAt": "2025-04-06T06:30:07.199Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f21f7c11a42d5440b550d4",
+      "roomId": "67860cde14e86ce92b2b9cef_67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "message": "rdyfghkj",
+      "replyTo": null,
+      "status": "read",
+      "createdAt": "2025-04-06T06:30:20.005Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f21f7d11a42d5440b550dc",
+      "roomId": "67860cde14e86ce92b2b9cef_67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "message": "hgfjhjjk",
+      "replyTo": null,
+      "status": "read",
+      "createdAt": "2025-04-06T06:30:21.098Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f21f7e11a42d5440b550e4",
+      "roomId": "67860cde14e86ce92b2b9cef_67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "message": "jghkjku",
+      "replyTo": null,
+      "status": "read",
+      "createdAt": "2025-04-06T06:30:22.652Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f21f7f11a42d5440b550ec",
+      "roomId": "67860cde14e86ce92b2b9cef_67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "message": "fhgfjkjlk",
+      "replyTo": null,
+      "status": "read",
+      "createdAt": "2025-04-06T06:30:23.585Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f21f8011a42d5440b550f4",
+      "roomId": "67860cde14e86ce92b2b9cef_67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "message": "gjhkjl;",
+      "replyTo": null,
+      "status": "read",
+      "createdAt": "2025-04-06T06:30:24.371Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f230a511a42d5440b56b17",
+      "roomId": "67860cde14e86ce92b2b9cef_67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "message": "hello ",
+      "replyTo": null,
+      "status": "read",
+      "createdAt": "2025-04-06T07:43:33.122Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f230a611a42d5440b56b19",
+      "roomId": "67860cde14e86ce92b2b9cef_67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "message": "kjhsdf",
+      "replyTo": null,
+      "status": "read",
+      "createdAt": "2025-04-06T07:43:34.169Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f230a611a42d5440b56b1b",
+      "roomId": "67860cde14e86ce92b2b9cef_67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "message": "asdf",
+      "replyTo": null,
+      "status": "read",
+      "createdAt": "2025-04-06T07:43:34.791Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f230b411a42d5440b56c6e",
+      "roomId": "67860cde14e86ce92b2b9cef_67860d4114e86ce92b2b9d00",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "message": "ksjdhf",
+      "replyTo": null,
+      "status": "read",
+      "createdAt": "2025-04-06T07:43:48.240Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f230b611a42d5440b56c76",
+      "roomId": "67860cde14e86ce92b2b9cef_67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "message": "asf",
+      "replyTo": null,
+      "status": "read",
+      "createdAt": "2025-04-06T07:43:50.886Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f230b911a42d5440b56c7e",
+      "roomId": "67860cde14e86ce92b2b9cef_67860d4114e86ce92b2b9d00",
+      "sender": "67860d4114e86ce92b2b9d00",
+      "recipient": "67860cde14e86ce92b2b9cef",
+      "message": "fasd",
+      "replyTo": null,
+      "status": "read",
+      "createdAt": "2025-04-06T07:43:53.027Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f230d811a42d5440b56e45",
+      "roomId": "67860cde14e86ce92b2b9cef_67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "message": "dfsd",
+      "replyTo": null,
+      "status": "delivered",
+      "createdAt": "2025-04-06T07:44:24.579Z",
+      "__v": 0
+    },
+    {
+      "_id": "67f230d911a42d5440b56e47",
+      "roomId": "67860cde14e86ce92b2b9cef_67860d4114e86ce92b2b9d00",
+      "sender": "67860cde14e86ce92b2b9cef",
+      "recipient": "67860d4114e86ce92b2b9d00",
+      "message": "sdf",
+      "replyTo": null,
+      "status": "delivered",
+      "createdAt": "2025-04-06T07:44:25.656Z",
+      "__v": 0
+    }
+  ]
+}

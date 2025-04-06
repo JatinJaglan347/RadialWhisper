@@ -49,12 +49,16 @@ const userSchema = new Schema({
         unique: true,
         match: /^[A-Z0-9]+$/, // Capital letters and numbers only
       },
-      profileImageURL: {
+      customProfileImageURL: {
+        type: String,
+        default: null,
+      },
+      autoGenProfileImageURL: {
         type: String,
         default: function () {  
           const defaultSeed = `${Math.random()*100}`; // Fallback seed for default profile image
           return `https://api.dicebear.com/9.x/fun-emoji/svg?seed=${defaultSeed}`;
-      },
+        },
       },
       bio: {
         type: [String], // Predefined options only, stored as an array
@@ -222,6 +226,46 @@ userSchema.add({
   }
 });
 
+// Add profileImageURL as a virtual property
+userSchema.virtual('profileImageURL').get(function() {
+  return this.customProfileImageURL || this.autoGenProfileImageURL;
+});
+
+// When setting profileImageURL directly (for backwards compatibility),
+// update the appropriate underlying field
+userSchema.virtual('profileImageURL').set(function(url) {
+  // Check if the URL is from dicebear (auto-generated)
+  if (url && url.includes('dicebear.com')) {
+    this.autoGenProfileImageURL = url;
+  } else {
+    this.customProfileImageURL = url;
+  }
+});
+
+// Ensure virtual fields are included in JSON and object conversions
+userSchema.set('toJSON', { virtuals: true });
+userSchema.set('toObject', { virtuals: true });
+
+// Migration helper for old documents that only have profileImageURL
+userSchema.pre('save', function(next) {
+  // If this is an existing document that has profileImageURL as a real field, migrate it
+  if (this.isNew === false && this._doc.profileImageURL && 
+      !this._doc.customProfileImageURL && !this._doc.autoGenProfileImageURL) {
+    
+    // Determine if the existing profileImageURL is auto-generated or custom
+    const url = this._doc.profileImageURL;
+    if (url && url.includes('dicebear.com')) {
+      this.autoGenProfileImageURL = url;
+    } else {
+      this.customProfileImageURL = url;
+    }
+    
+    // Remove the old field from the document
+    delete this._doc.profileImageURL;
+  }
+  next();
+});
+
 userSchema.pre("save" , async function(next){
     if(!this.isModified("password")) return next();
     this.password =await bcrypt.hash(this.password , 10)
@@ -287,7 +331,7 @@ userSchema.methods.updateLocation = async function (latitude, longitude) {
 
   // Generate a new profile image seed based on location
   const seed = `${latitude}-${longitude}`;
-  this.profileImageURL = `https://api.dicebear.com/9.x/fun-emoji/svg?seed=${seed}`;
+  this.autoGenProfileImageURL = `https://api.dicebear.com/9.x/fun-emoji/svg?seed=${seed}`;
 
   return await this.save();
 };

@@ -12,6 +12,7 @@
   "dependencies": {
     "@emoji-mart/data": "^1.2.1",
     "@emoji-mart/react": "^1.1.1",
+    "@hookstate/core": "^4.0.2",
     "aos": "^2.3.4",
     "axios": "^1.7.9",
     "date-fns": "^4.1.0",

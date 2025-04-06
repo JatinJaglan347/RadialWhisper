@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
-import { Shield, ArrowLeft, UserX, UserCheck, AlertTriangle, RotateCcw, Clock, UserPlus, UserMinus } from 'lucide-react';
+import { Shield, ArrowLeft, UserX, UserCheck, AlertTriangle, RotateCcw, Clock, UserPlus, UserMinus, Copy, Check } from 'lucide-react';
 import { format } from 'date-fns';
 
 const ModerateUser = () => {
@@ -22,6 +22,7 @@ const ModerateUser = () => {
   const [showBanHistory, setShowBanHistory] = useState(false);
   const [showRoleConfirmation, setShowRoleConfirmation] = useState(false);
   const [roleAction, setRoleAction] = useState(null); // 'promote' or 'demote'
+  const [copiedField, setCopiedField] = useState(null);
 
   useEffect(() => {
     if (userEmail) {
@@ -29,8 +30,26 @@ const ModerateUser = () => {
     }
   }, [userEmail, adminSearchUser]);
 
+  // Reset the copied status after 2 seconds
+  useEffect(() => {
+    if (copiedField) {
+      const timer = setTimeout(() => {
+        setCopiedField(null);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [copiedField]);
+
   const goBack = () => {
     navigate(-1);
+  };
+
+  const copyToClipboard = (text, field) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedField(field);
+    }).catch(err => {
+      console.error('Could not copy text: ', err);
+    });
   };
 
   const handleBanUnban = async (status) => {
@@ -134,7 +153,16 @@ const ModerateUser = () => {
           
           <div className="flex-1">
             <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
-              <h2 className="text-xl md:text-2xl font-bold">{fullName || "Unnamed User"}</h2>
+              <div className="flex items-center">
+                <h2 className="text-xl md:text-2xl font-bold">{fullName || "Unnamed User"}</h2>
+                <button 
+                  onClick={() => copyToClipboard(fullName || "Unnamed User", 'name')} 
+                  className="ml-2 p-1 hover:bg-[#FFF6E0]/10 rounded-full transition-colors"
+                  title="Copy user name"
+                >
+                  {copiedField === 'name' ? <Check size={16} className="text-green-400" /> : <Copy size={16} className="text-[#FFF6E0]/70" />}
+                </button>
+              </div>
               <span className="text-xs md:text-sm px-2 py-0.5 rounded-full bg-[#FFF6E0]/10 text-[#FFF6E0]/80 w-fit capitalize">
                 {userRole || "user"}
               </span>
@@ -146,9 +174,27 @@ const ModerateUser = () => {
             </div>
             
             <div className="mt-1 flex flex-col md:flex-row gap-1 md:gap-3 text-sm text-[#FFF6E0]/70">
-              <span>{email || "No email"}</span>
+              <div className="flex items-center">
+                <span>{email || "No email"}</span>
+                <button 
+                  onClick={() => copyToClipboard(email || "", 'email')} 
+                  className="ml-2 p-1 hover:bg-[#FFF6E0]/10 rounded-full transition-colors"
+                  title="Copy email"
+                >
+                  {copiedField === 'email' ? <Check size={14} className="text-green-400" /> : <Copy size={14} className="text-[#FFF6E0]/70" />}
+                </button>
+              </div>
               <span className="hidden md:inline">•</span>
-              <span>Tag: {uniqueTag || "N/A"}</span>
+              <div className="flex items-center">
+                <span>Tag: {uniqueTag || "N/A"}</span>
+                <button 
+                  onClick={() => copyToClipboard(uniqueTag || "", 'tag')} 
+                  className="ml-2 p-1 hover:bg-[#FFF6E0]/10 rounded-full transition-colors"
+                  title="Copy tag"
+                >
+                  {copiedField === 'tag' ? <Check size={14} className="text-green-400" /> : <Copy size={14} className="text-[#FFF6E0]/70" />}
+                </button>
+              </div>
             </div>
             
             {bio && bio.length > 0 && (
@@ -314,20 +360,47 @@ const ModerateUser = () => {
             <div className="grid grid-cols-1 gap-4">
               <div>
                 <p className="text-[#FFF6E0]/70 text-sm mb-1">User ID</p>
-                <p className="text-[#FFF6E0] break-all text-sm">{_id || "N/A"}</p>
+                <div className="flex items-center">
+                  <p className="text-[#FFF6E0] break-all text-sm">{_id || "N/A"}</p>
+                  <button 
+                    onClick={() => copyToClipboard(_id || "", 'id')} 
+                    className="ml-2 p-1 hover:bg-[#FFF6E0]/10 rounded-full transition-colors"
+                    title="Copy user ID"
+                  >
+                    {copiedField === 'id' ? <Check size={16} className="text-green-400" /> : <Copy size={16} className="text-[#FFF6E0]/70" />}
+                  </button>
+                </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <p className="text-[#FFF6E0]/70 text-sm mb-1">Email</p>
-                  <p className="text-[#FFF6E0]">{email || "N/A"}</p>
-                  </div>
-                  
-                  <div>
-                    <p className="text-[#FFF6E0]/70 text-sm mb-1">Unique Tag</p>
-                    <p className="text-[#FFF6E0]">{uniqueTag || "N/A"}</p>
+                  <div className="flex items-center">
+                    <p className="text-[#FFF6E0]">{email || "N/A"}</p>
+                    <button 
+                      onClick={() => copyToClipboard(email || "", 'email2')} 
+                      className="ml-2 p-1 hover:bg-[#FFF6E0]/10 rounded-full transition-colors"
+                      title="Copy email"
+                    >
+                      {copiedField === 'email2' ? <Check size={16} className="text-green-400" /> : <Copy size={16} className="text-[#FFF6E0]/70" />}
+                    </button>
                   </div>
                 </div>
+                  
+                <div>
+                  <p className="text-[#FFF6E0]/70 text-sm mb-1">Unique Tag</p>
+                  <div className="flex items-center">
+                    <p className="text-[#FFF6E0]">{uniqueTag || "N/A"}</p>
+                    <button 
+                      onClick={() => copyToClipboard(uniqueTag || "", 'tag2')} 
+                      className="ml-2 p-1 hover:bg-[#FFF6E0]/10 rounded-full transition-colors"
+                      title="Copy tag"
+                    >
+                      {copiedField === 'tag2' ? <Check size={16} className="text-green-400" /> : <Copy size={16} className="text-[#FFF6E0]/70" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>

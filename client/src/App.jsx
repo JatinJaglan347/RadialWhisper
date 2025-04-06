@@ -47,6 +47,7 @@ import FounderPage from "./pages/FounderPage.jsx";
 import BannedUserPage from "./pages/BannedUserPage.jsx";
 import LandingFeatures from "./pages/MainWebPage/LandingFeatures.jsx";
 import Reviews from "./pages/Reviews.jsx";
+import OverlordPage from "./pages/ModerationPages/OverlordPage.jsx";
 
 function App() {
   const {
@@ -287,6 +288,24 @@ function App() {
                       <DashboardPage />
                     ) : (
                       <Navigate to="/" />
+                    )
+                  ) : (
+                    <Navigate to="/login" />
+                  )
+                }
+              />
+
+              {/* Absolute Power (Overlord) route - King Only */}
+              <Route
+                path="overlord"
+                element={
+                  authUser ? (
+                    isUserBanned() ? (
+                      <Navigate to="/banned" />
+                    ) : isKing ? (
+                      <OverlordPage />
+                    ) : (
+                      <Navigate to="/op/dashboard" />
                     )
                   ) : (
                     <Navigate to="/login" />
