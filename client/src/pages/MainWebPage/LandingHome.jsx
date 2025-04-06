@@ -215,7 +215,7 @@ function LandingHome() {
                 {/* Phone mockup with app interface */}
                 <div className="relative overflow-hidden rounded-2xl border border-[#61677A]/30 shadow-2xl">
                   <img
-                    src="/src/assets/images/app-interface-map.jpg"
+                    src="image.png"
                     alt="RadialWhisper App Interface"
                     className="w-full h-auto rounded-2xl"
                   />
@@ -412,9 +412,9 @@ function LandingHome() {
                 <div className="absolute inset-0 bg-gradient-to-r from-[#61677A] to-[#D8D9DA] rounded-lg opacity-30 blur-xl transform -translate-x-2 translate-y-2"></div>
 
                 {/* First phone */}
-                <div className="relative md:absolute md:transform md:rotate-6 md:translate-x-8 md:z-10 rounded-2xl border border-[#61677A]/30 shadow-2xl transition-all duration-500 hover:rotate-0 hover:scale-105">
+                <div className="relative md:absolute md:transform md:rotate-6 md:translate-x-8 md:z-10 rounded-3xl border border-[#61677A]/30 shadow-2xl transition-all duration-500 hover:rotate-0 hover:scale-105">
                   <img
-                    src="/src/assets/images/app-screen-chat.jpg"
+                    src="ChatInterfacePhone1.png"
                     alt="RadialWhisper Mobile App"
                     className="w-full h-auto rounded-2xl"
                   />
@@ -431,7 +431,7 @@ function LandingHome() {
                 {/* Second phone */}
                 <div className="hidden md:block absolute top-8 -left-12 transform -rotate-6 rounded-2xl border border-[#61677A]/30 shadow-2xl transition-all duration-500 hover:rotate-0 hover:scale-105">
                   <img
-                    src="/src/assets/images/app-screen-profile.jpg"
+                    src="ChatInterfacePhone1.png"
                     alt="RadialWhisper Mobile App Alternative View"
                     className="w-full h-auto rounded-2xl"
                   />
@@ -734,7 +734,7 @@ function LandingHome() {
                   {/* Phone mockup */}
                   <div className="relative rounded-2xl border border-[#61677A]/30 shadow-2xl overflow-hidden">
                     <img
-                      src="/api/placeholder/500/300"
+                      src="PremiumPlanImg.png"
                       alt="RadialWhisper Premium Features"
                       className="w-full h-auto rounded-2xl"
                     />
