@@ -7,6 +7,8 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { toast } from 'react-hot-toast'; // Import react-hot-toast
 import jatinjatinimg from "../assets/images/JatinJaglanImg.jpeg";
+import thealgoshowimg from "../assets/images/ProjectImges/TheAlgoShowImg.png";
+import chitkaraconnectimg from "../assets/images/ProjectImges/ChitkaraConnectImg.png";
 
 
 const FounderPage = () => {
@@ -260,6 +262,18 @@ const FounderPage = () => {
                     {/* Decorative quote mark */}
                     <span className="absolute -bottom-4 -right-2 text-4xl opacity-20 font-serif">"</span>
                   </p>
+                  
+                  {/* Project buttons */}
+                  <div className="flex gap-3 justify-end mt-6 mb-6">
+                    <Link to="/" className="bg-[#FFF6E0] text-[#272829] px-4 py-2 rounded-full flex items-center gap-2 hover:-translate-y-1 transition-transform duration-300">
+                      <span>View Project</span>
+                      <ExternalLink className="h-4 w-4" />
+                    </Link>
+                    <a href="https://github.com/JatinJaglan347/RadialWhisper" target="_blank" rel="noopener noreferrer" className="bg-[#272829] text-[#FFF6E0] border border-[#FFF6E0]/30 px-4 py-2 rounded-full flex items-center gap-2 hover:-translate-y-1 transition-transform duration-300 hover:bg-[#31333A]">
+                      <span>GitHub</span>
+                      <Github className="h-4 w-4" />
+                    </a>
+                  </div>
                 </div>
               </div>
               
@@ -347,17 +361,31 @@ const FounderPage = () => {
                       </span>
                       <h3 className="text-2xl font-bold mb-3 bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-transparent bg-clip-text">RadialWhisper</h3>
                       <p className="text-[#D8D9DA] leading-relaxed mb-6">
-                        A proximity-based chat application that connects users within customizable 
-                        radius settings. Built with React, Node.js, and MongoDB.
+                        A proximity-based social app where users set their preferred radius to discover and chat with 
+                        nearby people anonymously. Only interests are displayed initially, preserving privacy while 
+                        fostering genuine connections. If users connect well, they can add each other as friends, 
+                        revealing their identities and enabling chats from anywhere, not just within proximity.
                       </p>
                       
                       {/* Tags */}
                       <div className="flex flex-wrap gap-2 justify-end mb-8 md:mb-0">
-                        {["React", "Node.js", "MongoDB", "WebSockets"].map((tag, i) => (
+                        {["React", "Node.js","Express", "MongoDB","Tailwind CSS", "Socket.io"].map((tag, i) => (
                           <span key={i} className="bg-[#61677A]/20 px-2 py-1 rounded-md text-xs">
                             {tag}
                           </span>
                         ))}
+                      </div>
+                      
+                      {/* Project buttons */}
+                      <div className="flex gap-3 justify-end mt-6 mb-6">
+                        <Link to="/" className="bg-[#FFF6E0] text-[#272829] px-4 py-2 rounded-full flex items-center gap-2 hover:-translate-y-1 transition-transform duration-300">
+                          <span>View Project</span>
+                          <ExternalLink className="h-4 w-4" />
+                        </Link>
+                        <a href="https://github.com/JatinJaglan347/RadialWhisper" target="_blank" rel="noopener noreferrer" className="bg-[#272829] text-[#FFF6E0] border border-[#FFF6E0]/30 px-4 py-2 rounded-full flex items-center gap-2 hover:-translate-y-1 transition-transform duration-300 hover:bg-[#31333A]">
+                          <span>GitHub</span>
+                          <Github className="h-4 w-4" />
+                        </a>
                       </div>
                     </div>
                     
@@ -377,10 +405,16 @@ const FounderPage = () => {
                           
                           {/* Project link overlay */}
                           <div className="absolute inset-0 bg-[#272829]/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <a href="#" className="bg-[#FFF6E0] text-[#272829] px-4 py-2 rounded-full flex items-center gap-2 transform -translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                              <span>View Project</span>
-                              <ExternalLink className="h-4 w-4" />
-                            </a>
+                            <div className="flex gap-3">
+                              <Link to="/" className="bg-[#FFF6E0] text-[#272829] px-4 py-2 rounded-full flex items-center gap-2 transform -translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                                <span>View Project</span>
+                                <ExternalLink className="h-4 w-4" />
+                              </Link>
+                              <a href="https://github.com/JatinJaglan347/RadialWhisper" target="_blank" rel="noopener noreferrer" className="bg-[#272829] text-[#FFF6E0] border border-[#FFF6E0]/30 px-4 py-2 rounded-full flex items-center gap-2 transform -translate-y-4 group-hover:translate-y-0 transition-transform duration-300 hover:bg-[#31333A]">
+                                <span>GitHub</span>
+                                <Github className="h-4 w-4" />
+                              </a>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -388,7 +422,7 @@ const FounderPage = () => {
                   </div>
                 </div>
                 
-                {/* Student Hub */}
+                {/* Chitkara Connect */}
                 <div className="relative" data-aos="fade-up">
                   <div className="flex flex-col md:flex-row items-start">
                     <div className="md:w-1/2 md:pl-16 order-2">
@@ -398,19 +432,32 @@ const FounderPage = () => {
                       <span className="bg-[#FFF6E0]/10 text-[#FFF6E0] px-3 py-1 rounded-full text-xs font-medium inline-block mb-3 backdrop-blur-sm">
                         2024
                       </span>
-                      <h3 className="text-2xl font-bold mb-3 bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-transparent bg-clip-text">Student Hub</h3>
+                      <h3 className="text-2xl font-bold mb-3 bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-transparent bg-clip-text">Chitkara Connect</h3>
                       <p className="text-[#D8D9DA] leading-relaxed mb-6">
-                        A resource sharing platform for university students with features for 
-                        notes exchange, event notifications, and study group formation.
+                        Enhanced version of ChakpadPro with a more intuitive interface. Features community forums 
+                        where students can discuss and share opinions about university life, along with resource sharing 
+                        and study group formation.
                       </p>
                       
                       {/* Tags */}
                       <div className="flex flex-wrap gap-2 mb-8 md:mb-0">
-                        {["React", "Firebase", "Tailwind", "Authentication"].map((tag, i) => (
+                        {["React", "Tailwind CSS", "Node.js", "Express.js", "MongoDB"].map((tag, i) => (
                           <span key={i} className="bg-[#61677A]/20 px-2 py-1 rounded-md text-xs">
                             {tag}
                           </span>
                         ))}
+                      </div>
+                      
+                      {/* Project buttons */}
+                      <div className="flex gap-3 mt-6 mb-6">
+                        <a href="https://chitkara-connect.vercel.app/" target="_blank" rel="noopener noreferrer" className="bg-[#FFF6E0] text-[#272829] px-4 py-2 rounded-full flex items-center gap-2 hover:-translate-y-1 transition-transform duration-300">
+                          <span>View Project</span>
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
+                        <a href="https://github.com/JatinJaglan347/chitkara-connect" target="_blank" rel="noopener noreferrer" className="bg-[#272829] text-[#FFF6E0] border border-[#FFF6E0]/30 px-4 py-2 rounded-full flex items-center gap-2 hover:-translate-y-1 transition-transform duration-300 hover:bg-[#31333A]">
+                          <span>GitHub</span>
+                          <Github className="h-4 w-4" />
+                        </a>
                       </div>
                     </div>
                     
@@ -422,18 +469,24 @@ const FounderPage = () => {
                         <div className="relative">
                           <div className="bg-gradient-to-br from-[#272829] to-[#31333A] p-1">
                             <img 
-                              src="/api/placeholder/400/200" 
-                              alt="Student Hub Project Screenshot"
+                              src={chitkaraconnectimg}
+                              alt="Chitkara Connect Project Screenshot"
                               className="w-full h-auto rounded-lg filter brightness-90 group-hover:brightness-110 transition-all duration-500"
                             />
                           </div>
                           
                           {/* Project link overlay */}
                           <div className="absolute inset-0 bg-[#272829]/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <a href="#" className="bg-[#FFF6E0] text-[#272829] px-4 py-2 rounded-full flex items-center gap-2 transform -translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                              <span>View Project</span>
-                              <ExternalLink className="h-4 w-4" />
-                            </a>
+                            <div className="flex gap-3">
+                              <a href="https://chitkara-connect.vercel.app/" target='_blank' className="bg-[#FFF6E0] text-[#272829] px-4 py-2 rounded-full flex items-center gap-2 transform -translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                                <span>View Project</span>
+                                <ExternalLink className="h-4 w-4" />
+                              </a>
+                              <a href="https://github.com/JatinJaglan347/chitkara-connect" target="_blank" rel="noopener noreferrer" className="bg-[#272829] text-[#FFF6E0] border border-[#FFF6E0]/30 px-4 py-2 rounded-full flex items-center gap-2 transform -translate-y-4 group-hover:translate-y-0 transition-transform duration-300 hover:bg-[#31333A]">
+                                <span>GitHub</span>
+                                <Github className="h-4 w-4" />
+                              </a>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -441,7 +494,7 @@ const FounderPage = () => {
                   </div>
                 </div>
                 
-                {/* Weather Data Visualizer */}
+                {/* The Algo Show */}
                 <div className="relative" data-aos="fade-up">
                   <div className="flex flex-col md:flex-row items-start">
                     <div className="md:w-1/2 md:pr-16 md:text-right order-2 md:order-1">
@@ -451,19 +504,32 @@ const FounderPage = () => {
                       <span className="bg-[#FFF6E0]/10 text-[#FFF6E0] px-3 py-1 rounded-full text-xs font-medium inline-block mb-3 backdrop-blur-sm">
                         2023
                       </span>
-                      <h3 className="text-2xl font-bold mb-3 bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-transparent bg-clip-text">Weather Data Visualizer</h3>
+                      <h3 className="text-2xl font-bold mb-3 bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-transparent bg-clip-text">The Algo Show</h3>
                       <p className="text-[#D8D9DA] leading-relaxed mb-6">
-                        An interactive weather data visualization tool built with D3.js and React,
-                        featuring historical weather patterns and forecasting.
+                        An algorithm visualization platform where users can see sorting algorithms in action, 
+                        understand how they work through detailed explanations, and view implementations in 
+                        popular programming languages.
                       </p>
                       
                       {/* Tags */}
                       <div className="flex flex-wrap gap-2 justify-end">
-                        {["React", "D3.js", "API Integration", "Data Visualization"].map((tag, i) => (
+                        {["React", "JavaScript", "Tailwind CSS"].map((tag, i) => (
                           <span key={i} className="bg-[#61677A]/20 px-2 py-1 rounded-md text-xs">
                             {tag}
                           </span>
                         ))}
+                      </div>
+                      
+                      {/* Project buttons */}
+                      <div className="flex gap-3 justify-end mt-6 mb-6">
+                        <a href="https://the-algo-show.vercel.app/" target="_blank" rel="noopener noreferrer" className="bg-[#FFF6E0] text-[#272829] px-4 py-2 rounded-full flex items-center gap-2 hover:-translate-y-1 transition-transform duration-300">
+                          <span>View Project</span>
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
+                        <a href="https://github.com/JatinJaglan347/The-Algo-Show" target="_blank" rel="noopener noreferrer" className="bg-[#272829] text-[#FFF6E0] border border-[#FFF6E0]/30 px-4 py-2 rounded-full flex items-center gap-2 hover:-translate-y-1 transition-transform duration-300 hover:bg-[#31333A]">
+                          <span>GitHub</span>
+                          <Github className="h-4 w-4" />
+                        </a>
                       </div>
                     </div>
                     
@@ -475,18 +541,24 @@ const FounderPage = () => {
                         <div className="relative">
                           <div className="bg-gradient-to-br from-[#272829] to-[#31333A] p-1">
                             <img 
-                              src="/api/placeholder/400/200" 
-                              alt="Weather Data Visualizer Project Screenshot"
+                              src={thealgoshowimg} 
+                              alt="The Algo Show Project Screenshot"
                               className="w-full h-auto rounded-lg filter brightness-90 group-hover:brightness-110 transition-all duration-500"
                             />
                           </div>
                           
                           {/* Project link overlay */}
                           <div className="absolute inset-0 bg-[#272829]/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <a href="#" className="bg-[#FFF6E0] text-[#272829] px-4 py-2 rounded-full flex items-center gap-2 transform -translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                              <span>View Project</span>
-                              <ExternalLink className="h-4 w-4" />
-                            </a>
+                            <div className="flex gap-3">
+                              <a href="https://the-algo-show.vercel.app/" target='_blank' className="bg-[#FFF6E0] text-[#272829] px-4 py-2 rounded-full flex items-center gap-2 transform -translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                                <span>View Project</span>
+                                <ExternalLink className="h-4 w-4" />
+                              </a>
+                              <a href="https://github.com/JatinJaglan347/The-Algo-Show" target="_blank" rel="noopener noreferrer" className="bg-[#272829] text-[#FFF6E0] border border-[#FFF6E0]/30 px-4 py-2 rounded-full flex items-center gap-2 transform -translate-y-4 group-hover:translate-y-0 transition-transform duration-300 hover:bg-[#31333A]">
+                                <span>GitHub</span>
+                                <Github className="h-4 w-4" />
+                              </a>
+                            </div>
                           </div>
                         </div>
                       </div>
