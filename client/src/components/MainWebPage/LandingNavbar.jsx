@@ -91,6 +91,7 @@ const LandingNavbar = () => {
     { to: "/features", label: "Features", icon: <Star className="w-5 h-5" /> },
     { to: "/premium", label: "Premium", icon: <Sparkles className="w-5 h-5" /> },
     { to: "/about", label: "About", icon: <Info className="w-5 h-5" /> },
+    { to: "/anonymous", label: "Meet the Creator", icon: <Heart className="w-5 h-5" /> },
     { to: "/suggestion", label: "Suggestion", icon: <Sparkles className="w-5 h-5" /> },
     { to: "/contact", label: "Contact", icon: <MessageCircle className="w-5 h-5" /> },
   ];

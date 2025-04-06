@@ -19,6 +19,7 @@ import {
   Github,
   Linkedin,
   Twitter,
+  Heart,
 } from "lucide-react";
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -195,6 +196,17 @@ function LandingHome() {
                 </Link>
               </div>
 
+              {/* Meet the Creator link */}
+              <div className="mt-6">
+                <Link 
+                  to="/anonymous" 
+                  className="inline-flex items-center text-[#FFF6E0]/80 hover:text-[#FFF6E0] transition-colors group"
+                >
+                  <Heart className="h-4 w-4 mr-2 group-hover:text-pink-300 transition-colors" />
+                  <span className="text-sm border-b border-[#FFF6E0]/40 group-hover:border-[#FFF6E0] pb-0.5">Meet the Creator</span>
+                </Link>
+              </div>
+
               {/* Remove user stats */}
               <div className="mt-12 px-5 py-4 bg-gradient-to-r from-[#31333A]/80 to-[#31333A]/20 backdrop-blur-sm rounded-lg border border-[#61677A]/30">
                 <p className="text-[#FFF6E0] font-medium">
@@ -257,7 +269,7 @@ function LandingHome() {
         </div>
 
         {/* Curved wave divider */}
-        <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-10">
+        <div className="absolute bottom-[-40px] left-0 w-full overflow-hidden leading-none z-10">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 1200 120"
@@ -273,9 +285,9 @@ function LandingHome() {
       </div>
 
       {/* How It Works */}
-      <div className="bg-gradient-to-b from-[#61677A] to-[#4d525f] py-24 md:py-32 relative">
+      <div className="bg-gradient-to-b from-[#61677A] to-[#4d525f] py-24 md:py-32 relative mt-10">
         {/* Background pattern */}
-        <div className="absolute inset-0 opacity-5">
+        <div className="absolute inset-0 opacity-5 ">
           <div
             className="absolute inset-0"
             style={{
@@ -407,52 +419,43 @@ function LandingHome() {
               className="md:w-1/2 mb-16 md:mb-0 relative"
               data-aos="fade-right"
             >
-              <div className="relative">
-                {/* Glow effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-[#61677A] to-[#D8D9DA] rounded-lg opacity-30 blur-xl transform -translate-x-2 translate-y-2"></div>
+              <div className="relative w-full max-w-sm mx-auto md:mx-0">
+                {/* Floating glass panel effect behind phones */}
 
-                {/* First phone */}
-                <div className="relative md:absolute md:transform md:rotate-6 md:translate-x-8 md:z-10 rounded-3xl border border-[#61677A]/30 shadow-2xl transition-all duration-500 hover:rotate-0 hover:scale-105">
-                  <img
-                    src="ChatInterfacePhone1.png"
-                    alt="RadialWhisper Mobile App"
-                    className="w-full h-auto rounded-2xl"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#272829] to-transparent opacity-40 rounded-2xl"></div>
-
-                  {/* UI elements */}
-                  <div className="absolute top-8 left-1/2 transform -translate-x-1/2 bg-[#FFF6E0]/10 backdrop-blur-md px-4 py-2 rounded-full border border-[#FFF6E0]/30">
-                    <p className="text-sm text-[#FFF6E0] font-medium">
-                      5 people within 100m
-                    </p>
-                  </div>
-                </div>
-
-                {/* Second phone */}
-                <div className="hidden md:block absolute top-8 -left-12 transform -rotate-6 rounded-2xl border border-[#61677A]/30 shadow-2xl transition-all duration-500 hover:rotate-0 hover:scale-105">
-                  <img
-                    src="ChatInterfacePhone1.png"
-                    alt="RadialWhisper Mobile App Alternative View"
-                    className="w-full h-auto rounded-2xl"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#272829] to-transparent opacity-40 rounded-2xl"></div>
-
-                  {/* Chat UI element */}
-                  <div className="absolute bottom-16 inset-x-4 bg-[#272829]/80 backdrop-blur-md p-3 rounded-xl border border-[#61677A]/30">
-                    <div className="flex items-start gap-2">
-                      <div className="w-8 h-8 rounded-full bg-[#61677A] flex-shrink-0 overflow-hidden">
-                        <img
-                          src={`https://api.dicebear.com/9.x/fun-emoji/svg?seed=${seed}`}
-                          alt="User"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="bg-[#61677A]/50 px-3 py-2 rounded-lg max-w-[80%]">
-                        <p className="text-sm text-[#FFF6E0]">
-                          Hey! Are you at the north entrance?
-                        </p>
-                      </div>
+                
+                {/* Phone display area */}
+                <div className="relative p-6 md:p-10">
+                  {/* Decorative elements */}
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-[#FFF6E0]/5 rounded-full blur-lg"></div>
+                  <div className="absolute bottom-12 left-4 w-12 h-12 bg-[#FFF6E0]/10 rounded-full blur-md"></div>
+                  
+                  {/* Phone stack container */}
+                  <div className="relative">
+                    {/* Main phone (front) */}
+                    <div className="relative z-20 w-52 md:w-64 mx-auto shadow-[0_20px_50px_rgba(0,0,0,0.3)] rounded-[41px] p-0.5 border border-[#61677A]/30 transform hover:-translate-y-2 transition-all duration-300">
+                      <img
+                        src="ChatInterfacePhone1.png"
+                        alt="RadialWhisper Mobile App"
+                        className="w-full h-auto rounded-2xl"
+                      />
+                      {/* Subtle gradient overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#272829]/30 to-transparent rounded-2xl"></div>
                     </div>
+                    
+                    {/* Second phone (background) */}
+                    <div className="absolute -bottom-6 -left-8 z-10 w-48 h-auto shadow-[0_10px_30px_rgba(0,0,0,0.2)] rounded-[32px] p-0.5 border border-[#61677A]/30 transform -rotate-6 hover:-rotate-3 transition-all duration-300">
+                      <img
+                        src="ChatInterfacePhone1.png"
+                        alt="RadialWhisper Mobile App Alternative View"
+                        className="w-full h-auto rounded-2xl"
+                      />
+                      {/* Subtle gradient overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#272829]/40 to-transparent rounded-2xl"></div>
+                    </div>
+                    
+                    {/* Decorative circles */}
+                    <div className="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-[#FFF6E0]/20 animate-pulse" style={{animationDuration: '3s'}}></div>
+                    <div className="absolute -bottom-2 right-10 w-6 h-6 rounded-full bg-[#FFF6E0]/15 animate-pulse" style={{animationDuration: '4s'}}></div>
                   </div>
                 </div>
               </div>
