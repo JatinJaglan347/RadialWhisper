@@ -9,7 +9,7 @@ import { toast } from 'react-hot-toast'; // Import react-hot-toast
 import jatinjatinimg from "../assets/images/JatinJaglanImg.jpeg";
 import thealgoshowimg from "../assets/images/ProjectImges/TheAlgoShowImg.png";
 import chitkaraconnectimg from "../assets/images/ProjectImges/ChitkaraConnectImg.png";
-
+import radialwhisperimg from "../assets/images/ProjectImges/RadialWhisperImg.png";
 
 const FounderPage = () => {
   useEffect(() => {
@@ -397,7 +397,7 @@ const FounderPage = () => {
                         <div className="relative">
                           <div className="bg-gradient-to-br from-[#272829] to-[#31333A] p-1">
                             <img 
-                              src="/api/placeholder/400/200" 
+                              src={radialwhisperimg} 
                               alt="RadialWhisper Project Screenshot"
                               className="w-full h-auto rounded-lg filter brightness-90 group-hover:brightness-110 transition-all duration-500"
                             />

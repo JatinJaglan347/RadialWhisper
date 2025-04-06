@@ -227,7 +227,7 @@ function LandingHome() {
                 {/* Phone mockup with app interface */}
                 <div className="relative overflow-hidden rounded-2xl border border-[#61677A]/30 shadow-2xl">
                   <img
-                    src="image.png"
+                    src="RadialWhisper1.png"
                     alt="RadialWhisper App Interface"
                     className="w-full h-auto rounded-2xl"
                   />
