@@ -366,6 +366,11 @@ const ManageReviewsPage = () => {
     setCurrentPage(1);
   };
   
+  // Show loader while fetching data
+  if (isLoadingReviews) {
+    return <Loader />;
+  }
+  
   // Check if user is authorized to manage reviews (only king or admin)
   if (!isKing && !isAdmin) {
     return (

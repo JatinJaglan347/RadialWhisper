@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/useAuthStore.js';
 import { Star, Filter, Search, Calendar, ThumbsUp, CheckCircle, Edit2, Award, MessageSquare, BarChart2, ArrowUpDown, ChevronDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import Loader from '../components/Loader';
 
 import ReviewForm from '../components/ReviewForm';
 import ReviewItem from '../components/ReviewItem';
@@ -158,6 +159,11 @@ const Reviews = () => {
     fetchReviewStats(); // Refresh stats when a new review is added
     setActiveTab('all');
   };
+
+  // Show loader while fetching data
+  if (!fetchReviews ||  !fetchReviewStats || !reviewStats) {
+    return <Loader />;
+  }
 
   return (
     <div className="min-h-screen bg-[#272829] text-[#FFF6E0]">

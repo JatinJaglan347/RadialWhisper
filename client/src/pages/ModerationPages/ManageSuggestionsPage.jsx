@@ -155,6 +155,11 @@ const ManageSuggestionsPage = () => {
     return pageNumbers;
   };
   
+  // Show loader while fetching data
+  if (isLoading) {
+    return <Loader />;
+  }
+  
   return (
     <div className="min-h-screen bg-[#1A1B1F] text-[#FFF6E0] relative overflow-hidden max-w-screen ">
       {/* Enhanced background elements */}
@@ -273,14 +278,7 @@ const ManageSuggestionsPage = () => {
         </div>
         
         {/* Enhanced Suggestions List */}
-        {isLoading ? (
-          <div className="flex justify-center items-center py-32">
-            <div className="flex flex-col items-center">
-              <Loader size={40} className="text-[#FFF6E0] animate-spin mb-4" />
-              <p className="text-[#D8D9DA] text-lg">Loading suggestions...</p>
-            </div>
-          </div>
-        ) : filteredSuggestions.length === 0 ? (
+        {filteredSuggestions.length === 0 ? (
           <div className="bg-[#31333A]/70 backdrop-blur-md p-12 rounded-2xl border border-[#61677A]/30 text-center shadow-lg">
             <Bookmark size={60} className="mx-auto text-[#D8D9DA] mb-6 opacity-70" />
             <h3 className="text-2xl font-semibold mb-3">No suggestions found</h3>

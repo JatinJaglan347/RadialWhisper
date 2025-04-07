@@ -14,8 +14,22 @@ import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import toast from "react-hot-toast";
 import OtpVerification from "../components/OtpVerification";
+import Loader from "../components/Loader";
 
 function SignUpPage() {
+  // Get the auth store functions and state including OTP related
+  const { 
+    signup, 
+    isSigningUp, 
+    fetchPublicUserInfoRules, 
+    userInfoRules, 
+    isLoading,
+    isOtpVerified,
+    sendRegistrationOtp,
+    verifyOtp,
+    resetOtpVerification
+  } = useAuthStore();
+
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
@@ -33,28 +47,14 @@ function SignUpPage() {
   const [useLiveLocation, setUseLiveLocation] = useState(false);
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [isGenderDropdownOpen, setIsGenderDropdownOpen] = useState(false);
-
-  // Add state for OTP verification flow
-  const [registrationStep, setRegistrationStep] = useState("form"); // "form", "otp", "completed"
-  const [otp, setOtp] = useState("");  // Store OTP value for form submission
-
-  // Get the auth store functions and state including OTP related
-  const { 
-    signup, 
-    isSigningUp, 
-    fetchPublicUserInfoRules, 
-    userInfoRules, 
-    isLoading,
-    isOtpVerified,
-    sendRegistrationOtp,
-    verifyOtp,
-    resetOtpVerification
-  } = useAuthStore();
+  const [registrationStep, setRegistrationStep] = useState("form");
+  const [otp, setOtp] = useState("");
 
   // Fetch user info rules on component mount
   useEffect(() => {
     fetchPublicUserInfoRules();
   }, [fetchPublicUserInfoRules]);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -205,7 +205,6 @@ function SignUpPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     const success = validateForm();
     if (success) {
       if (registrationStep === "form") {
@@ -265,6 +264,11 @@ function SignUpPage() {
     // Immediately trigger form submission with OTP
     signup({ ...formData, otp: otpValue });
   };
+
+  // Show loader while fetching data
+  if (isLoading || !userInfoRules) {
+    return <Loader />;
+  }
 
   return (
     <div className="min-h-screen bg-[#272829] text-[#FFF6E0] relative overflow-hidden flex items-center justify-center w-full">

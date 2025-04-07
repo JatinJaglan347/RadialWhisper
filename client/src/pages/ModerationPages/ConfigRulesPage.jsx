@@ -14,6 +14,7 @@ import {
   X, 
   Save
 } from "lucide-react";
+import Loader from "../../components/Loader";
 
 function ConfigRulesPage() {
   const { authUser } = useAuthStore();
@@ -336,15 +337,9 @@ function ConfigRulesPage() {
     }
   };
 
+  // Show loader while fetching data
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[#272829] flex items-center justify-center">
-        <div className="relative">
-          <div className="w-16 h-16 rounded-full border-4 border-[#FFF6E0]/30 border-t-[#FFF6E0] animate-spin"></div>
-          <span className="mt-4 block text-[#FFF6E0]">Loading configuration...</span>
-        </div>
-      </div>
-    );
+    return <Loader />;
   }
 
   return (

@@ -55,6 +55,7 @@ import { RiUserReceivedLine } from 'react-icons/ri';
 import { GiBowTie } from 'react-icons/gi';
 import { IoCheckmark, IoCheckmarkDone } from 'react-icons/io5';
 import FriendRequestPolicyPopup from "../components/FriendRequestPolicyPopup";
+import Loader from '../components/Loader';
 
 
 const HomePage = () => {
@@ -80,6 +81,9 @@ const HomePage = () => {
     acceptFriendRequest,
     rejectFriendRequest,
     removeFriend,
+    isFetchingFriends,
+    isFetchingFriendRequests,
+    isFetchingSentRequests
   } = useAuthStore();
 
   const [locationPermissionDenied, setLocationPermissionDenied] =
@@ -1160,6 +1164,11 @@ const HomePage = () => {
       toast.info("Original message not available in chat history");
     }
   };
+
+  // Show loader while fetching data
+  if ( isFetchingFriends || isFetchingFriendRequests || isFetchingSentRequests) {
+    return <Loader />;
+  }
 
   return (
     <div

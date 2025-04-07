@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Edit3, MapPin, Cake, Hash, User, Globe, Clock, Radio, Shield, Settings } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import UpdateField from "../components/UpdateField";
+import Loader from "../components/Loader";
 
 const ProfilePage = () => {
-  const { authUser, isGettingUserInfoRules, userInfoRulesData ,  fetchPublicUserInfoRules} = useAuthStore();
+  const { authUser, isGettingUserInfoRules, userInfoRulesData, fetchPublicUserInfoRules } = useAuthStore();
   const userData = authUser?.data?.user;
 
   const [showUpdateBox, setShowUpdateBox] = useState(false);
@@ -32,33 +33,7 @@ const handleEditClick = (field, value, type) => {
     fetchPublicUserInfoRules();
   },[]);
 
-  if (!userData) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-[#272829] relative overflow-hidden">
-        {/* Background elements for loading state */}
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-[#272829] opacity-80"></div>
-          <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-[#272829] via-[#31333A] to-transparent opacity-90"></div>
-        </div>
-        
-        {/* Animated floating orbs */}
-        {/* <div className="absolute top-40 right-20 w-64 h-64 rounded-full bg-[#61677A] blur-[100px] opacity-30 animate-pulse"></div> */}
-        
-        {/* Loading animation */}
-        <div className="relative z-10 flex flex-col items-center">
-          <div className="relative mx-auto w-24 h-24 mb-6">
-            <div className="absolute inset-0 bg-gradient-to-r from-[#61677A]/30 to-[#D8D9DA]/30 rounded-full opacity-60 blur-xl"></div>
-            <div className="relative h-full flex items-center justify-center">
-              <div className="absolute w-full h-full rounded-full border-4 border-[#61677A]/40 animate-spin"></div>
-              <div className="absolute w-3/4 h-3/4 rounded-full border-4 border-[#FFF6E0]/30"></div>
-              <Radio size={30} className="text-[#FFF6E0] animate-pulse" />
-            </div>
-          </div>
-          <p className="text-xl font-semibold text-[#D8D9DA]">Loading profile...</p>
-        </div>
-      </div>
-    );
-  }
+ 
 
   // Destructure user data.
   const {
