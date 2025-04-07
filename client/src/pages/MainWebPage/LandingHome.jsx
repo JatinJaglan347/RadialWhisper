@@ -250,14 +250,14 @@ function LandingHome() {
 
                 {/* Animated notification */}
                 <div
-                  className="absolute top-1/4 right-0 transform translate-x-1/2 bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-[#272829] p-3 rounded-full shadow-lg flex items-center justify-center animate-bounce"
+                  className="absolute top-full right-0 transform translate-x-1/2 bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-[#272829] p-3 rounded-full shadow-lg flex items-center justify-center animate-bounce"
                   style={{ animationDuration: "2s" }}
                 >
                   <BellRing size={24} />
                 </div>
 
                 {/* Status indicators */}
-                <div className="absolute bottom-12 right-8 flex items-center gap-2 bg-[#272829]/80 backdrop-blur-sm px-3 py-1 rounded-full border border-[#61677A]/50">
+                <div className="absolute -top-4 -left-3 -rotate-6 bg-right-top flex items-center gap-2 bg-[#272829]/80 backdrop-blur-sm px-3 py-1 rounded-full border border-[#61677A]/50">
                   <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
                   <span className="text-xs text-[#FFF6E0]">
                     15 users nearby
