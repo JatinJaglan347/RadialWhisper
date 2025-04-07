@@ -5,6 +5,7 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import SettingsPage from "./pages/SettingsPage";
 import ProfilePage from "./pages/ProfilePage";
 import { useAuthStore } from "./store/useAuthStore.js";
@@ -214,6 +215,10 @@ function App() {
             <Route
               path="/signup"
               element={!authUser ? <SignUpPage /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/forgot-password"
+              element={!authUser ? <ForgotPasswordPage /> : <Navigate to="/login" />}
             />
 
             {/* Chat related routes with banned user check */}

@@ -200,9 +200,9 @@ function LoginPage() {
                 </button>
               </div>
               <div className="flex justify-end">
-                <a href="#" className="text-xs text-[#FFF6E0]/70 hover:text-[#FFF6E0] mt-2 transition-colors">
+                <Link to="/forgot-password" className="text-xs text-[#FFF6E0]/70 hover:text-[#FFF6E0] mt-2 transition-colors">
                   Forgot password?
-                </a>
+                </Link>
               </div>
             </div>
 

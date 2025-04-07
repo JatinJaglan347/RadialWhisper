@@ -42,6 +42,11 @@ export const useAuthStore = create((set, get) => ({
   pendingAuthUserData: null, // Store pending auth data when device prompt is shown
   pendingCredentials: null, // Store credentials when device prompt is shown
   
+  // OTP related states
+  isOtpVerified: false,
+  isSendingOtp: false,
+  isVerifyingOtp: false,
+  otpRequestCount: 0,
 
   user: null,
   isActive: false,
@@ -131,10 +136,18 @@ export const useAuthStore = create((set, get) => ({
 
       set({ authUser: res.data });
       toast.success("Account created successfully");
+      
+      // Redirect to chat after successful signup
+      setTimeout(() => {
+        window.location.href = "/chat";
+      }, 1000);
+      
+      return { success: true };
     } catch (error) {
       console.error(error);  // Log the entire error object to the console
       const errorMessage = error.response?.data?.message;
       toast.error(errorMessage);
+      return { success: false, error: errorMessage };
     } finally {
       set({ isSigninUp: false });
     }
@@ -1430,6 +1443,59 @@ fetchPublicUserInfoRules: async () => {
       toast.error(errorMessage);
       throw error;
     }
+  },
+
+  // Function to send OTP for registration
+  sendRegistrationOtp: async (email) => {
+    set({ isSendingOtp: true });
+    try {
+      const res = await axiosInstance.post('/api/v1/otp/send', { email });
+      set({ otpRequestCount: res.data.data.requestCount });
+      toast.success('OTP sent to your email');
+      return { success: true };
+    } catch (error) {
+      console.error('Error sending OTP:', error);
+      const errorMessage = error.response?.data?.message || 'Failed to send OTP';
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      set({ isSendingOtp: false });
+    }
+  },
+
+  // Function to verify OTP
+  verifyOtp: async (email, otp) => {
+    set({ isVerifyingOtp: true });
+    try {
+      const res = await axiosInstance.post('/api/v1/otp/verify', { email, otp });
+      set({ isOtpVerified: true });
+      toast.success('Email verified successfully');
+      return { success: true };
+    } catch (error) {
+      console.error('Error verifying OTP:', error);
+      const errorMessage = error.response?.data?.message || 'Invalid OTP';
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      set({ isVerifyingOtp: false });
+    }
+  },
+
+  // Function to get OTP request count for admins
+  getOtpRequestStats: async () => {
+    try {
+      const res = await axiosInstance.get('/api/v1/otp/stats');
+      set({ otpRequestCount: res.data.data.requestCount });
+      return res.data.data;
+    } catch (error) {
+      console.error('Error getting OTP stats:', error);
+      return { success: false };
+    }
+  },
+
+  // Function to reset OTP verification status
+  resetOtpVerification: () => {
+    set({ isOtpVerified: false });
   },
 
 }));

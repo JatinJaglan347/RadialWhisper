@@ -92,17 +92,34 @@ const generateAccesAndRefreshToken = async(userId, deviceInfo = null, ip = null,
 }
 
 const registerUser = asyncHandler(async (req, res) => {
-    const { fullName, email, password, gender, dateOfBirth, bio, currentLocation } = req.body;
+    const { fullName, email, password, gender, dateOfBirth, bio, currentLocation, otp } = req.body;
 
     // Validate required fields
-    if ([fullName, email, password, gender].some((field) => field?.trim() === "")) {
+    if ([fullName, email, password, gender, otp].some((field) => field?.trim() === "")) {
         throw new ApiError(400, "All fields are required");
     }
 
-    // Check if email already exists
-    const existedUser = await User.findOne({ email });
-    if (existedUser) {
-        throw new ApiError(409, "Email already taken");
+    // Verify OTP first
+    const existingUser = await User.findOne({ email });
+    
+    if (!existingUser) {
+        throw new ApiError(404, "User not found. Please request an OTP first.");
+    }
+    
+    // Check OTP verification
+    if (!existingUser.otp.verified) {
+        // Check if OTP is correct
+        if (existingUser.otp.code !== otp) {
+            throw new ApiError(401, "Invalid OTP");
+        }
+        
+        // Check if OTP has expired
+        if (existingUser.otp.expiresAt < new Date()) {
+            throw new ApiError(401, "OTP has expired");
+        }
+        
+        // Mark OTP as verified
+        existingUser.otp.verified = true;
     }
 
     // Validate currentLocation structure
@@ -119,20 +136,19 @@ const registerUser = asyncHandler(async (req, res) => {
     // Generate a unique tag
     const uniqueTag = await uniqueTagGen();
 
-    // Create the user
-    const user = await User.create({
-        fullName,
-        email,
-        password,
-        gender,
-        dateOfBirth,
-        bio,
-        currentLocation: geoCurrentLocation, // Assign GeoJSON location
-        uniqueTag,
-    });
+    // Update user with registration details
+    existingUser.fullName = fullName;
+    existingUser.password = password; // This will be hashed by the pre-save hook
+    existingUser.gender = gender;
+    existingUser.dateOfBirth = dateOfBirth;
+    existingUser.bio = bio || existingUser.bio;
+    existingUser.currentLocation = geoCurrentLocation;
+    existingUser.uniqueTag = uniqueTag;
+    
+    await existingUser.save();
 
     // Fetch created user without sensitive fields
-    const createdUser = await User.findById(user._id).select("-password -refreshToken -activeSessions");
+    const createdUser = await User.findById(existingUser._id).select("-password -refreshToken -activeSessions -otp");
 
     if (!createdUser) {
         throw new ApiError(500, "Something went wrong while registering the user");
@@ -144,7 +160,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
     // Generate access and refresh tokens with device info
     const { accessToken, refreshToken } = await generateAccesAndRefreshToken(
-        user._id, 
+        existingUser._id, 
         deviceInfo, 
         ip,
         false // No need to force logout on registration

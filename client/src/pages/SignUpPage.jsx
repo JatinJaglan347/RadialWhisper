@@ -13,6 +13,7 @@ import {
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import toast from "react-hot-toast";
+import OtpVerification from "../components/OtpVerification";
 
 function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -33,8 +34,22 @@ function SignUpPage() {
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [isGenderDropdownOpen, setIsGenderDropdownOpen] = useState(false);
 
-  // Get the auth store functions and state
-  const { signup, isSigningUp, fetchPublicUserInfoRules, userInfoRules, isLoading } = useAuthStore();
+  // Add state for OTP verification flow
+  const [registrationStep, setRegistrationStep] = useState("form"); // "form", "otp", "completed"
+  const [otp, setOtp] = useState("");  // Store OTP value for form submission
+
+  // Get the auth store functions and state including OTP related
+  const { 
+    signup, 
+    isSigningUp, 
+    fetchPublicUserInfoRules, 
+    userInfoRules, 
+    isLoading,
+    isOtpVerified,
+    sendRegistrationOtp,
+    verifyOtp,
+    resetOtpVerification
+  } = useAuthStore();
 
   // Fetch user info rules on component mount
   useEffect(() => {
@@ -60,6 +75,13 @@ function SignUpPage() {
     minAge: 18,
     maxAge: 100
   };
+
+  // Clear OTP verification on component unmount
+  useEffect(() => {
+    return () => {
+      resetOtpVerification();
+    };
+  }, [resetOtpVerification]);
 
   const handleBioSelection = (option) => {
     let selectedOptions = [...formData.bio];
@@ -185,7 +207,15 @@ function SignUpPage() {
     e.preventDefault();
 
     const success = validateForm();
-    if (success === true) signup(formData);
+    if (success) {
+      if (registrationStep === "form") {
+        // Move to OTP verification step when form is valid
+        setRegistrationStep("otp");
+      } else if (registrationStep === "completed") {
+        // Complete registration with OTP
+        signup({ ...formData, otp: document.getElementById('otp')?.value || otp });
+      }
+    }
   };
 
   const handleChange = (e) => {
@@ -227,6 +257,13 @@ function SignUpPage() {
         longitude: "",
       },
     });
+  };
+
+  // Handle OTP verification completion
+  const handleOtpVerified = (otpValue) => {
+    setOtp(otpValue);
+    // Immediately trigger form submission with OTP
+    signup({ ...formData, otp: otpValue });
   };
 
   return (
@@ -347,319 +384,329 @@ function SignUpPage() {
         </div>
 
         {/* Form */}
-        <form
-          onSubmit={handleSubmit}
-          className="bg-gradient-to-b from-[#31333A]/70 to-[#272829]/70 backdrop-blur-md rounded-2xl border border-[#61677A]/30 p-4 sm:p-6 md:p-8 shadow-2xl"
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-            {/* Full Name */}
-            <div className="form-control col-span-1">
-              <label className="text-xs sm:text-sm font-medium text-[#D8D9DA] mb-1 sm:mb-2 flex items-center">
-                <User className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 text-[#FFF6E0]/70" />
-                <span>Full Name</span>
-                <span className="ml-1 text-xs text-[#FFF6E0]/50">
-                  ({nameMinLength}-{nameMaxLength} chars)
-                </span>
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  placeholder="Enter your full name"
-                  className="w-full py-2 sm:py-3 px-3 sm:px-4 rounded-xl bg-[#272829]/80 border border-[#61677A]/50 text-[#FFF6E0] text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#FFF6E0]/20 focus:border-[#FFF6E0]/30 transition-all"
-                />
-                <div className="absolute inset-0 border border-[#FFF6E0]/5 rounded-xl pointer-events-none"></div>
-              </div>
-            </div>
-
-            {/* Email */}
-            <div className="form-control col-span-1">
-              <label className="text-xs sm:text-sm font-medium text-[#D8D9DA] mb-1 sm:mb-2 flex items-center">
-                <Mail className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 text-[#FFF6E0]/70" />
-                <span>Email</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Enter your email"
-                  className="w-full py-2 sm:py-3 px-3 sm:px-4 rounded-xl bg-[#272829]/80 border border-[#61677A]/50 text-[#FFF6E0] text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#FFF6E0]/20 focus:border-[#FFF6E0]/30 transition-all"
-                />
-                <div className="absolute inset-0 border border-[#FFF6E0]/5 rounded-xl pointer-events-none"></div>
-              </div>
-            </div>
-
-            {/* Password */}
-            <div className="form-control col-span-1">
-              <label className="text-xs sm:text-sm font-medium text-[#D8D9DA] mb-1 sm:mb-2 flex items-center">
-                <Lock className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 text-[#FFF6E0]/70" />
-                <span>Password</span>
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Enter your password"
-                  className="w-full py-2 sm:py-3 px-3 sm:px-4 rounded-xl bg-[#272829]/80 border border-[#61677A]/50 text-[#FFF6E0] text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#FFF6E0]/20 focus:border-[#FFF6E0]/30 transition-all pr-10"
-                />
-                <div className="absolute inset-0 border border-[#FFF6E0]/5 rounded-xl pointer-events-none"></div>
-                <button
-                  type="button"
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#FFF6E0]/70 h-6 w-6 sm:h-7 sm:w-7 rounded-full hover:bg-[#FFF6E0]/10 flex items-center justify-center transition-colors"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff size={16} className="sm:h-4 sm:w-4" />
-                  ) : (
-                    <Eye size={16} className="sm:h-4 sm:w-4" />
-                  )}
-                </button>
-              </div>
-              <div className="mt-1 text-xs text-[#FFF6E0]/50">
-                <ul className="list-disc ml-4">
-                  <li>At least {passwordRules.minCharLength} characters</li>
-                  {passwordRules.requireUpperCase && <li>One uppercase letter</li>}
-                  {passwordRules.requireNumber && <li>One number</li>}
-                  {passwordRules.requireSpecialChar && <li>One special character</li>}
-                </ul>
-              </div>
-            </div>
-
-            {/* Gender */}
-            <div className="form-control col-span-1">
-              <label className="text-xs sm:text-sm font-medium text-[#D8D9DA] mb-1 sm:mb-2 flex items-center">
-                <User className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 text-[#FFF6E0]/70" />
-                <span>Gender</span>
-              </label>
-              <div className="relative">
-                <div
-                  className="w-full py-2 sm:py-3 px-3 sm:px-4 rounded-xl bg-[#272829]/80 border border-[#61677A]/50 text-[#FFF6E0] text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#FFF6E0]/20 focus:border-[#FFF6E0]/30 transition-all flex justify-between items-center cursor-pointer"
-                  onClick={() => setIsGenderDropdownOpen(!isGenderDropdownOpen)}
-                >
-                  <span
-                    className={
-                      formData.gender ? "text-[#FFF6E0]" : "text-[#FFF6E0]/50"
-                    }
-                  >
-                    {formData.gender || "Select your gender"}
+        {registrationStep === "form" ? (
+          <form
+            onSubmit={handleSubmit}
+            className="bg-gradient-to-b from-[#31333A]/70 to-[#272829]/70 backdrop-blur-md rounded-2xl border border-[#61677A]/30 p-4 sm:p-6 md:p-8 shadow-2xl"
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              {/* Full Name */}
+              <div className="form-control col-span-1">
+                <label className="text-xs sm:text-sm font-medium text-[#D8D9DA] mb-1 sm:mb-2 flex items-center">
+                  <User className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 text-[#FFF6E0]/70" />
+                  <span>Full Name</span>
+                  <span className="ml-1 text-xs text-[#FFF6E0]/50">
+                    ({nameMinLength}-{nameMaxLength} chars)
                   </span>
-                  <ChevronDown
-                    size={16}
-                    className={`sm:h-4 sm:w-4 transition-transform ${
-                      isGenderDropdownOpen ? "rotate-180" : ""
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="fullName"
+                    value={formData.fullName}
+                    onChange={handleChange}
+                    placeholder="Enter your full name"
+                    className="w-full py-2 sm:py-3 px-3 sm:px-4 rounded-xl bg-[#272829]/80 border border-[#61677A]/50 text-[#FFF6E0] text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#FFF6E0]/20 focus:border-[#FFF6E0]/30 transition-all"
+                  />
+                  <div className="absolute inset-0 border border-[#FFF6E0]/5 rounded-xl pointer-events-none"></div>
+                </div>
+              </div>
+
+              {/* Email */}
+              <div className="form-control col-span-1">
+                <label className="text-xs sm:text-sm font-medium text-[#D8D9DA] mb-1 sm:mb-2 flex items-center">
+                  <Mail className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 text-[#FFF6E0]/70" />
+                  <span>Email</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="Enter your email"
+                    className="w-full py-2 sm:py-3 px-3 sm:px-4 rounded-xl bg-[#272829]/80 border border-[#61677A]/50 text-[#FFF6E0] text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#FFF6E0]/20 focus:border-[#FFF6E0]/30 transition-all"
+                  />
+                  <div className="absolute inset-0 border border-[#FFF6E0]/5 rounded-xl pointer-events-none"></div>
+                </div>
+              </div>
+
+              {/* Password */}
+              <div className="form-control col-span-1">
+                <label className="text-xs sm:text-sm font-medium text-[#D8D9DA] mb-1 sm:mb-2 flex items-center">
+                  <Lock className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 text-[#FFF6E0]/70" />
+                  <span>Password</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Enter your password"
+                    className="w-full py-2 sm:py-3 px-3 sm:px-4 rounded-xl bg-[#272829]/80 border border-[#61677A]/50 text-[#FFF6E0] text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#FFF6E0]/20 focus:border-[#FFF6E0]/30 transition-all pr-10"
+                  />
+                  <div className="absolute inset-0 border border-[#FFF6E0]/5 rounded-xl pointer-events-none"></div>
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#FFF6E0]/70 h-6 w-6 sm:h-7 sm:w-7 rounded-full hover:bg-[#FFF6E0]/10 flex items-center justify-center transition-colors"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff size={16} className="sm:h-4 sm:w-4" />
+                    ) : (
+                      <Eye size={16} className="sm:h-4 sm:w-4" />
+                    )}
+                  </button>
+                </div>
+                <div className="mt-1 text-xs text-[#FFF6E0]/50">
+                  <ul className="list-disc ml-4">
+                    <li>At least {passwordRules.minCharLength} characters</li>
+                    {passwordRules.requireUpperCase && <li>One uppercase letter</li>}
+                    {passwordRules.requireNumber && <li>One number</li>}
+                    {passwordRules.requireSpecialChar && <li>One special character</li>}
+                  </ul>
+                </div>
+              </div>
+
+              {/* Gender */}
+              <div className="form-control col-span-1">
+                <label className="text-xs sm:text-sm font-medium text-[#D8D9DA] mb-1 sm:mb-2 flex items-center">
+                  <User className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 text-[#FFF6E0]/70" />
+                  <span>Gender</span>
+                </label>
+                <div className="relative">
+                  <div
+                    className="w-full py-2 sm:py-3 px-3 sm:px-4 rounded-xl bg-[#272829]/80 border border-[#61677A]/50 text-[#FFF6E0] text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#FFF6E0]/20 focus:border-[#FFF6E0]/30 transition-all flex justify-between items-center cursor-pointer"
+                    onClick={() => setIsGenderDropdownOpen(!isGenderDropdownOpen)}
+                  >
+                    <span
+                      className={
+                        formData.gender ? "text-[#FFF6E0]" : "text-[#FFF6E0]/50"
+                      }
+                    >
+                      {formData.gender || "Select your gender"}
+                    </span>
+                    <ChevronDown
+                      size={16}
+                      className={`sm:h-4 sm:w-4 transition-transform ${
+                        isGenderDropdownOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </div>
+                  <div className="absolute inset-0 border border-[#FFF6E0]/5 rounded-xl pointer-events-none"></div>
+
+                  {isGenderDropdownOpen && genderOptions.length > 0 && (
+                    <div className="absolute z-20 mt-1 w-full py-2 bg-[#31333A] border border-[#61677A]/50 rounded-xl shadow-2xl max-h-36 sm:max-h-48 overflow-y-auto">
+                      {genderOptions.map((gender, index) => (
+                        <div
+                          key={index}
+                          className="px-3 sm:px-4 py-1.5 sm:py-2 hover:bg-[#61677A]/20 cursor-pointer transition-colors text-sm sm:text-base"
+                          onClick={() => {
+                            setFormData({ ...formData, gender });
+                            setIsGenderDropdownOpen(false);
+                          }}
+                        >
+                          {gender}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Date of Birth */}
+              <div className="form-control col-span-1">
+                <label className="text-xs sm:text-sm font-medium text-[#D8D9DA] mb-1 sm:mb-2 flex items-center">
+                  <Calendar className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 text-[#FFF6E0]/70" />
+                  <span>Date of Birth</span>
+                  <span className="ml-1 text-xs text-[#FFF6E0]/50">
+                    (Age: {ageRules.minAge}-{ageRules.maxAge})
+                  </span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="date"
+                    name="dateOfBirth"
+                    value={formData.dateOfBirth}
+                    onChange={handleChange}
+                    className="w-full py-2 sm:py-3 px-3 sm:px-4 rounded-xl bg-[#272829]/80 border border-[#61677A]/50 text-[#FFF6E0] text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#FFF6E0]/20 focus:border-[#FFF6E0]/30 transition-all"
+                  />
+                  <div className="absolute inset-0 border border-[#FFF6E0]/5 rounded-xl pointer-events-none"></div>
+                </div>
+              </div>
+
+              {/* Bio */}
+              <div className="form-control col-span-1 sm:col-span-2">
+                <label className="text-xs sm:text-sm font-medium text-[#D8D9DA] mb-2 sm:mb-3 flex items-center">
+                  <span>Choose up to {bioSelectionLimit} fields that describe you</span>
+                  <span className="ml-2 text-xs text-[#FFF6E0]/50">
+                    ({formData.bio.length}/{bioSelectionLimit} selected)
+                  </span>
+                </label>
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                  {bioOptions.map((option, index) => (
+                    <div
+                      key={index}
+                      className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-full cursor-pointer transition-all duration-300 text-xs sm:text-sm ${
+                        formData.bio.includes(option)
+                          ? "bg-gradient-to-r from-[#FFF6E0]/20 to-[#D8D9DA]/20 border border-[#FFF6E0]/30 text-[#FFF6E0]"
+                          : "bg-[#272829]/80 border border-[#61677A]/30 text-[#D8D9DA] hover:border-[#FFF6E0]/20"
+                      }`}
+                      onClick={() => handleBioSelection(option)}
+                    >
+                      {option}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Live Location */}
+              <div className="form-control col-span-1 sm:col-span-2">
+                <label className="text-xs sm:text-sm font-medium text-[#D8D9DA] mb-1 sm:mb-2 flex items-center">
+                  <MapPin className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 text-[#FFF6E0]/70" />
+                  <span>Live Location</span>
+                </label>
+                <div className="flex items-center space-x-2 bg-[#272829]/80 border border-[#61677A]/50 rounded-xl p-3 sm:p-4">
+                  <div
+                    className={`w-10 sm:w-12 h-5 sm:h-6 rounded-full p-1 cursor-pointer transition-all duration-300 flex items-center ${
+                      useLiveLocation
+                        ? "bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA]"
+                        : "bg-[#61677A]/30"
                     }`}
+                    onClick={() => {
+                      if (!useLiveLocation) handleLiveLocation();
+                      else cancelLiveLocation();
+                    }}
+                  >
+                    <div
+                      className={`bg-[#272829] w-3 sm:w-4 h-3 sm:h-4 rounded-full shadow-md transform transition-transform duration-300 ${
+                        useLiveLocation ? "translate-x-5 sm:translate-x-6" : ""
+                      }`}
+                    ></div>
+                  </div>
+                  <span className="text-[#FFF6E0]/80 text-sm sm:text-base">
+                    Use live location
+                  </span>
+                </div>
+                {useLiveLocation &&
+                  formData.currentLocation.latitude &&
+                  formData.currentLocation.longitude && (
+                    <div className="mt-1 sm:mt-2 text-xs text-[#FFF6E0]/50 flex items-center">
+                      <MapPin className="h-3 w-3 mr-1" />
+                      <span>
+                        Current Location:{" "}
+                        {formData.currentLocation.latitude.toFixed(4)},{" "}
+                        {formData.currentLocation.longitude.toFixed(4)}
+                      </span>
+                    </div>
+                  )}
+                
+                {/* Radius information notice */}
+                <div className="mt-2 p-2 bg-[#911B1C]/40 border-l-2 border-[#FFF6E0]/30 rounded-r-lg text-xs text-[#D8D9DA]/80 flex items-start">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5 text-[#FFF6E0]/70 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>Your account will be set up with a default radius of 100m. You can adjust this range from your profile settings after signing up.</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Gender disclaimer notice */}
+            <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-[#31333A]/70 border border-[#61677A]/30 rounded-xl">
+              <div className="flex items-start">
+                <div className="flex-shrink-0 mt-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#FFF6E0]/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h4 className="text-sm sm:text-base font-medium text-[#FFF6E0]/90">Gender Options Notice</h4>
+                  <p className="mt-1 text-xs sm:text-sm text-[#D8D9DA]/80 leading-relaxed">
+                    Some gender options in our list are non-traditional and intended for fun or creative user interaction only. 
+                    We respect all gender identities and expressions and do not intend to mock or diminish any person's identity. 
+                    Your selection is private and solely used for personalization within our platform.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Terms and conditions */}
+            <div className="mt-4 sm:mt-6">
+              <div className="flex items-start">
+                <div className="flex items-center h-5">
+                  <input
+                    id="terms"
+                    name="terms"
+                    type="checkbox"
+                    checked={formData.acceptedTerms || false}
+                    onChange={(e) => setFormData({ ...formData, acceptedTerms: e.target.checked })}
+                    className="h-4 w-4 sm:h-5 sm:w-5 text-[#FFF6E0] bg-[#272829] border-[#61677A] rounded focus:ring-[#FFF6E0]/30 focus:ring-offset-[#272829]"
                   />
                 </div>
-                <div className="absolute inset-0 border border-[#FFF6E0]/5 rounded-xl pointer-events-none"></div>
-
-                {isGenderDropdownOpen && genderOptions.length > 0 && (
-                  <div className="absolute z-20 mt-1 w-full py-2 bg-[#31333A] border border-[#61677A]/50 rounded-xl shadow-2xl max-h-36 sm:max-h-48 overflow-y-auto">
-                    {genderOptions.map((gender, index) => (
-                      <div
-                        key={index}
-                        className="px-3 sm:px-4 py-1.5 sm:py-2 hover:bg-[#61677A]/20 cursor-pointer transition-colors text-sm sm:text-base"
-                        onClick={() => {
-                          setFormData({ ...formData, gender });
-                          setIsGenderDropdownOpen(false);
-                        }}
-                      >
-                        {gender}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Date of Birth */}
-            <div className="form-control col-span-1">
-              <label className="text-xs sm:text-sm font-medium text-[#D8D9DA] mb-1 sm:mb-2 flex items-center">
-                <Calendar className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 text-[#FFF6E0]/70" />
-                <span>Date of Birth</span>
-                <span className="ml-1 text-xs text-[#FFF6E0]/50">
-                  (Age: {ageRules.minAge}-{ageRules.maxAge})
-                </span>
-              </label>
-              <div className="relative">
-                <input
-                  type="date"
-                  name="dateOfBirth"
-                  value={formData.dateOfBirth}
-                  onChange={handleChange}
-                  className="w-full py-2 sm:py-3 px-3 sm:px-4 rounded-xl bg-[#272829]/80 border border-[#61677A]/50 text-[#FFF6E0] text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#FFF6E0]/20 focus:border-[#FFF6E0]/30 transition-all"
-                />
-                <div className="absolute inset-0 border border-[#FFF6E0]/5 rounded-xl pointer-events-none"></div>
-              </div>
-            </div>
-
-            {/* Bio */}
-            <div className="form-control col-span-1 sm:col-span-2">
-              <label className="text-xs sm:text-sm font-medium text-[#D8D9DA] mb-2 sm:mb-3 flex items-center">
-                <span>Choose up to {bioSelectionLimit} fields that describe you</span>
-                <span className="ml-2 text-xs text-[#FFF6E0]/50">
-                  ({formData.bio.length}/{bioSelectionLimit} selected)
-                </span>
-              </label>
-              <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                {bioOptions.map((option, index) => (
-                  <div
-                    key={index}
-                    className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-full cursor-pointer transition-all duration-300 text-xs sm:text-sm ${
-                      formData.bio.includes(option)
-                        ? "bg-gradient-to-r from-[#FFF6E0]/20 to-[#D8D9DA]/20 border border-[#FFF6E0]/30 text-[#FFF6E0]"
-                        : "bg-[#272829]/80 border border-[#61677A]/30 text-[#D8D9DA] hover:border-[#FFF6E0]/20"
-                    }`}
-                    onClick={() => handleBioSelection(option)}
-                  >
-                    {option}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Live Location */}
-            <div className="form-control col-span-1 sm:col-span-2">
-              <label className="text-xs sm:text-sm font-medium text-[#D8D9DA] mb-1 sm:mb-2 flex items-center">
-                <MapPin className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 text-[#FFF6E0]/70" />
-                <span>Live Location</span>
-              </label>
-              <div className="flex items-center space-x-2 bg-[#272829]/80 border border-[#61677A]/50 rounded-xl p-3 sm:p-4">
-                <div
-                  className={`w-10 sm:w-12 h-5 sm:h-6 rounded-full p-1 cursor-pointer transition-all duration-300 flex items-center ${
-                    useLiveLocation
-                      ? "bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA]"
-                      : "bg-[#61677A]/30"
-                  }`}
-                  onClick={() => {
-                    if (!useLiveLocation) handleLiveLocation();
-                    else cancelLiveLocation();
-                  }}
-                >
-                  <div
-                    className={`bg-[#272829] w-3 sm:w-4 h-3 sm:h-4 rounded-full shadow-md transform transition-transform duration-300 ${
-                      useLiveLocation ? "translate-x-5 sm:translate-x-6" : ""
-                    }`}
-                  ></div>
+                <div className="ml-3 text-xs sm:text-sm">
+                  <label htmlFor="terms" className="font-medium text-[#D8D9DA]">
+                    I agree to the Terms and Conditions
+                  </label>
+                  <p className="text-[#D8D9DA]/70 mt-1 leading-relaxed">
+                    By creating an account, you agree to our{" "}
+                    <a
+                      href="/terms"
+                      className="text-[#FFF6E0] hover:underline"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Terms of Service
+                    </a>{" "}
+                    and{" "}
+                    <a
+                      href="/privacy"
+                      className="text-[#FFF6E0] hover:underline"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Privacy Policy
+                    </a>
+                    . We collect and process your personal data as described in our policies.
+                  </p>
                 </div>
-                <span className="text-[#FFF6E0]/80 text-sm sm:text-base">
-                  Use live location
-                </span>
               </div>
-              {useLiveLocation &&
-                formData.currentLocation.latitude &&
-                formData.currentLocation.longitude && (
-                  <div className="mt-1 sm:mt-2 text-xs text-[#FFF6E0]/50 flex items-center">
-                    <MapPin className="h-3 w-3 mr-1" />
-                    <span>
-                      Current Location:{" "}
-                      {formData.currentLocation.latitude.toFixed(4)},{" "}
-                      {formData.currentLocation.longitude.toFixed(4)}
-                    </span>
-                  </div>
+            </div>
+
+            {/* Submit button */}
+            <button
+              type="submit"
+              disabled={isSigningUp || isLoading || !formData.acceptedTerms}
+              className={`group relative overflow-hidden w-full bg-gradient-to-r ${
+                formData.acceptedTerms 
+                  ? "from-[#FFF6E0] to-[#D8D9DA] hover:from-[#D8D9DA] hover:to-[#FFF6E0] text-[#272829]" 
+                  : "from-[#61677A]/50 to-[#61677A]/30 text-[#D8D9DA]/50 cursor-not-allowed"
+              } border-none px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-xl font-medium transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl mt-6 sm:mt-8`}
+            >
+              <span className="relative z-10 flex items-center justify-center font-semibold text-sm sm:text-base">
+                {isSigningUp ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                    <span>Creating Account...</span>
+                  </>
+                ) : (
+                  "Continue to Verification"
                 )}
-              
-              {/* Radius information notice */}
-              <div className="mt-2 p-2 bg-[#911B1C]/40 border-l-2 border-[#FFF6E0]/30 rounded-r-lg text-xs text-[#D8D9DA]/80 flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5 text-[#FFF6E0]/70 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>Your account will be set up with a default radius of 100m. You can adjust this range from your profile settings after signing up.</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Gender disclaimer notice */}
-          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-[#31333A]/70 border border-[#61677A]/30 rounded-xl">
-            <div className="flex items-start">
-              <div className="flex-shrink-0 mt-1">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#FFF6E0]/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <h4 className="text-sm sm:text-base font-medium text-[#FFF6E0]/90">Gender Options Notice</h4>
-                <p className="mt-1 text-xs sm:text-sm text-[#D8D9DA]/80 leading-relaxed">
-                  Some gender options in our list are non-traditional and intended for fun or creative user interaction only. 
-                  We respect all gender identities and expressions and do not intend to mock or diminish any person's identity. 
-                  Your selection is private and solely used for personalization within our platform.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Terms and conditions */}
-          <div className="mt-4 sm:mt-6">
-            <div className="flex items-start">
-              <div className="flex items-center h-5">
-                <input
-                  id="terms"
-                  name="terms"
-                  type="checkbox"
-                  checked={formData.acceptedTerms || false}
-                  onChange={(e) => setFormData({ ...formData, acceptedTerms: e.target.checked })}
-                  className="h-4 w-4 sm:h-5 sm:w-5 text-[#FFF6E0] bg-[#272829] border-[#61677A] rounded focus:ring-[#FFF6E0]/30 focus:ring-offset-[#272829]"
-                />
-              </div>
-              <div className="ml-3 text-xs sm:text-sm">
-                <label htmlFor="terms" className="font-medium text-[#D8D9DA]">
-                  I agree to the Terms and Conditions
-                </label>
-                <p className="text-[#D8D9DA]/70 mt-1 leading-relaxed">
-                  By creating an account, you agree to our{" "}
-                  <a
-                    href="/terms"
-                    className="text-[#FFF6E0] hover:underline"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Terms of Service
-                  </a>{" "}
-                  and{" "}
-                  <a
-                    href="/privacy"
-                    className="text-[#FFF6E0] hover:underline"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Privacy Policy
-                  </a>
-                  . We collect and process your personal data as described in our policies.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Submit button */}
-          <button
-            type="submit"
-            disabled={isSigningUp || isLoading || !formData.acceptedTerms}
-            className={`group relative overflow-hidden w-full bg-gradient-to-r ${
-              formData.acceptedTerms 
-                ? "from-[#FFF6E0] to-[#D8D9DA] hover:from-[#D8D9DA] hover:to-[#FFF6E0] text-[#272829]" 
-                : "from-[#61677A]/50 to-[#61677A]/30 text-[#D8D9DA]/50 cursor-not-allowed"
-            } border-none px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-xl font-medium transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl mt-6 sm:mt-8`}
-          >
-            <span className="relative z-10 flex items-center justify-center font-semibold text-sm sm:text-base">
-              {isSigningUp ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
-                  <span>Creating Account...</span>
-                </>
-              ) : (
-                "Create Account"
+              </span>
+              {formData.acceptedTerms && (
+                <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#D8D9DA] to-[#FFF6E0] translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
               )}
-            </span>
-            {formData.acceptedTerms && (
-              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#D8D9DA] to-[#FFF6E0] translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
-            )}
-          </button>
-        </form>
+            </button>
+          </form>
+        ) : registrationStep === "otp" ? (
+          // OTP Verification
+          <div>
+            <OtpVerification 
+              email={formData.email} 
+              onVerificationComplete={handleOtpVerified} 
+            />
+          </div>
+        ) : null }
 
         {/* Sign in link */}
         <div className="text-center mt-6 sm:mt-8">
@@ -672,7 +719,6 @@ function SignUpPage() {
           </div>
         </div>
         <div className="flex justify-center items-center">
-
           <Link
             to="/login"
             className="inline-block mt-2 sm:mt-3 text-[#FFF6E0] bg-[#31333A]/50 hover:bg-[#31333A] border border-[#61677A]/30 transition-all duration-300 px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl font-medium text-sm sm:text-base"

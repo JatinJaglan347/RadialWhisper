@@ -188,6 +188,16 @@ const userSchema = new Schema({
         isActive: { type: Boolean, default: false },
         lastActive: { type: Date, default: Date.now }
       },
+      otp: {
+        code: { type: String, default: null },
+        expiresAt: { type: Date, default: null },
+        verified: { type: Boolean, default: false }
+      },
+      passwordReset: {
+        otp: { type: String, default: null },
+        expiresAt: { type: Date, default: null },
+        verified: { type: Boolean, default: false }
+      },
       banned: {
         current: {
           status: { type: Boolean, default: false },
