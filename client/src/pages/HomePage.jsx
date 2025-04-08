@@ -529,9 +529,9 @@ const HomePage = () => {
       0
     );
     if (totalUnread > 0) {
-      document.title = `(${totalUnread}) ChatApp`;
+      document.title = `(${totalUnread}) Radial Whisper`;
     } else {
-      document.title = "ChatApp";
+      document.title = "Radial Whisper";
     }
   }, [unreadMessagesBySender]);
 
