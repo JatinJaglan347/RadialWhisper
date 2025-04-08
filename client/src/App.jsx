@@ -9,7 +9,7 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import SettingsPage from "./pages/SettingsPage";
 import ProfilePage from "./pages/ProfilePage";
 import { useAuthStore } from "./store/useAuthStore.js";
-import { Ban, Loader } from "lucide-react";
+// import { Ban, Loader } from "lucide-react";
 import { Toaster } from "react-hot-toast";
 import ConfigRulesPage from "./pages/ModerationPages/ConfigRulesPage.jsx";
 import toast from "react-hot-toast";
@@ -50,6 +50,7 @@ import BannedUserPage from "./pages/BannedUserPage.jsx";
 import LandingFeatures from "./pages/MainWebPage/LandingFeatures.jsx";
 import Reviews from "./pages/Reviews.jsx";
 import OverlordPage from "./pages/ModerationPages/OverlordPage.jsx";
+import Loader from "./components/Loader.jsx";
 
 function App() {
   const {
@@ -103,9 +104,10 @@ function App() {
   }
   if (isCheckingAuth && !authUser)
     return (
-      <div className="flex items-center justify-center h-screen ">
-        <Loader className="size-10 animate-spin" />
-      </div>
+      // <div className="flex items-center justify-center h-screen ">
+      //   <Loader className="size-10 animate-spin" />
+      // </div>
+      <Loader/>
     );
 
   // Check if user has admin access for /op routes

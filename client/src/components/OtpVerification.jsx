@@ -179,7 +179,7 @@ const OtpVerification = ({ email, onVerificationComplete }) => {
             <div className="mb-6">
               <label 
                 htmlFor="otp" 
-                className="block text-xs sm:text-sm font-medium text-[#D8D9DA] mb-2 flex items-center justify-center"
+                className=" text-xs sm:text-sm font-medium text-[#D8D9DA] mb-2 flex items-center justify-center"
               >
                 <Check className="mr-1.5 h-3.5 w-3.5 text-[#FFF6E0]/70" />
                 <span>Enter 6-digit OTP</span>

@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { formatDistanceToNow } from 'date-fns';
+import Loading from '../../components/Loading';
 
 const ManageSuggestionsPage = () => {
   const { 
@@ -157,7 +158,7 @@ const ManageSuggestionsPage = () => {
   
   // Show loader while fetching data
   if (isLoading) {
-    return <Loader />;
+    return <Loading/>;
   }
   
   return (

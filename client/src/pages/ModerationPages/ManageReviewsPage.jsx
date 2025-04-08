@@ -9,6 +9,7 @@ import {
 import { useAuthStore } from '../../store/useAuthStore';
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'react-hot-toast';
+import Loading from '../../components/Loading';
 
 const ManageReviewsPage = () => {
   const { 
@@ -368,7 +369,7 @@ const ManageReviewsPage = () => {
   
   // Show loader while fetching data
   if (isLoadingReviews) {
-    return <Loader />;
+    return <Loading/>;
   }
   
   // Check if user is authorized to manage reviews (only king or admin)
