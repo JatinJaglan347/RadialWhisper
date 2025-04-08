@@ -170,6 +170,7 @@ const registerUser = asyncHandler(async (req, res) => {
     const options = {
         httpOnly: true,
         secure: true,
+        sameSite: "None"
     };
 
     // Respond with user data and tokens
@@ -269,7 +270,8 @@ const loginUser = asyncHandler(async (req, res) => {
 
         const options = {
             httpOnly: true,
-            secure: true
+            secure: true,
+            sameSite: "None"
         };
 
         // If this is a first-phase login and there are other sessions
@@ -338,7 +340,8 @@ const logoutUser = asyncHandler(async(req,res)=>{
 
     const options = {
         httpOnly: true,
-        secure: true
+        secure: true,
+        sameSite: "None"
     }
 
     return res 
@@ -414,7 +417,8 @@ const refreshAccessToken = asyncHandler(async(req, res) => {
       
       const options = {
          httpOnly: true, 
-         secure: true
+         secure: true,
+         sameSite: "None"
       }
       
       return res 
