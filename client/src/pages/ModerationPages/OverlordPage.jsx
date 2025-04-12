@@ -77,11 +77,32 @@ const OverlordPage = () => {
   const [activeSessions, setActiveSessions] = useState([]);
   const [backups, setBackups] = useState([]);
   const [backupsLoading, setBackupsLoading] = useState(false);
+  const [temporaryUsers, setTemporaryUsers] = useState([]);
+  const [tempUserLoading, setTempUserLoading] = useState(false);
+  const [tempUserSearch, setTempUserSearch] = useState('');
+  const [tempUserSortBy, setTempUserSortBy] = useState('createdAt');
+  const [tempUserSortOrder, setTempUserSortOrder] = useState('desc');
+  const [tempUserFilterType, setTempUserFilterType] = useState('temporary'); // Default to show 'Temporary User' named users
+  const [bulkDeleteLoading, setBulkDeleteLoading] = useState(false);
+  const [selectedUserIds, setSelectedUserIds] = useState([]);
+  const [dateRangeStart, setDateRangeStart] = useState('');
+  const [dateRangeEnd, setDateRangeEnd] = useState('');
+  const [temporaryUsersPagination, setTemporaryUsersPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    limit: 20,
+    totalCount: 0
+  });
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [verificationInput, setVerificationInput] = useState('');
   const [dashboardStats, setDashboardStats] = useState({
     usersCount: 0,
     sessionCount: 0,
     messagesCount: 0,
-    collectionCount: 0
+    collectionCount: 0,
+    temporaryUsersCount: 0
   });
   const { authUser } = useAuthStore();
 
@@ -119,20 +140,123 @@ const OverlordPage = () => {
     );
   }
 
-  // Dashboard data fetch - new function
+  // Dashboard data fetch - using real endpoint
   const fetchDashboardStats = async () => {
     try {
-      // This would connect to a real endpoint in production
-      // Simulating some stats for now
-      setDashboardStats({
-        usersCount: Math.floor(Math.random() * 1000) + 500,
-        sessionCount: Math.floor(Math.random() * 200) + 50,
-        messagesCount: Math.floor(Math.random() * 10000) + 1000,
-        collectionCount: Math.floor(Math.random() * 20) + 10,
-        lastBackup: new Date().toISOString()
-      });
+      const response = await api.get('/api/v1/overlord/dashboard-stats');
+      setDashboardStats(response.data.data);
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
+      toast.error(error.response?.data?.message || 'Failed to fetch dashboard statistics');
+      // Fallback to dummy data if API call fails
+      setDashboardStats({
+        usersCount: 0,
+        sessionCount: 0,
+        messagesCount: 0,
+        collectionCount: 0,
+        temporaryUsersCount: 0
+      });
+    }
+  };
+  
+  // Delete multiple users at once
+  const bulkDeleteUsers = async () => {
+    if (selectedUserIds.length === 0) {
+      toast.error('No users selected for deletion');
+      return;
+    }
+    
+    const confirmMessage = selectedUserIds.length === temporaryUsers.length ?
+      `Are you sure you want to delete ALL ${selectedUserIds.length} displayed users? This cannot be undone.` :
+      `Are you sure you want to delete ${selectedUserIds.length} selected users? This cannot be undone.`;
+      
+    if (!window.confirm(confirmMessage)) return;
+    
+    setBulkDeleteLoading(true);
+    try {
+      const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
+      
+      const verifyInput = window.prompt(
+        `Please enter this verification code to confirm bulk deletion:\n${code}`
+      );
+      
+      if (!verifyInput || verifyInput !== code) {
+        toast.error('Verification failed. Bulk deletion canceled.');
+        setBulkDeleteLoading(false);
+        return;
+      }
+      
+      // Process deletion in batches to avoid overwhelming the server
+      let successCount = 0;
+      let failCount = 0;
+      
+      // Process in batches of 5
+      for (let i = 0; i < selectedUserIds.length; i += 5) {
+        const batch = selectedUserIds.slice(i, i + 5);
+        await Promise.all(batch.map(async (userId) => {
+          try {
+            await api.post('/api/v1/overlord/delete-user', {
+              userId: userId,
+              verificationCode: code,
+              verificationInput: code
+            });
+            successCount++;
+          } catch (error) {
+            console.error(`Error deleting user ${userId}:`, error);
+            failCount++;
+          }
+        }));
+      }
+      
+      // Refresh the temporary users list
+      fetchTemporaryUsers();
+      fetchDashboardStats();
+      
+      if (successCount > 0) {
+        toast.success(`Successfully deleted ${successCount} users`);
+      }
+      
+      if (failCount > 0) {
+        toast.error(`Failed to delete ${failCount} users`);
+      }
+    } catch (error) {
+      console.error('Error in bulk delete:', error);
+      toast.error(error.response?.data?.message || 'Bulk deletion failed');
+    } finally {
+      setBulkDeleteLoading(false);
+      setSelectedUserIds([]);
+    }
+  };
+  
+  // Fetch temporary users with filtering and pagination
+  const fetchTemporaryUsers = async () => {
+    setTempUserLoading(true);
+    setSelectedUserIds([]); // Reset selected users on fetch
+    try {
+      const response = await api.post('/api/v1/overlord/temporary-users', {
+        limit: temporaryUsersPagination.limit,
+        offset: (temporaryUsersPagination.currentPage - 1) * temporaryUsersPagination.limit,
+        searchTerm: tempUserSearch,
+        sortBy: tempUserSortBy,
+        sortOrder: tempUserSortOrder,
+        filterType: tempUserFilterType,
+        dateRangeStart: dateRangeStart || undefined,
+        dateRangeEnd: dateRangeEnd || undefined
+      });
+      
+      setTemporaryUsers(response.data.data.users);
+      setTemporaryUsersPagination({
+        ...temporaryUsersPagination,
+        totalCount: response.data.data.totalCount,
+        totalPages: response.data.data.totalPages,
+        currentPage: response.data.data.currentPage || 1
+      });
+      
+    } catch (error) {
+      console.error('Error fetching temporary users:', error);
+      toast.error(error.response?.data?.message || 'Failed to fetch temporary users');
+    } finally {
+      setTempUserLoading(false);
     }
   };
 
@@ -217,24 +341,52 @@ const OverlordPage = () => {
     }
   };
 
-  // Delete user account
-  const deleteUser = async () => {
+  // Generate random verification code
+  const generateVerificationCode = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
+  };
+  
+  // Show delete confirmation modal
+  const showDeleteConfirmationModal = () => {
     if (!selectedUser?._id) {
       toast.error('No user selected');
       return;
     }
-
-    const confirm = window.confirm(`Are you sure you want to permanently delete ${selectedUser.fullName}? This action cannot be undone.`);
-    if (!confirm) return;
+    
+    // Generate verification code
+    setVerificationCode(generateVerificationCode());
+    setVerificationInput('');
+    setUserToDelete(selectedUser);
+    setShowDeleteConfirmation(true);
+  };
+  
+  // Delete user account with verification
+  const deleteUser = async () => {
+    if (!userToDelete?._id || !verificationCode || !verificationInput) {
+      toast.error('Verification information missing');
+      return;
+    }
 
     setLoading(true);
     try {
       await api.post('/api/v1/overlord/delete-user', {
-        userId: selectedUser._id
+        userId: userToDelete._id,
+        verificationCode,
+        verificationInput
       });
+      
+      // If the deleted user was in the temporary users list, remove them from the list
+      if (activeTab === 'temporaryUsers') {
+        setTemporaryUsers(prev => prev.filter(user => user._id !== userToDelete._id));
+      }
       
       toast.success('User deleted successfully');
       setSelectedUser(null);
+      setShowDeleteConfirmation(false);
+      setUserToDelete(null);
+      
+      // Refresh dashboard stats if needed
+      fetchDashboardStats();
     } catch (error) {
       console.error('Error deleting user:', error);
       toast.error(error.response?.data?.message || 'Failed to delete user');
@@ -431,6 +583,11 @@ const OverlordPage = () => {
     }
   };
 
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchDashboardStats();
+  }, []);
+
   // Fetch collections when tab changes
   useEffect(() => {
     if (activeTab === 'database') {
@@ -438,6 +595,8 @@ const OverlordPage = () => {
       fetchBackups();
     } else if (activeTab === 'security') {
       fetchActiveSessions();
+    } else if (activeTab === 'temporaryUsers') {
+      fetchTemporaryUsers();
     }
   }, [activeTab]);
 
@@ -458,6 +617,90 @@ const OverlordPage = () => {
 
   return (
     <div className="min-h-screen bg-[#1A1B1F] text-[#FFF6E0] relative overflow-hidden">
+      {/* Delete User Confirmation Modal */}
+      {showDeleteConfirmation && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-gradient-to-br from-[#272829] to-[#31333A] rounded-xl border border-red-900/30 shadow-2xl max-w-md w-full p-6 animate-fadeIn">
+            <div className="flex justify-between items-start mb-4">
+              <h3 className="text-xl font-bold text-[#FFF6E0]">Delete User Confirmation</h3>
+              <button 
+                onClick={() => setShowDeleteConfirmation(false)}
+                className="text-[#FFF6E0]/70 hover:text-[#FFF6E0] transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="bg-red-900/20 p-4 rounded-lg border border-red-900/30">
+                <div className="flex items-center gap-3 mb-2">
+                  <AlertCircle className="h-5 w-5 text-red-400" />
+                  <span className="font-semibold text-red-400">This action cannot be undone</span>
+                </div>
+                <p className="text-sm text-[#FFF6E0]/80">
+                  You are about to permanently delete user {userToDelete?.fullName || 'Unknown'}. This will remove all their data from the system.
+                </p>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-2 text-[#FFF6E0]/80">Verification Required</label>
+                <p className="text-xs mb-3 text-[#FFF6E0]/60">
+                  To confirm deletion, enter the 6-digit code below, the user's email, or their unique tag.
+                </p>
+                
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="bg-[#1A1B1F] p-3 rounded-lg font-mono text-center border border-red-900/30 text-red-400">
+                    {verificationCode}
+                  </div>
+                  <div className="text-xs text-[#FFF6E0]/60">
+                    <p>Email: {userToDelete?.email}</p>
+                    <p>Unique Tag: {userToDelete?.uniqueTag}</p>
+                  </div>
+                </div>
+                
+                <input 
+                  type="text" 
+                  className="w-full bg-[#1A1B1F] border border-red-900/30 text-[#FFF6E0]/90 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-red-700/50"
+                  placeholder="Enter verification code, email, or unique tag"
+                  value={verificationInput}
+                  onChange={(e) => setVerificationInput(e.target.value)}
+                />
+              </div>
+              
+              <div className="flex gap-3 pt-2">
+                <button 
+                  onClick={() => setShowDeleteConfirmation(false)}
+                  className="flex-1 px-4 py-3 bg-[#1A1B1F] hover:bg-[#31333A] text-[#FFF6E0]/90 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={deleteUser}
+                  disabled={loading || !verificationInput}
+                  className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2 ${
+                    loading || !verificationInput
+                      ? 'bg-red-900/30 text-red-400/50 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-red-700 to-red-900 text-[#FFF6E0] hover:from-red-600 hover:to-red-800'
+                  }`}
+                >
+                  {loading ? (
+                    <>
+                      <RefreshCw className="h-5 w-5 animate-spin" />
+                      <span>Processing</span>
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="h-5 w-5" />
+                      <span>Delete User</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Background elements */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-[#1A1B1F] opacity-95"></div>
@@ -510,7 +753,7 @@ const OverlordPage = () => {
       </header>
 
         {/* Navigation Tabs */}
-        <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4">
+        <div className="mb-8 grid grid-cols-1 md:grid-cols-4 gap-2 md:gap-4">
         <button
             className={`py-3 px-4 rounded-xl transition-all duration-300 flex flex-col items-center justify-center ${
               activeTab === 'user' 
@@ -521,6 +764,23 @@ const OverlordPage = () => {
         >
             <Users size={24} className={activeTab === 'user' ? 'mb-1 text-red-300' : 'mb-1'} />
             <span className="text-sm font-medium">User Control</span>
+        </button>
+        
+        <button
+            className={`py-3 px-4 rounded-xl transition-all duration-300 flex flex-col items-center justify-center ${
+              activeTab === 'temporaryUsers' 
+                ? 'bg-gradient-to-br from-red-800 to-red-900 text-[#FFF6E0] shadow-lg shadow-red-900/30' 
+                : 'bg-[#272829]/60 hover:bg-[#272829]/90 text-[#FFF6E0]/70 hover:text-[#FFF6E0]'
+            }`}
+          onClick={() => setActiveTab('temporaryUsers')}
+        >
+            <UserPlus size={24} className={activeTab === 'temporaryUsers' ? 'mb-1 text-red-300' : 'mb-1'} />
+            <span className="text-sm font-medium">Temporary Users</span>
+            {dashboardStats.temporaryUsersCount > 0 && (
+              <span className="mt-1 px-2 py-0.5 bg-red-500/30 text-red-400 text-xs rounded-full">
+                {dashboardStats.temporaryUsersCount}
+              </span>
+            )}
         </button>
           
         <button
@@ -545,11 +805,376 @@ const OverlordPage = () => {
         >
             <Shield size={24} className={activeTab === 'security' ? 'mb-1 text-red-300' : 'mb-1'} />
             <span className="text-sm font-medium">Security</span>
-          </button>
-          
-         
+        </button>
       </div>
 
+        {/* Temporary Users Tab */}
+        {activeTab === 'temporaryUsers' && (
+          <div className="space-y-6">
+            {/* Temporary Users Header */}
+            <div className="bg-gradient-to-br from-[#272829]/90 to-[#31333A]/90 backdrop-blur-md p-6 rounded-xl border border-red-900/20 shadow-lg">
+              <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+                <div>
+                  <h2 className="text-xl font-bold flex items-center mb-2">
+                    <UserPlus className="mr-3 text-red-400" /> Temporary Users
+                  </h2>
+                  <p className="text-[#FFF6E0]/70 max-w-xl">
+                    Manage users with pending verification. These users have registered but have not completed email verification.
+                  </p>
+                </div>
+                
+                <div className="flex gap-3">
+                  <button
+                    onClick={fetchTemporaryUsers}
+                    className="px-4 py-2 bg-[#1A1B1F] hover:bg-[#1A1B1F]/80 text-[#FFF6E0]/90 rounded-lg transition-colors flex items-center gap-2"
+                    disabled={tempUserLoading}
+                  >
+                    <RefreshCw className={`h-4 w-4 ${tempUserLoading ? 'animate-spin' : ''}`} />
+                    <span>Refresh</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            {/* Temporary Users Filtering and Table */}
+            <div className="bg-gradient-to-br from-[#272829]/90 to-[#31333A]/90 backdrop-blur-md p-6 rounded-xl border border-red-900/20 shadow-lg">
+              <div className="flex flex-col gap-4 mb-6">
+                {/* Header with title and bulk delete button */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                  <div>
+                    <h3 className="text-lg font-semibold">
+                      {temporaryUsersPagination.totalCount > 0 ? `${temporaryUsersPagination.totalCount} Temporary Users Found` : 'No Temporary Users Found'}
+                    </h3>
+                    {selectedUserIds.length > 0 && (
+                      <p className="text-sm text-red-400 mt-1">{selectedUserIds.length} users selected for deletion</p>
+                    )}
+                  </div>
+                  
+                  <div>
+                    {selectedUserIds.length > 0 && (
+                      <button
+                        onClick={bulkDeleteUsers}
+                        disabled={bulkDeleteLoading}
+                        className={`w-full md:w-auto px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 ${bulkDeleteLoading ? 'bg-red-900/30 text-red-400/50 cursor-not-allowed' : 'bg-red-900/20 hover:bg-red-900/40 text-red-400 border border-red-900/30'}`}
+                      >
+                        {bulkDeleteLoading ? (
+                          <>
+                            <RefreshCw className="h-4 w-4 animate-spin" />
+                            <span>Deleting...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Trash2 className="h-4 w-4" />
+                            <span>Delete Selected ({selectedUserIds.length})</span>
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Search section */}
+                <div className="w-full">
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    fetchTemporaryUsers();
+                  }}>
+                    <div className="flex w-full">
+                      <div className="relative flex-grow">
+                        <input
+                          type="text"
+                          placeholder="Search by name, email, or tag..."
+                          value={tempUserSearch}
+                          onChange={(e) => setTempUserSearch(e.target.value)}
+                          className="w-full pl-10 pr-4 py-2 bg-[#1A1B1F] border border-red-900/30 text-[#FFF6E0]/90 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-700/50"
+                        />
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#FFF6E0]/50" />
+                      </div>
+                      <button
+                        type="submit"
+                        className="ml-2 px-4 py-2 bg-red-900/20 hover:bg-red-900/30 border border-red-900/30 text-[#FFF6E0]/90 rounded-lg focus:outline-none transition-colors"
+                      >
+                        Search
+                      </button>
+                    </div>
+                  </form>
+                </div>
+                
+                {/* Filter controls */}
+                <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-3">
+                    {/* Date Range Filter */}
+                    <div className="flex flex-col gap-1 w-full">
+                      <label className="text-xs text-[#FFF6E0]/60">Date Range</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="date"
+                          value={dateRangeStart}
+                          onChange={(e) => setDateRangeStart(e.target.value)}
+                          className="flex-1 px-2 py-1 bg-[#1A1B1F] border border-red-900/30 text-[#FFF6E0]/90 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-700/50"
+                          placeholder="From"
+                        />
+                        <span className="text-[#FFF6E0]/60 whitespace-nowrap">to</span>
+                        <input
+                          type="date"
+                          value={dateRangeEnd}
+                          onChange={(e) => setDateRangeEnd(e.target.value)}
+                          className="flex-1 px-2 py-1 bg-[#1A1B1F] border border-red-900/30 text-[#FFF6E0]/90 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-700/50"
+                          placeholder="To"
+                        />
+                      </div>
+                    </div>
+                    
+                    
+                  
+                    {/* Sort and Filter Controls */}
+                    <div className="flex flex-col gap-1 w-full">
+                      <label className="text-xs text-[#FFF6E0]/60">User Type & Sorting</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {/* User Type Filter */}
+                        <select
+                          value={tempUserFilterType}
+                          onChange={(e) => {
+                            setTempUserFilterType(e.target.value);
+                            setTemporaryUsersPagination({
+                              ...temporaryUsersPagination,
+                              currentPage: 1
+                            });
+                          }}
+                          className="w-full px-3 py-2 bg-[#1A1B1F] border border-red-900/30 text-[#FFF6E0]/90 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-700/50"
+                        >
+                          <option value="temporary">Temporary Users</option>
+                          <option value="unverified">Unverified Users</option>
+                          <option value="both">All Temporary Users</option>
+                        </select>
+
+                        {/* Sort Direction Toggle */}
+                        <button
+                          onClick={() => setTempUserSortOrder(tempUserSortOrder === 'asc' ? 'desc' : 'asc')}
+                          className="px-3 py-2 bg-[#1A1B1F] border border-red-900/30 text-[#FFF6E0]/90 rounded-lg focus:outline-none hover:bg-[#31333A] transition-colors"
+                        >
+                          {tempUserSortOrder === 'asc' ? '↑ Ascending' : '↓ Descending'}
+                        </button>
+                        
+                        {/* Sort By Field */}
+                        <select
+                          value={tempUserSortBy}
+                          onChange={(e) => setTempUserSortBy(e.target.value)}
+                          className="col-span-2 mt-2 w-full px-3 py-2 bg-[#1A1B1F] border border-red-900/30 text-[#FFF6E0]/90 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-700/50"
+                        >
+                          <option value="createdAt">Sort by: Date</option>
+                          <option value="fullName">Sort by: Name</option>
+                          <option value="email">Sort by: Email</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    {/* Filter Action Buttons */}
+                    <div className="flex flex-col gap-1 w-full">
+                      <label className="text-xs text-[#FFF6E0]/60">Actions</label>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={fetchTemporaryUsers}
+                          className="flex-1 px-4 py-2 bg-red-900/20 hover:bg-red-900/40 border border-red-900/30 text-[#FFF6E0]/90 rounded-lg focus:outline-none transition-colors font-medium"
+                        >
+                          Apply Filters
+                        </button>
+                        
+                        <button
+                          onClick={() => {
+                            setTempUserSearch('');
+                            setTempUserSortBy('createdAt');
+                            setTempUserSortOrder('desc');
+                            setTempUserFilterType('temporary'); // Reset to default filter
+                            setDateRangeStart('');
+                            setDateRangeEnd('');
+                            setTemporaryUsersPagination({
+                              ...temporaryUsersPagination,
+                              currentPage: 1
+                            });
+                            fetchTemporaryUsers();
+                          }}
+                          className="flex-1 px-3 py-2 bg-[#1A1B1F] border border-red-900/30 text-[#FFF6E0]/90 rounded-lg focus:outline-none hover:bg-[#31333A] transition-colors"
+                        >
+                          Reset All
+                        </button>
+                      </div>
+                    </div>
+                </div>
+              </div>
+              
+              {/* User table section */}
+              {tempUserLoading ? (
+                <div className="flex justify-center py-12">
+                  <div className="flex flex-col items-center">
+                    <RefreshCw className="h-10 w-10 text-red-400 animate-spin mb-4" />
+                    <span className="text-[#FFF6E0]/70">Loading temporary users...</span>
+                  </div>
+                </div>
+              ) : temporaryUsers.length > 0 ? (
+                <div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-[#FFF6E0]/90">
+                      <thead className="bg-[#1A1B1F]">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-[#FFF6E0]/60 uppercase tracking-wider">
+                            <div className="flex items-center">
+                              <input
+                                type="checkbox"
+                                checked={temporaryUsers.length > 0 && selectedUserIds.length === temporaryUsers.length}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedUserIds(temporaryUsers.map(user => user._id));
+                                  } else {
+                                    setSelectedUserIds([]);
+                                  }
+                                }}
+                                className="mr-2 h-4 w-4 bg-[#1A1B1F] border border-red-900/30 rounded-sm focus:ring-red-500 text-red-600 focus:ring-2"
+                              />
+                              <span>User</span>
+                            </div>
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-[#FFF6E0]/60 uppercase tracking-wider">Email</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-[#FFF6E0]/60 uppercase tracking-wider">Unique Tag</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-[#FFF6E0]/60 uppercase tracking-wider">Registered</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-[#FFF6E0]/60 uppercase tracking-wider">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-red-900/10">
+                        {temporaryUsers.map(user => (
+                          <tr key={user._id} className="hover:bg-[#1A1B1F]/50">
+                            <td className="px-4 py-4">
+                              <div className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedUserIds.includes(user._id)}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setSelectedUserIds([...selectedUserIds, user._id]);
+                                    } else {
+                                      setSelectedUserIds(selectedUserIds.filter(id => id !== user._id));
+                                    }
+                                  }}
+                                  className="mr-3 h-4 w-4 bg-[#1A1B1F] border border-red-900/30 rounded-sm focus:ring-red-500 text-red-600 focus:ring-2"
+                                />
+                                <div className="h-10 w-10 rounded-full bg-[#1A1B1F] flex items-center justify-center text-sm font-semibold mr-3">
+                                  {user.fullName.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                  <div className="font-medium">{user.fullName}</div>
+                                  <div className="text-sm text-[#FFF6E0]/60">{user.gender || 'Not specified'}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-4 py-4">
+                              <div className="text-sm">{user.email}</div>
+                            </td>
+                            <td className="px-4 py-4">
+                              <div className="text-sm font-mono bg-[#1A1B1F] inline-block px-2 py-1 rounded">{user.uniqueTag}</div>
+                            </td>
+                            <td className="px-4 py-4">
+                              <div className="text-sm">{new Date(user.createdAt).toLocaleString()}</div>
+                            </td>
+                            <td className="px-4 py-4">
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => {
+                                    setSelectedUser(user);
+                                    setActiveTab('user');
+                                  }}
+                                  className="p-2 bg-[#1A1B1F] hover:bg-[#31333A] rounded-lg transition-colors"
+                                  title="View Details"
+                                >
+                                  <Eye className="h-4 w-4 text-blue-400" />
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setSelectedUser(user);
+                                    showDeleteConfirmationModal();
+                                  }}
+                                  className="p-2 bg-red-900/20 hover:bg-red-900/40 rounded-lg transition-colors"
+                                  title="Delete User"
+                                >
+                                  <Trash2 className="h-4 w-4 text-red-400" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  {/* Pagination Controls */}
+                  {temporaryUsersPagination.totalPages > 1 && (
+                    <div className="flex justify-between items-center mt-6">
+                      <div className="text-sm text-[#FFF6E0]/60">
+                        Showing {((temporaryUsersPagination.currentPage - 1) * temporaryUsersPagination.limit) + 1} to {Math.min(temporaryUsersPagination.currentPage * temporaryUsersPagination.limit, temporaryUsersPagination.totalCount)} of {temporaryUsersPagination.totalCount} users
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            if (temporaryUsersPagination.currentPage > 1) {
+                              setTemporaryUsersPagination({
+                                ...temporaryUsersPagination,
+                                currentPage: temporaryUsersPagination.currentPage - 1
+                              });
+                              fetchTemporaryUsers();
+                            }
+                          }}
+                          disabled={temporaryUsersPagination.currentPage === 1}
+                          className={`px-3 py-1.5 rounded-lg transition-colors ${temporaryUsersPagination.currentPage === 1 ? 'bg-[#1A1B1F]/50 text-[#FFF6E0]/30 cursor-not-allowed' : 'bg-[#1A1B1F] hover:bg-[#31333A] text-[#FFF6E0]/90'}`}
+                        >
+                          Previous
+                        </button>
+                        {Array.from({ length: temporaryUsersPagination.totalPages }, (_, i) => i + 1).map(page => (
+                          <button
+                            key={page}
+                            onClick={() => {
+                              if (page !== temporaryUsersPagination.currentPage) {
+                                setTemporaryUsersPagination({
+                                  ...temporaryUsersPagination,
+                                  currentPage: page
+                                });
+                                fetchTemporaryUsers();
+                              }
+                            }}
+                            className={`w-8 h-8 rounded-lg transition-colors ${page === temporaryUsersPagination.currentPage ? 'bg-gradient-to-br from-red-800 to-red-900 text-[#FFF6E0]' : 'bg-[#1A1B1F] hover:bg-[#31333A] text-[#FFF6E0]/90'}`}
+                          >
+                            {page}
+                          </button>
+                        ))}
+                        <button
+                          onClick={() => {
+                            if (temporaryUsersPagination.currentPage < temporaryUsersPagination.totalPages) {
+                              setTemporaryUsersPagination({
+                                ...temporaryUsersPagination,
+                                currentPage: temporaryUsersPagination.currentPage + 1
+                              });
+                              fetchTemporaryUsers();
+                            }
+                          }}
+                          disabled={temporaryUsersPagination.currentPage === temporaryUsersPagination.totalPages}
+                          className={`px-3 py-1.5 rounded-lg transition-colors ${temporaryUsersPagination.currentPage === temporaryUsersPagination.totalPages ? 'bg-[#1A1B1F]/50 text-[#FFF6E0]/30 cursor-not-allowed' : 'bg-[#1A1B1F] hover:bg-[#31333A] text-[#FFF6E0]/90'}`}
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-[#1A1B1F] rounded-lg p-8 flex flex-col items-center justify-center text-center">
+                  <UserPlus className="h-16 w-16 text-[#FFF6E0]/10 mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No Temporary Users Found</h3>
+                  <p className="text-[#FFF6E0]/60 max-w-md">
+                    There are currently no users with pending verification. All users have completed their signup process.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        
         {/* Dashboard Tab */}
         {activeTab === 'dashboard' && (
           <div className="space-y-6">
@@ -842,7 +1467,7 @@ const OverlordPage = () => {
                     </button>
                         
                     <button
-                      onClick={deleteUser}
+                      onClick={showDeleteConfirmationModal}
                           className="w-full flex items-center justify-between px-4 py-3 bg-red-900/20 hover:bg-red-900/40 rounded-lg transition-colors text-[#FFF6E0]/90"
                         >
                           <span className="flex items-center">
@@ -1387,4 +2012,4 @@ const OverlordPage = () => {
   );
 };
 
-export default OverlordPage; 
+export default OverlordPage;

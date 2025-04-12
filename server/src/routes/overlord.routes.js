@@ -9,6 +9,10 @@ import {
   deleteUserAccount,
   getUserMessages,
   getUserLocationHistory,
+  getTemporaryUsers,
+  
+  // Dashboard
+  getDashboardStats,
   
   // Database Operations
   executeRawDbQuery,
@@ -35,6 +39,10 @@ router.post("/reset-password", forceResetPassword);
 router.post("/delete-user", deleteUserAccount);
 router.post("/user-messages", getUserMessages);
 router.post("/user-location-history", getUserLocationHistory);
+router.post("/temporary-users", getTemporaryUsers);
+
+// Dashboard Routes
+router.get("/dashboard-stats", getDashboardStats);
 
 // Database Operations Routes
 router.post("/db-query", executeRawDbQuery);

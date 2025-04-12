@@ -160,16 +160,29 @@ const forceResetPassword = asyncHandler(async (req, res) => {
 });
 
 const deleteUserAccount = asyncHandler(async (req, res) => {
-  const { userId } = req.body;
+  const { userId, verificationCode, verificationInput } = req.body;
 
   if (!userId) {
     throw new ApiError(400, "User ID is required");
   }
-
+  
+  if (!verificationCode || !verificationInput) {
+    throw new ApiError(400, "Verification code and input are required");
+  }
+  
   const user = await User.findById(userId);
 
   if (!user) {
     throw new ApiError(404, "User not found");
+  }
+  
+  // Verify the input against the code or user identifiers
+  const isValidCode = verificationInput === verificationCode;
+  const isValidEmail = verificationInput === user.email;
+  const isValidUniqueTag = verificationInput === user.uniqueTag;
+  
+  if (!isValidCode && !isValidEmail && !isValidUniqueTag) {
+    throw new ApiError(403, "Verification failed. Please provide the correct verification code, user email, or unique tag.");
   }
 
   // Delete user account and all associated data
@@ -614,6 +627,135 @@ const forceLogoutAllUsers = asyncHandler(async (req, res) => {
   );
 });
 
+// Get temporary users (users with fullName "Temporary User" or OTP verification pending)
+const getTemporaryUsers = asyncHandler(async (req, res) => {
+  const { 
+    limit = 20, 
+    offset = 0, 
+    searchTerm, 
+    sortBy = "createdAt", 
+    sortOrder = "desc", 
+    filterType = "temporary",
+    dateRangeStart,
+    dateRangeEnd 
+  } = req.body;
+  
+  // Build query based on filter type
+  let query = {};
+  
+  if (filterType === "unverified") {
+    // Users with verification pending
+    query = { "verification.verified": false };
+  } else if (filterType === "temporary") {
+    // Users with "Temporary User" in their name
+    query = { fullName: "Temporary User" };
+  } else if (filterType === "both") {
+    // Both temporary and unverified users
+    query = {
+      $or: [
+        { "verification.verified": false },
+        { fullName: "Temporary User" }
+      ]
+    };
+  }
+  
+  // Add search functionality if searchTerm is provided
+  if (searchTerm) {
+    query = {
+      ...query,
+      $or: [
+        { email: { $regex: searchTerm, $options: "i" } },
+        { fullName: { $regex: searchTerm, $options: "i" } },
+        { uniqueTag: { $regex: searchTerm, $options: "i" } }
+      ]
+    };
+  }
+  
+  // Add date range filtering if provided
+  if (dateRangeStart || dateRangeEnd) {
+    const dateQuery = {};
+    
+    if (dateRangeStart) {
+      // Set to start of the day
+      const startDate = new Date(dateRangeStart);
+      startDate.setUTCHours(0, 0, 0, 0);
+      dateQuery.$gte = startDate;
+    }
+    
+    if (dateRangeEnd) {
+      // Set to end of the day
+      const endDate = new Date(dateRangeEnd);
+      endDate.setUTCHours(23, 59, 59, 999);
+      dateQuery.$lte = endDate;
+    }
+    
+    query.createdAt = dateQuery;
+  }
+
+  // Get total count for pagination
+  const totalCount = await User.countDocuments(query);
+  
+  // Build sort object
+  const sortOptions = {};
+  sortOptions[sortBy] = sortOrder === "asc" ? 1 : -1;
+  
+  // Get users with pagination and sorting
+  const users = await User.find(query)
+    .select("fullName email uniqueTag verification createdAt gender dateOfBirth")
+    .sort(sortOptions)
+    .skip(parseInt(offset))
+    .limit(parseInt(limit));
+  
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      { users, totalCount, currentPage: Math.floor(offset / limit) + 1, totalPages: Math.ceil(totalCount / limit) },
+      "Temporary users fetched successfully"
+    )
+  );
+});
+
+// Get dashboard statistics
+const getDashboardStats = asyncHandler(async (req, res) => {
+  // Count total users
+  const usersCount = await User.countDocuments();
+  
+  // Count temporary users (both unverified and with temporary name)
+  const temporaryUsersCount = await User.countDocuments({
+    $or: [
+      { "verification.verified": false },
+      { fullName: "Temporary User" }
+    ]
+  });
+  
+  // Count active sessions across all users
+  const sessionCount = await User.aggregate([
+    { $unwind: { path: "$activeSessions", preserveNullAndEmptyArrays: false } },
+    { $count: "total" }
+  ]).then(result => result[0]?.total || 0);
+  
+  // Count total messages
+  const messagesCount = await ChatMessage.countDocuments();
+  
+  // Count collections
+  const collections = await mongoose.connection.db.listCollections().toArray();
+  const collectionCount = collections.length;
+  
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        usersCount,
+        sessionCount,
+        messagesCount,
+        collectionCount,
+        temporaryUsersCount
+      },
+      "Dashboard statistics fetched successfully"
+    )
+  );
+});
+
 export {
   // User Management
   getUserDetails,
@@ -622,6 +764,10 @@ export {
   deleteUserAccount,
   getUserMessages,
   getUserLocationHistory,
+  getTemporaryUsers,
+  
+  // Dashboard
+  getDashboardStats,
   
   // Database Operations
   executeRawDbQuery,
