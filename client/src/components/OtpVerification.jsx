@@ -80,7 +80,7 @@ const OtpVerification = ({ email, onVerificationComplete }) => {
       }
     } catch (error) {
       console.error('Error verifying OTP:', error);
-      toast.error(error.response?.data?.message || 'Invalid OTP');
+      // toast.error(error.response?.data?.message || 'Invalid OTP');
     } finally {
       setIsSubmitting(false);
     }

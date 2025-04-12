@@ -114,6 +114,11 @@ const userInfoRulesSchema = new Schema({
           default: 200,
         },
   },
+  isSignupOtpRequired:{
+    type: Boolean,
+     
+    default: true,
+  },
 
 });
 

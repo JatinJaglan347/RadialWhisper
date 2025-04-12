@@ -75,6 +75,7 @@ function SignUpPage() {
     minAge: 18,
     maxAge: 100
   };
+  const isSignupOtpRequired = userInfoRules?.isSignupOtpRequired !== false;
 
   // Clear OTP verification on component unmount
   useEffect(() => {
@@ -204,18 +205,21 @@ function SignUpPage() {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    const success = validateForm();
-    if (success) {
-      if (registrationStep === "form") {
-        // Move to OTP verification step when form is valid
-        setRegistrationStep("otp");
-      } else if (registrationStep === "completed") {
-        // Complete registration with OTP
-        signup({ ...formData, otp: document.getElementById('otp')?.value || otp });
-      }
+  e.preventDefault();
+  const success = validateForm();
+  if (success) {
+    if (!isSignupOtpRequired) {
+      // If OTP is not required, directly proceed with signup
+      signup({ ...formData });
+    } else if (registrationStep === "form") {
+      // Move to OTP verification step when form is valid
+      setRegistrationStep("otp");
+    } else if (registrationStep === "completed") {
+      // Complete registration with OTP
+      signup({ ...formData, otp: document.getElementById('otp')?.value || otp });
     }
-  };
+  }
+};
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -386,7 +390,31 @@ function SignUpPage() {
           </p>
           <div className="w-12 sm:w-16 h-1 bg-gradient-to-r from-[#FFF6E0] to-transparent mx-auto my-3 sm:my-4 rounded-full"></div>
         </div>
-
+        {!isSignupOtpRequired && (
+          <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-amber-600/20 border-l-2 border-amber-400 rounded-lg text-sm">
+            <div className="flex items-start">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 mr-2 text-amber-400 flex-shrink-0 mt-0.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+              <span className="text-[#FFF6E0]">
+                <strong>Testing Mode Active:</strong> Email verification has
+                been temporarily disabled by administrators for testing
+                purposes. In production, all accounts require verification.
+              </span>
+            </div>
+          </div>
+        )}
         {/* Form */}
         {registrationStep === "form" ? (
           <form
@@ -433,6 +461,25 @@ function SignUpPage() {
                   />
                   <div className="absolute inset-0 border border-[#FFF6E0]/5 rounded-xl pointer-events-none"></div>
                 </div>
+                {!isSignupOtpRequired && (
+                  <div className="mt-1 text-xs text-amber-300/80 flex items-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-3 w-3 mr-1"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <span>OTP verification bypassed for testing</span>
+                  </div>
+                )}
               </div>
 
               {/* Password */}
@@ -466,9 +513,13 @@ function SignUpPage() {
                 <div className="mt-1 text-xs text-[#FFF6E0]/50">
                   <ul className="list-disc ml-4">
                     <li>At least {passwordRules.minCharLength} characters</li>
-                    {passwordRules.requireUpperCase && <li>One uppercase letter</li>}
+                    {passwordRules.requireUpperCase && (
+                      <li>One uppercase letter</li>
+                    )}
                     {passwordRules.requireNumber && <li>One number</li>}
-                    {passwordRules.requireSpecialChar && <li>One special character</li>}
+                    {passwordRules.requireSpecialChar && (
+                      <li>One special character</li>
+                    )}
                   </ul>
                 </div>
               </div>
@@ -482,7 +533,9 @@ function SignUpPage() {
                 <div className="relative">
                   <div
                     className="w-full py-2 sm:py-3 px-3 sm:px-4 rounded-xl bg-[#272829]/80 border border-[#61677A]/50 text-[#FFF6E0] text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#FFF6E0]/20 focus:border-[#FFF6E0]/30 transition-all flex justify-between items-center cursor-pointer"
-                    onClick={() => setIsGenderDropdownOpen(!isGenderDropdownOpen)}
+                    onClick={() =>
+                      setIsGenderDropdownOpen(!isGenderDropdownOpen)
+                    }
                   >
                     <span
                       className={
@@ -543,7 +596,9 @@ function SignUpPage() {
               {/* Bio */}
               <div className="form-control col-span-1 sm:col-span-2">
                 <label className="text-xs sm:text-sm font-medium text-[#D8D9DA] mb-2 sm:mb-3 flex items-center">
-                  <span>Choose up to {bioSelectionLimit} fields that describe you</span>
+                  <span>
+                    Choose up to {bioSelectionLimit} fields that describe you
+                  </span>
                   <span className="ml-2 text-xs text-[#FFF6E0]/50">
                     ({formData.bio.length}/{bioSelectionLimit} selected)
                   </span>
@@ -605,13 +660,28 @@ function SignUpPage() {
                       </span>
                     </div>
                   )}
-                
+
                 {/* Radius information notice */}
                 <div className="mt-2 p-2 bg-[#911B1C]/40 border-l-2 border-[#FFF6E0]/30 rounded-r-lg text-xs text-[#D8D9DA]/80 flex items-start">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5 text-[#FFF6E0]/70 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 mr-1.5 text-[#FFF6E0]/70 flex-shrink-0 mt-0.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
-                  <span>Your account will be set up with a default radius of 100m. You can adjust this range from your profile settings after signing up.</span>
+                  <span>
+                    Your account will be set up with a default radius of 100m.
+                    You can adjust this range from your profile settings after
+                    signing up.
+                  </span>
                 </div>
               </div>
             </div>
@@ -620,16 +690,32 @@ function SignUpPage() {
             <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-[#31333A]/70 border border-[#61677A]/30 rounded-xl">
               <div className="flex items-start">
                 <div className="flex-shrink-0 mt-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#FFF6E0]/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-[#FFF6E0]/80"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <h4 className="text-sm sm:text-base font-medium text-[#FFF6E0]/90">Gender Options Notice</h4>
+                  <h4 className="text-sm sm:text-base font-medium text-[#FFF6E0]/90">
+                    Gender Options Notice
+                  </h4>
                   <p className="mt-1 text-xs sm:text-sm text-[#D8D9DA]/80 leading-relaxed">
-                    Some gender options in our list are non-traditional and intended for fun or creative user interaction only. 
-                    We respect all gender identities and expressions and do not intend to mock or diminish any person's identity. 
-                    Your selection is private and solely used for personalization within our platform.
+                    Some gender options in our list are non-traditional and
+                    intended for fun or creative user interaction only. We
+                    respect all gender identities and expressions and do not
+                    intend to mock or diminish any person's identity. Your
+                    selection is private and solely used for personalization
+                    within our platform.
                   </p>
                 </div>
               </div>
@@ -644,7 +730,12 @@ function SignUpPage() {
                     name="terms"
                     type="checkbox"
                     checked={formData.acceptedTerms || false}
-                    onChange={(e) => setFormData({ ...formData, acceptedTerms: e.target.checked })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        acceptedTerms: e.target.checked,
+                      })
+                    }
                     className="h-4 w-4 sm:h-5 sm:w-5 text-[#FFF6E0] bg-[#272829] border-[#61677A] rounded focus:ring-[#FFF6E0]/30 focus:ring-offset-[#272829]"
                   />
                 </div>
@@ -671,7 +762,8 @@ function SignUpPage() {
                     >
                       Privacy Policy
                     </a>
-                    . We collect and process your personal data as described in our policies.
+                    . We collect and process your personal data as described in
+                    our policies.
                   </p>
                 </div>
               </div>
@@ -682,8 +774,8 @@ function SignUpPage() {
               type="submit"
               disabled={isSigningUp || isLoading || !formData.acceptedTerms}
               className={`group relative overflow-hidden w-full bg-gradient-to-r ${
-                formData.acceptedTerms 
-                  ? "from-[#FFF6E0] to-[#D8D9DA] hover:from-[#D8D9DA] hover:to-[#FFF6E0] text-[#272829]" 
+                formData.acceptedTerms
+                  ? "from-[#FFF6E0] to-[#D8D9DA] hover:from-[#D8D9DA] hover:to-[#FFF6E0] text-[#272829]"
                   : "from-[#61677A]/50 to-[#61677A]/30 text-[#D8D9DA]/50 cursor-not-allowed"
               } border-none px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-xl font-medium transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl mt-6 sm:mt-8`}
             >
@@ -693,8 +785,10 @@ function SignUpPage() {
                     <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
                     <span>Creating Account...</span>
                   </>
-                ) : (
+                ) : isSignupOtpRequired ? (
                   "Continue to Verification"
+                ) : (
+                  "Create Account"
                 )}
               </span>
               {formData.acceptedTerms && (
@@ -705,12 +799,12 @@ function SignUpPage() {
         ) : registrationStep === "otp" ? (
           // OTP Verification
           <div>
-            <OtpVerification 
-              email={formData.email} 
-              onVerificationComplete={handleOtpVerified} 
+            <OtpVerification
+              email={formData.email}
+              onVerificationComplete={handleOtpVerified}
             />
           </div>
-        ) : null }
+        ) : null}
 
         {/* Sign in link */}
         <div className="text-center mt-6 sm:mt-8">

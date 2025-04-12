@@ -3,6 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/user.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { uniqueTagGen } from "../utils/uniqueTagGen.js";
+import { UserInfoRules } from "../models/userInfoRules.model.js";
 import jwt from "jsonwebtoken";
 
 const generateAccesAndRefreshToken = async(userId, deviceInfo = null, ip = null, forceLogoutOthers = false)=>{
@@ -93,33 +94,54 @@ const generateAccesAndRefreshToken = async(userId, deviceInfo = null, ip = null,
 
 const registerUser = asyncHandler(async (req, res) => {
     const { fullName, email, password, gender, dateOfBirth, bio, currentLocation, otp } = req.body;
-
-    // Validate required fields
-    if ([fullName, email, password, gender, otp].some((field) => field?.trim() === "")) {
-        throw new ApiError(400, "All fields are required");
-    }
-
-    // Verify OTP first
-    const existingUser = await User.findOne({ email });
     
-    if (!existingUser) {
-        throw new ApiError(404, "User not found. Please request an OTP first.");
-    }
+    // Get system settings to check if OTP is required
+    const userInfoRules = await UserInfoRules.findOne({});
+    const isOtpRequired = userInfoRules?.isSignupOtpRequired ?? true; // Default to true if not found
     
-    // Check OTP verification
-    if (!existingUser.otp.verified) {
-        // Check if OTP is correct
-        if (existingUser.otp.code !== otp) {
-            throw new ApiError(401, "Invalid OTP");
+    console.log("Signup request received with OTP required:", isOtpRequired);
+    
+    if (isOtpRequired) {
+        // OTP is required - validate OTP field
+        if ([fullName, email, password, gender, otp].some((field) => field?.trim() === "")) {
+            throw new ApiError(400, "All fields including OTP are required");
         }
         
-        // Check if OTP has expired
-        if (existingUser.otp.expiresAt < new Date()) {
-            throw new ApiError(401, "OTP has expired");
+        // Verify OTP first
+        const existingUser = await User.findOne({ email });
+        
+        if (!existingUser) {
+            throw new ApiError(404, "User not found. Please request an OTP first.");
         }
         
-        // Mark OTP as verified
-        existingUser.otp.verified = true;
+        // Check OTP verification
+        if (!existingUser.otp.verified) {
+            // Check if OTP is correct
+            if (existingUser.otp.code !== otp) {
+                throw new ApiError(401, "Invalid OTP");
+            }
+            
+            // Check if OTP has expired
+            if (existingUser.otp.expiresAt < new Date()) {
+                throw new ApiError(401, "OTP has expired");
+            }
+            
+            // Mark OTP as verified and set email as verified
+            existingUser.otp.verified = true;
+            existingUser.isEmailVerified = true; // Set email as verified when OTP is verified
+        }
+    } else {
+        // OTP is not required - validate all fields except OTP
+        if ([fullName, email, password, gender].some((field) => field?.trim() === "")) {
+            throw new ApiError(400, "All required fields must be provided");
+        }
+        
+        // Check if user already exists with this email
+        const existingUser = await User.findOne({ email });
+        
+        if (existingUser && (!existingUser.otp || existingUser.otp.verified)) {
+            throw new ApiError(409, "Email is already registered");
+        }
     }
 
     // Validate currentLocation structure
@@ -135,20 +157,63 @@ const registerUser = asyncHandler(async (req, res) => {
 
     // Generate a unique tag
     const uniqueTag = await uniqueTagGen();
-
-    // Update user with registration details
-    existingUser.fullName = fullName;
-    existingUser.password = password; // This will be hashed by the pre-save hook
-    existingUser.gender = gender;
-    existingUser.dateOfBirth = dateOfBirth;
-    existingUser.bio = bio || existingUser.bio;
-    existingUser.currentLocation = geoCurrentLocation;
-    existingUser.uniqueTag = uniqueTag;
     
-    await existingUser.save();
+    let existingUser, createdUser;
+    
+    if (isOtpRequired) {
+        // OTP flow - update existing user
+        existingUser = await User.findOne({ email });
+        
+        // Update user with registration details
+        existingUser.fullName = fullName;
+        existingUser.password = password; // This will be hashed by the pre-save hook
+        existingUser.gender = gender;
+        existingUser.dateOfBirth = dateOfBirth;
+        existingUser.bio = bio || existingUser.bio;
+        existingUser.currentLocation = geoCurrentLocation;
+        existingUser.uniqueTag = uniqueTag;
+        
+        await existingUser.save();
 
-    // Fetch created user without sensitive fields
-    const createdUser = await User.findById(existingUser._id).select("-password -refreshToken -activeSessions -otp");
+        // Fetch created user without sensitive fields
+        createdUser = await User.findById(existingUser._id).select("-password -refreshToken -activeSessions -otp");
+    } else {
+        // Direct signup flow - create new user or update existing temporary user
+        existingUser = await User.findOne({ email });
+        
+        if (existingUser) {
+            // Update existing temporary user
+            existingUser.fullName = fullName;
+            existingUser.password = password;
+            existingUser.gender = gender;
+            existingUser.dateOfBirth = dateOfBirth;
+            existingUser.bio = bio || existingUser.bio;
+            existingUser.currentLocation = geoCurrentLocation;
+            existingUser.uniqueTag = uniqueTag;
+            existingUser.otp = { verified: true }; // Mark as verified
+            existingUser.isEmailVerified = false; // Email not verified through OTP
+            
+            await existingUser.save();
+            createdUser = await User.findById(existingUser._id).select("-password -refreshToken -activeSessions -otp");
+        } else {
+            // Create brand new user without OTP verification
+            const newUser = await User.create({
+                email,
+                fullName,
+                password,
+                gender,
+                dateOfBirth,
+                bio: bio || "",
+                currentLocation: geoCurrentLocation,
+                uniqueTag,
+                otp: { verified: true }, // Mark as verified by default
+                isEmailVerified: false // Email not verified through OTP
+            });
+            
+            existingUser = newUser;
+            createdUser = await User.findById(newUser._id).select("-password -refreshToken -activeSessions -otp");
+        }
+    }
 
     if (!createdUser) {
         throw new ApiError(500, "Something went wrong while registering the user");

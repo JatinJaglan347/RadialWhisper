@@ -198,6 +198,10 @@ const userSchema = new Schema({
         expiresAt: { type: Date, default: null },
         verified: { type: Boolean, default: false }
       },
+      isEmailVerified: {
+        type: Boolean,
+        default: false,
+      },
       banned: {
         current: {
           status: { type: Boolean, default: false },

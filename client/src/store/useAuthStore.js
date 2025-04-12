@@ -1450,9 +1450,19 @@ fetchPublicUserInfoRules: async () => {
     set({ isSendingOtp: true });
     try {
       const res = await axiosInstance.post('/api/v1/otp/send', { email });
-      set({ otpRequestCount: res.data.data.requestCount });
-      toast.success('OTP sent to your email');
-      return { success: true };
+      
+      // Check if OTP verification is required based on server response
+      if (res.data.data.otpRequired === false) {
+        // OTP verification is not required, mark as verified automatically
+        set({ isOtpVerified: true });
+        toast.success('Email verified. OTP verification not required.');
+        return { success: true, otpRequired: false };
+      } else {
+        // OTP verification is required
+        set({ otpRequestCount: res.data.data.requestCount });
+        toast.success('OTP sent to your email');
+        return { success: true, otpRequired: true };
+      }
     } catch (error) {
       console.error('Error sending OTP:', error);
       const errorMessage = error.response?.data?.message || 'Failed to send OTP';

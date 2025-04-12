@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
+import { UserInfoRules } from "../models/userInfoRules.model.js";
 import { sendOtpEmail, generateOTP, getOtpRequestCount, resetOtpRequestCounter } from "../utils/brevoService.js";
 
 // Send OTP for email verification during registration
@@ -12,6 +13,63 @@ export const sendRegistrationOtp = asyncHandler(async (req, res) => {
 
   if (!email) {
     throw new ApiError(400, "Email is required");
+  }
+  
+  // Check if OTP is required for signup based on system settings
+  const userInfoRules = await UserInfoRules.findOne({});
+  const isOtpRequired = userInfoRules?.isSignupOtpRequired ?? true; // Default to true if not found
+  
+  console.log("OTP required for signup:", isOtpRequired);
+  
+  if (!isOtpRequired) {
+    // If OTP is not required, we'll still create a temporary user but mark it as not needing verification
+    console.log("OTP not required for signup - skipping verification");
+    // Check if email already exists and is verified
+    const existingUser = await User.findOne({ email });
+    
+    if (existingUser && existingUser.otp && existingUser.otp.verified) {
+      throw new ApiError(409, "Email is already registered and verified");
+    }
+    
+    if (!existingUser) {
+      // Create temporary user with OTP already verified
+      await User.create({
+        email,
+        otp: {
+          verified: true
+        },
+        isEmailVerified: false, // Since OTP is not required, email is not verified
+        // Set temporary values for required fields to avoid validation errors
+        fullName: "Temporary User",
+        password: "temporary_password_will_be_updated",
+        gender: "unspecified",
+        dateOfBirth: new Date(),
+        uniqueTag: "TEMP" + Date.now(),
+        currentLocation: {
+          type: "Point",
+          coordinates: [0, 0] // Default coordinates
+        }
+      });
+    } else {
+      // Update existing user to mark OTP as verified
+      if (!existingUser.otp) {
+        existingUser.otp = {};
+      }
+      existingUser.otp.verified = true;
+      existingUser.isEmailVerified = false; // Since OTP is not required, email is not verified
+      await existingUser.save();
+    }
+    
+    return res.status(200).json(
+      new ApiResponse(
+        200, 
+        { 
+          otpRequired: false,
+          message: "OTP verification is not required. You can proceed with registration." 
+        }, 
+        "OTP verification skipped"
+      )
+    );
   }
 
   try {
@@ -108,8 +166,9 @@ export const verifyOtp = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid OTP");
   }
   
-  // Mark as verified
+  // Mark as verified and set email as verified
   user.otp.verified = true;
+  user.isEmailVerified = true; // Email is now verified through OTP
   await user.save();
   
   return res.status(200).json(

@@ -14,6 +14,7 @@ import {
   X, 
   Save
 } from "lucide-react";
+import { IoKeyOutline } from "react-icons/io5";
 import Loader from "../../components/Loader";
 
 function ConfigRulesPage() {
@@ -38,6 +39,7 @@ function ConfigRulesPage() {
     maxAge: 0,
     minRadiusLength: 0,
     maxRadiusLength: 0,
+    isSignupOtpRequired: false,
   });
 
   const [bioOptions, setBioOptions] = useState([]);
@@ -69,6 +71,7 @@ function ConfigRulesPage() {
           maxAge: data?.dateOfBirth?.maxAge || 0,
           minRadiusLength: data?.locationRadiusPreference?.minLength || 0,
           maxRadiusLength: data?.locationRadiusPreference?.maxLength || 0,
+          isSignupOtpRequired: data?.isSignupOtpRequired || false,
         });
 
         setBioOptions(data?.bio?.options || []);
@@ -99,6 +102,7 @@ function ConfigRulesPage() {
       maxAge: originalData?.dateOfBirth?.maxAge || 0,
       minRadiusLength: originalData?.locationRadiusPreference?.minLength || 0,
       maxRadiusLength: originalData?.locationRadiusPreference?.maxLength || 0,
+      isSignupOtpRequired: originalData?.isSignupOtpRequired || false,
     };
 
     const rulesChanged = JSON.stringify(configRules) !== JSON.stringify(originalConfig);
@@ -287,6 +291,9 @@ function ConfigRulesPage() {
     ) {
       updatedData.bio = { options: filteredBioOptions };
     }
+    if (configRules.isSignupOtpRequired !== originalData?.isSignupOtpRequired) {
+      updatedData.isSignupOtpRequired = configRules.isSignupOtpRequired;
+    }
     if (
       JSON.stringify(filteredGenderList) !==
       JSON.stringify((originalData?.genderList || []).filter((g) => g.trim() !== ""))
@@ -328,6 +335,7 @@ function ConfigRulesPage() {
         },
         bio: { options: filteredBioOptions },
         genderList: filteredGenderList,
+        isSignupOtpRequired: configRules.isSignupOtpRequired,
       }));
       setIsChanged(false);
       setKey((prev) => prev + 1);
@@ -420,8 +428,29 @@ function ConfigRulesPage() {
                 />
               </div>
             </div>
+
+
+<div className="my-4 border-t border-[#61677A]/30"></div>
+<h2 className="text-xl font-semibold mb-6 flex items-center">
+              <IoKeyOutline className="mr-3 h-5 w-5 text-[#FFF6E0]" />
+              <span className="bg-gradient-to-r from-[#FFF6E0] to-[#D8D9DA] text-transparent bg-clip-text">OTP</span>
+  </h2>
+<div className="flex items-center justify-between px-1 mt-4">
+  <span className="text-[#D8D9DA] text-sm">Require OTP on Signup</span>
+  <label className="relative inline-flex items-center cursor-pointer">
+    <input
+      type="checkbox"
+      name="isSignupOtpRequired"
+      checked={configRules.isSignupOtpRequired}
+      onChange={handleInputChange}
+      className="sr-only peer"
+    />
+    <div className="w-11 h-6 bg-[#272829] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#D8D9DA] after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#FFF6E0]/30"></div>
+  </label>
+</div>
             
             <div className="my-8 border-t border-[#61677A]/30"></div>
+            
             
             <h2 className="text-xl font-semibold mb-6 flex items-center">
               <Lock className="mr-3 h-5 w-5 text-[#FFF6E0]" />
