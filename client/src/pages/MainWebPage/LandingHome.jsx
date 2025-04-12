@@ -20,6 +20,7 @@ import {
   Linkedin,
   Twitter,
   Heart,
+  TriangleAlert, 
 } from "lucide-react";
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -668,6 +669,11 @@ function LandingHome() {
             className="mt-24 p-6 md:p-10 bg-gradient-to-br from-[#272829] to-[#31333A] rounded-2xl border border-[#61677A]/30 shadow-2xl relative overflow-hidden"
             data-aos="fade-up"
           >
+            <div className="flex justify-center rounded-lg items-center gap-2 mb-5 border border-yellow-500 py-2 px-3 text-yellow-500 bg-yellow-500/10 text-wrap" >
+              <TriangleAlert />
+              <h1>RadialWhisper Premium is currently under development. All the features are fee for all the users</h1>
+              
+            </div>
             {/* Background shapes */}
             <div className="absolute -top-10 -right-10 w-60 h-60 rounded-full bg-[#61677A]/10 blur-lg"></div>
             <div className="absolute bottom-10 -left-20 w-80 h-80 rounded-full bg-[#FFF6E0]/5 blur-xl"></div>

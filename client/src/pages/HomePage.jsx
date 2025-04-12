@@ -710,6 +710,81 @@ const HomePage = () => {
     return message.substring(0, cutoff) + "...";
   };
 
+  // Function to detect and format URLs in message text
+  const formatMessageWithLinks = (text) => {
+    if (!text) return text;
+    
+    // Regex for URL detection (http, https, ftp, www)
+    const urlRegex = /(https?:\/\/|www\.)[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
+    
+    // Regex for email detection
+    const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi;
+    
+    // Split text by URLs and emails
+    const parts = [];
+    let lastIndex = 0;
+    let match;
+    
+    // First find and mark all URLs
+    const urlMatches = Array.from(text.matchAll(urlRegex));
+    const emailMatches = Array.from(text.matchAll(emailRegex));
+    
+    // Combine matches and sort by index
+    const allMatches = [...urlMatches, ...emailMatches].sort((a, b) => a.index - b.index);
+    
+    // Process each match in order
+    allMatches.forEach((match) => {
+      // Add text before the match
+      if (match.index > lastIndex) {
+        parts.push({
+          type: 'text',
+          content: text.substring(lastIndex, match.index)
+        });
+      }
+      
+      const matchedText = match[0];
+      
+      // Check if it's a URL or email
+      if (urlRegex.test(matchedText)) {
+        // Format URL (ensure it has http prefix for href)
+        let href = matchedText;
+        if (matchedText.startsWith('www.')) {
+          href = 'https://' + matchedText;
+        }
+        
+        parts.push({
+          type: 'url',
+          content: matchedText,
+          href: href
+        });
+      } else if (emailRegex.test(matchedText)) {
+        // Format email
+        parts.push({
+          type: 'email',
+          content: matchedText,
+          href: 'mailto:' + matchedText
+        });
+      }
+      
+      lastIndex = match.index + matchedText.length;
+    });
+    
+    // Add any remaining text
+    if (lastIndex < text.length) {
+      parts.push({
+        type: 'text',
+        content: text.substring(lastIndex)
+      });
+    }
+    
+    // If no matches were found, return the original text
+    if (parts.length === 0) {
+      return text;
+    }
+    
+    return parts;
+  };
+
   // Function to handle message click and show context menu
   const handleMessageClick = (e, message) => {
     e.preventDefault();
@@ -894,7 +969,7 @@ const HomePage = () => {
           <div className="text-xs font-semibold mb-1">
             Replying to {replySender}
           </div>
-          <div className="text-sm text-[#FFF6E0]/80 max-w-[220px] overflow-hidden text-ellipsis line-clamp-2 whitespace-pre-line">
+          <div className="text-sm text-[#FFF6E0]/80 max-w-[220px] overflow-hidden text-ellipsis line-clamp-2 whitespace-pre-line break-words">
             {replyingTo.message}
           </div>
         </div>
@@ -944,7 +1019,7 @@ const HomePage = () => {
         <div className="font-semibold text-[#FFF6E0]/90 mb-0.5">
           {replySender}
         </div>
-        <div className="max-w-full line-clamp-2 whitespace-pre-line">
+        <div className="max-w-full line-clamp-2 whitespace-pre-line break-words">
           {repliedMessage ? repliedMessage.message : "Original message not available"}
         </div>
       </div>
@@ -2434,7 +2509,7 @@ const HomePage = () => {
                                     <div
                                       id={`message-${msg._id}`}
                                       className={`
-                                        relative p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer
+                                        relative p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer max-w-full
                                         ${isMe 
                                           ? "bg-[#272829] text-[#FFF6E0] rounded-2xl rounded-br-sm" 
                                           : "bg-[#61677A] text-[#FFF6E0] rounded-2xl rounded-bl-sm"}
@@ -2446,11 +2521,33 @@ const HomePage = () => {
                                       {renderRepliedMessage(msg)}
                                       
                                       {/* Message Content */}
-                                      <p className="leading-relaxed text-sm md:text-base whitespace-pre-line">
-                                        {isLongMessage && !isExpanded
-                                          ? truncateMessage(msg.message)
-                                          : msg.message}
-                                      </p>
+                                      <div className="leading-relaxed text-sm md:text-base whitespace-pre-line break-words">
+                                        {isLongMessage && !isExpanded ? (
+                                          truncateMessage(msg.message)
+                                        ) : (
+                                          Array.isArray(formatMessageWithLinks(msg.message)) ? (
+                                            formatMessageWithLinks(msg.message).map((part, index) => {
+                                              if (part.type === 'text') {
+                                                return <span key={index}>{part.content}</span>;
+                                              } else if (part.type === 'url' || part.type === 'email') {
+                                                return (
+                                                  <a 
+                                                    key={index}
+                                                    href={part.href}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    className={`${part.type === 'url' ? 'text-blue-400' : 'text-green-400'} hover:underline`}
+                                                  >
+                                                    {part.content}
+                                                  </a>
+                                                );
+                                              }
+                                              return null;
+                                            })
+                                          ) : msg.message
+                                        )}
+                                      </div>
                                       
                                       {/* Read More/Less Button */}
                                       {isLongMessage && (
@@ -2589,9 +2686,9 @@ const HomePage = () => {
                   value={chatMessage}
                   onChange={(e) => setChatMessage(e.target.value)}
                   onKeyDown={handleKeyPress}
-                  className="flex-1 bg-[#272829] text-[#FFF6E0] border-none rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#61677A] transition-all duration-300 shadow-inner placeholder-[#FFF6E0]/50 min-h-[44px] resize-none overflow-auto"
+                  className="flex-1 bg-[#272829] text-[#FFF6E0] border-none rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#61677A] transition-all duration-300 shadow-inner placeholder-[#FFF6E0]/50 min-h-[44px] resize-none overflow-auto break-words"
                   placeholder={replyingTo ? "Type your reply..." : "Type a message..."}
-                  style={{ maxHeight: '120px' }}
+                  style={{ maxHeight: '120px', wordWrap: 'break-word' }}
                 />
 
                 <button
