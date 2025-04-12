@@ -651,11 +651,11 @@ const OverlordUserInfo = ({ userId, isOpen, onClose, onUpdate }) => {
                       <label className="block text-sm text-[#FFF6E0]/70">Email Verified</label>
                       {editMode ? (
                         <select
-                          name="emailVerified"
-                          value={editedData.emailVerified ? 'true' : 'false'}
+                          name="isEmailVerified"
+                          value={editedData.isEmailVerified ? 'true' : 'false'}
                           onChange={(e) => setEditedData({
                             ...editedData,
-                            emailVerified: e.target.value === 'true'
+                            isEmailVerified: e.target.value === 'true'
                           })}
                           className="w-full p-2 rounded-lg bg-[#1A1B1F] border border-red-900/20 focus:border-purple-500 focus:outline-none"
                         >
@@ -663,8 +663,8 @@ const OverlordUserInfo = ({ userId, isOpen, onClose, onUpdate }) => {
                           <option value="false">Not Verified</option>
                         </select>
                       ) : (
-                        <p className={`p-2 rounded-lg ${userData.emailVerified ? 'bg-green-900/30 text-green-300' : 'bg-yellow-900/30 text-yellow-300'} border border-red-900/20`}>
-                          {userData.emailVerified ? 'Verified' : 'Not Verified'}
+                        <p className={`p-2 rounded-lg ${userData.isEmailVerified ? 'bg-green-900/30 text-green-300' : 'bg-yellow-900/30 text-yellow-300'} border border-red-900/20`}>
+                          {userData.isEmailVerified ? 'Verified' : 'Not Verified'}
                         </p>
                       )}
                     </div>
@@ -1025,16 +1025,16 @@ const OverlordUserInfo = ({ userId, isOpen, onClose, onUpdate }) => {
                       <label className="block text-sm text-[#FFF6E0]/70">Email Verification</label>
                       {editMode ? (
                         <select
-                          value={editedData.emailVerified ? 'true' : 'false'}
-                          onChange={(e) => handleChange('emailVerified', e.target.value === 'true')}
+                          value={editedData.isEmailVerified ? 'true' : 'false'}
+                          onChange={(e) => handleChange('isEmailVerified', e.target.value === 'true')}
                           className="w-full p-2 rounded-lg bg-[#1A1B1F] border border-red-900/20 focus:border-purple-500 focus:outline-none"
                         >
                           <option value="true">Verified</option>
                           <option value="false">Not Verified</option>
                         </select>
                       ) : (
-                        <p className={`p-2 rounded-lg ${userData.emailVerified ? 'bg-green-900/30 text-green-300' : 'bg-yellow-900/30 text-yellow-300'} border border-red-900/20`}>
-                          {userData.emailVerified ? 'Verified' : 'Not Verified'}
+                        <p className={`p-2 rounded-lg ${userData.isEmailVerified? 'bg-green-900/30 text-green-300' : 'bg-yellow-900/30 text-yellow-300'} border border-red-900/20`}>
+                          {userData.isEmailVerified ? 'Verified' : 'Not Verified'}
                         </p>
                       )}
                     </div>
