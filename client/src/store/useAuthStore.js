@@ -134,6 +134,14 @@ export const useAuthStore = create((set, get) => ({
 
       console.log("Signup API");
 
+      // Store tokens in localStorage as fallback for Safari/cross-domain scenarios
+      if (res.data?.data?.accessToken) {
+        localStorage.setItem('accessToken', res.data.data.accessToken);
+      }
+      if (res.data?.data?.refreshToken) {
+        localStorage.setItem('refreshToken', res.data.data.refreshToken);
+      }
+
       set({ authUser: res.data });
       toast.success("Account created successfully");
       
@@ -194,6 +202,15 @@ export const useAuthStore = create((set, get) => ({
       
       // Normal login flow - no other sessions or user confirmed logout
       console.log("COMPLETE LOGIN FLOW, setting full auth state");
+      
+      // Store tokens in localStorage as fallback for Safari/cross-domain scenarios
+      if (res.data?.data?.accessToken) {
+        localStorage.setItem('accessToken', res.data.data.accessToken);
+      }
+      if (res.data?.data?.refreshToken) {
+        localStorage.setItem('refreshToken', res.data.data.refreshToken);
+      }
+      
       set({ 
         authUser: res.data,
         showSingleDevicePrompt: false,
@@ -276,9 +293,11 @@ export const useAuthStore = create((set, get) => ({
         sentFriendRequests: [],
       });
   
-      // Clear stored user data
+      // Clear stored user data and tokens
       localStorage.removeItem("authUser");
       localStorage.removeItem("unreadMessagesBySender");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
   
       // Disconnect socket if connected
       const { socket } = get();
@@ -1508,6 +1527,30 @@ fetchPublicUserInfoRules: async () => {
     set({ isOtpVerified: false });
   },
 
+  refreshAccessToken: async () => {
+    try {
+      // Try to get refresh token from localStorage if it's not in cookies
+      const refreshToken = localStorage.getItem('refreshToken');
+      
+      if (!refreshToken) {
+        console.log('No refresh token found in localStorage');
+        return false;
+      }
+      
+      const res = await axiosInstance.post('/api/v1/user/refresh-token', { refreshToken });
+      
+      // Update tokens in localStorage
+      if (res.data?.data?.accessToken) {
+        localStorage.setItem('accessToken', res.data.data.accessToken);
+      }
+      if (res.data?.data?.refreshToken) {
+        localStorage.setItem('refreshToken', res.data.data.refreshToken);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      return false;
+    }
+  },
 }));
-
-
