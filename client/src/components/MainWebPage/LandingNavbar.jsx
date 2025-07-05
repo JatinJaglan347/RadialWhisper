@@ -4,7 +4,8 @@ import { useAuthStore } from '../../store/useAuthStore.js'; // Zustand store
 import { axiosInstance } from '../../lib/axios.js'; // axios instance for API calls
 import { 
   User, Settings, LogOut, Skull, Scale, Crown, AlertTriangle, Menu as MenuIcon, 
-  X, Home, MessageSquare, Sparkles, Info, Star, HelpCircle, MessageCircle, Heart 
+  X, Home, MessageSquare, Sparkles, Info, Star, HelpCircle, MessageCircle, Heart,
+  BarChart
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -83,7 +84,8 @@ const LandingNavbar = () => {
   const mainNavItems = [
     { to: "/", label: "Home", icon: <Home className="w-5 h-5" /> },
     { to: "/chat", label: "Chat", icon: <MessageSquare className="w-5 h-5" /> },
-    { to: "/reviews", label: "Reviews", icon: <Star className="w-5 h-5" /> }
+    { to: "/reviews", label: "Reviews", icon: <Star className="w-5 h-5" /> },
+    { to: "/stats", label: "Stats", icon: <BarChart className="w-5 h-5" /> }
   ];
   
   const sideNavItems = [
@@ -94,6 +96,7 @@ const LandingNavbar = () => {
     { to: "/anonymous", label: "Meet the Creator", icon: <Heart className="w-5 h-5" /> },
     { to: "/suggestion", label: "Suggestion", icon: <Sparkles className="w-5 h-5" /> },
     { to: "/contact", label: "Contact", icon: <MessageCircle className="w-5 h-5" /> },
+    { to: "/stats", label: "Website Stats", icon: <BarChart className="w-5 h-5" /> }
   ];
 
   return (

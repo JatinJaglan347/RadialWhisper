@@ -20,7 +20,9 @@ import {
   Linkedin,
   Twitter,
   Heart,
-  TriangleAlert, 
+  TriangleAlert,
+  BarChart,
+  TrendingUp,
 } from "lucide-react";
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -34,6 +36,8 @@ function LandingHome() {
     email: "",
     ifExistingUser: false,
   });
+  const [isStatsLoaded, setIsStatsLoaded] = useState(false);
+  const [showStats, setShowStats] = useState(false);
 
   useEffect(() => {
     setSeed(Math.random() * 100);
@@ -113,6 +117,14 @@ function LandingHome() {
         position: "top-center",
       }
     );
+  };
+
+  const handleStatsLoad = () => {
+    setIsStatsLoaded(true);
+  };
+
+  const toggleStats = () => {
+    setShowStats(!showStats);
   };
 
   return (
@@ -1001,9 +1013,9 @@ function LandingHome() {
                       <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#D8D9DA] to-[#FFF6E0] translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
                     </Link>
                   </div>
+                  </div>
                 </div>
               </div>
-            </div>
             
             {/* Right: Story and vision */}
             <div className="lg:w-7/12" data-aos="fade-left">
@@ -1175,6 +1187,71 @@ function LandingHome() {
               </Link>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Analytics Dashboard Section */}
+      <div className="bg-gradient-to-br from-[#31333A] to-[#272829] py-16 relative overflow-hidden">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-12" data-aos="fade-up">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 flex items-center justify-center">
+              <BarChart className="h-8 w-8 mr-3" />
+              Website Analytics
+            </h2>
+            <p className="text-lg text-[#FFF6E0]/80 max-w-3xl mx-auto">
+              Explore our website statistics and see how RadialWhisper is growing and evolving through real-time analytics.
+            </p>
+            <button
+              onClick={toggleStats}
+              className="mt-6 px-6 py-3 bg-gradient-to-r from-[#61677A] to-[#4d525f] hover:from-[#4d525f] hover:to-[#61677A] text-[#FFF6E0] rounded-full inline-flex items-center shadow-lg transition-all duration-300 transform hover:scale-105"
+            >
+              {showStats ? (
+                <>
+                  <X className="h-5 w-5 mr-2" />
+                  Hide Analytics
+                </>
+              ) : (
+                <>
+                  <TrendingUp className="h-5 w-5 mr-2" />
+                  View Analytics
+                </>
+              )}
+            </button>
+          </div>
+          
+          {showStats && (
+            <div 
+              className="relative bg-gradient-to-br from-[#272829] to-[#31333A] rounded-xl border border-[#61677A]/30 shadow-xl overflow-hidden"
+              data-aos="fade-up"
+              data-aos-delay="100"
+            >
+              {/* Decorative elements */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-[#FFF6E0]/5 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
+              <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#FFF6E0]/5 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2"></div>
+              
+              {/* Loading overlay */}
+              {!isStatsLoaded && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-[#31333A] to-[#272829] z-10">
+                  <div className="relative w-20 h-20">
+                    <div className="absolute inset-0 border-4 border-[#FFF6E0]/20 rounded-full"></div>
+                    <div className="absolute inset-0 border-t-4 border-[#FFF6E0] rounded-full animate-spin"></div>
+                  </div>
+                  <p className="text-[#FFF6E0] text-lg mt-4 animate-pulse">Loading analytics dashboard...</p>
+                </div>
+              )}
+              
+              {/* Stats iframe */}
+              <div className={`relative p-0 h-[600px] transition-opacity duration-700 ${isStatsLoaded ? 'opacity-100' : 'opacity-0'}`}>
+                <iframe
+                  src="https://cloud.umami.is/share/VvRmWf0JZu7Ujdyt/radial-whisper.vercel.app"
+                  className="w-full h-full border-0"
+                  title="Website Analytics"
+                  allow="fullscreen"
+                  onLoad={handleStatsLoad}
+                ></iframe>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

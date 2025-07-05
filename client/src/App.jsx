@@ -51,6 +51,7 @@ import LandingFeatures from "./pages/MainWebPage/LandingFeatures.jsx";
 import Reviews from "./pages/Reviews.jsx";
 import OverlordPage from "./pages/ModerationPages/OverlordPage.jsx";
 import Loader from "./components/Loader.jsx";
+import WebsiteStatsPage from "./pages/WebsiteStatsPage.jsx";
 
 function App() {
   const {
@@ -208,6 +209,7 @@ function App() {
             <Route path="/features" element={<LandingFeatures/>} />
             <Route path="/reviews" element={<Reviews />} />
             <Route path="/how-it-works" element={<LandingHowItWorks />} />
+            <Route path="/stats" element={<WebsiteStatsPage />} />
 
             {/* Authentication routes at root level */}
             <Route
